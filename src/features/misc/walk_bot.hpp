@@ -240,6 +240,12 @@ private:
     // Auto knife: the knife slot's secondary attack, held for one swing at a time.
     owned_control m_knife_attack{};
     std::uintptr_t m_knife_target{};
+    // Close-range commitment: once the knife is within stab range, keep the slot out until this target dies or leaves
+    // the hysteresis leash. The lock is set before the draw and the gun restore refuses to run while it is held, so
+    // the primary cannot win back the slot during a point-blank chase.
+    bool m_knife_locked{};
+    static constexpr float k_knife_lock_enter_range{110.0f};
+    static constexpr float k_knife_lock_leash{1.35f};
     clock::time_point m_knife_next_switch{};
     clock::time_point m_knife_next_attack{};
     clock::time_point m_knife_release{};

@@ -259,7 +259,7 @@ void draw_panel(ImDrawList* draw, const ImVec2 origin, const float appear)
 void draw_title(const guide_content& content, const int step)
 {
     namespace loc = render::localization;
-    constexpr const char* titles[guide_steps]{"Welcome to Vesta", "Hotkeys", "Good to know", "Performance"};
+    constexpr const char* titles[guide_steps]{"Welcome to PASTA", "Hotkeys", "Good to know", "Performance"};
     const auto size = ImGui::GetFontSize() * 1.6f;
     const auto position = content.screen(40.0f);
     content.draw->AddText(ImGui::GetFont(), size, position, faded(k_text_main, content.alpha), loc::tr(titles[step]));
@@ -349,7 +349,7 @@ void draw_hotkeys_step(const guide_content& content, const char*& message)
         const char* label;
         std::uint16_t current;
         std::uint16_t* chosen;
-    } rows[]{{"Open / close the menu", keys.menu, &menu_choice}, {"Exit Vesta", keys.exit, &exit_choice}};
+    } rows[]{{"Open / close the menu", keys.menu, &menu_choice}, {"Exit PASTA", keys.exit, &exit_choice}};
     float y = k_content_top + 62.0f;
     for (const auto& row : rows)
     {
@@ -391,7 +391,7 @@ void draw_notes_step(const guide_content& content)
     ImGui::SetCursorPos({k_margin + content.slide + 18.0f, k_content_top + 10.0f});
     ImGui::PushTextWrapPos(k_margin + content.slide + k_content_width - 18.0f);
     ImGui::TextUnformatted(loc::tr("Settings, cache and logs live in %TEMP%\\vesta. Cleaning tools may remove it; "
-                                   "Vesta then starts with default settings."));
+                                   "PASTA then starts with default settings."));
     ImGui::PopTextWrapPos();
     ImGui::SetCursorPos({k_margin + content.slide + 18.0f, k_content_top + data_height - 44.0f});
     if (guide_button(loc::tr("Open data folder"), 190.0f, false))
@@ -406,7 +406,7 @@ void draw_notes_step(const guide_content& content)
         const char* name;
         const char* label;
     } hints[]{{config::lifecycle_key_name(keys.menu), "Open / close the menu"},
-              {config::lifecycle_key_name(keys.exit), "Exit Vesta"}};
+              {config::lifecycle_key_name(keys.exit), "Exit PASTA"}};
     float line = min.y + 14.0f;
     for (const auto& hint : hints)
     {
@@ -421,12 +421,12 @@ void draw_notes_step(const guide_content& content)
                       true);
 }
 
-// Step 4: Vesta runs beside the game and shares its hardware; what to do when the game leaves nothing spare.
+// Step 4: PASTA runs beside the game and shares its hardware; what to do when the game leaves nothing spare.
 void draw_performance_step(const guide_content& content)
 {
     namespace loc = render::localization;
     content.paragraph(k_content_top,
-                      "Vesta is external: it runs next to the game as its own program and uses your computer's "
+                      "PASTA is external: it runs next to the game as its own program and uses your computer's "
                       "resources, mostly the CPU, and the GPU for some features.",
                       false);
 

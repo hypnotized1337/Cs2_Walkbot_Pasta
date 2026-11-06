@@ -81,7 +81,7 @@ inline constexpr double loading_notice_delay_seconds = 3.0;
     if (current.scripting.value == state::error)
         result.push_back(
             {"scripting", level::warning,
-             "Lua is unavailable: its data folder could not be prepared. Check free disk space, then restart Vesta.",
+             "Lua is unavailable: its data folder could not be prepared. Check free disk space, then restart PASTA.",
              1});
     if (current.input_hook_failed)
         result.push_back(

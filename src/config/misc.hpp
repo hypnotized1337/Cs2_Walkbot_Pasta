@@ -326,6 +326,14 @@ struct general_profile
     } palette{};
 
     bool auto_accept{true};
+    // Beta automation: hold the game's duck bind while the aimbot is engaged with a live target.
+    bool auto_crouch{false};
+    struct auto_bonus
+    {
+        bool enabled{false};
+        int key{'G'};
+        int interval_ms{1000};
+    } m_auto_bonus{};
     bool obs_bypass{false};
     // Lua runtime is local-only. The production binary exposes no network API;
     // scripts may explicitly launch an external helper through the OS library.

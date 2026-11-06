@@ -406,27 +406,43 @@ walk_bot_t::combat_plan walk_bot_t::combat(const player_state& player, const clo
                 !game::local_player().is_enemy(other.team))
                 continue;
             const auto distance = other.origin.distance(player.origin);
-            if (distance > leash || std::abs(other.origin.z - player.origin.z) > 48.0f)
-                break;
-            // A rear-defense knife target is an active threat and may move. The close-range feature's respawn grace
-            // and AFK switch also end the chase if its chosen target is too fresh or has moved since first seen.
-            if (m_rear_target != m_knife_target)
+            // Once the knife is committed at stab range, do not re-run the acquisition filters while the target stays
+            // in the hysteresis leash. This is what keeps a point-blank chase from alternating between knife and gun.
+            const auto committed = m_knife_locked && cfg.auto_knife && m_rear_target != m_knife_target;
+            if (committed)
             {
-                if (!knife_grace_ready(other.pawn) ||
-                    (cfg.auto_knife_afk_only && !knife_afk_ready(other.pawn)))
+                if (distance > cfg.auto_knife_distance * k_knife_lock_leash)
+                {
+                    m_knife_target = 0;
+                    m_knife_locked = false;
+                    break;
+                }
+            }
+            else
+            {
+                if (distance > leash || std::abs(other.origin.z - player.origin.z) > 48.0f)
+                    break;
+                // A rear-defense knife target is an active threat and may move. The close-range feature's respawn
+                // grace and AFK switch also end the chase if its chosen target is too fresh or has moved since first
+                // seen.
+                if (m_rear_target != m_knife_target)
+                {
+                    if (!knife_grace_ready(other.pawn) ||
+                        (cfg.auto_knife_afk_only && !knife_afk_ready(other.pawn)))
+                    {
+                        m_knife_target = 0;
+                        break;
+                    }
+                }
+                if (!knife_reachable(other))
                 {
                     m_knife_target = 0;
                     break;
                 }
-            }
-            if (!knife_reachable(other))
-            {
-                m_knife_target = 0;
-                break;
+                if (!in_sight(head_of(other)))
+                    break;
             }
             const auto head = head_of(other);
-            if (!in_sight(head))
-                break;
             combat_plan plan{};
             plan.what = combat_plan::kind::knife;
             plan.view = {gaze::mode::fight, head, 0.0f, 0.0f, config::combat_profile::aim_part::head};
@@ -436,6 +452,7 @@ walk_bot_t::combat_plan walk_bot_t::combat(const player_state& player, const clo
             return plan;
         }
         m_knife_target = 0;
+        m_knife_locked = false;
     }
 
     // Acquisition: the nearest visible enemy inside the close-range threshold, from any direction. The rear defense

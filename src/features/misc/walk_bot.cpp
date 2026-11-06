@@ -458,9 +458,16 @@ void walk_bot_t::handle_knife(const player_state& player, const combat_plan& pla
                             plan.enemy + SCHEMA("C_BaseEntity", "m_iHealth"_id)) <= 0)
     {
         m_knife_target = 0;
+        m_knife_locked = false;
         (void)set_secondary_control(m_knife_attack, false);
         return;
     }
+
+    const auto distance = distance_2d(player.origin, plan.target);
+    // Commit before drawing the knife. From this tick on the engagement owns the weapon slot, and the restore path
+    // refuses to draw the gun while the lock target is alive and inside the leash.
+    if (m_rear_target != plan.enemy && distance <= k_knife_lock_enter_range)
+        m_knife_locked = true;
 
     const auto weapon_type = game::local_player().weapon_type();
     if (!m_knife_restore && (weapon_type != game::rules::knife || scope_weapon_switch))
@@ -480,7 +487,6 @@ void walk_bot_t::handle_knife(const player_state& player, const combat_plan& pla
     const auto want_yaw = degrees(std::atan2(to.y, to.x));
     const auto want_pitch = -degrees(std::atan2(to.z, std::hypot(to.x, to.y)));
     const auto off = std::hypot(foundation::wrap_yaw(want_yaw - player.view.y), want_pitch - player.view.x);
-    const auto distance = distance_2d(player.origin, plan.target);
     // Keep closing until body collision range, and stab while closing: stopping at the edge of the knife's reach
     // made a target that stopped a few units too far away stand there swinging at air.
     constexpr float k_knife_stop = 42.0f;
@@ -515,6 +521,10 @@ void walk_bot_t::restore_knife_weapon(const clock::time_point now)
 {
     if (!m_knife_restore)
         return;
+    // A committed Auto-Knife engagement owns the hands. Do not draw the gun back while its target is still alive and
+    // inside the lock, even if the fight plan has a one-tick gap.
+    if (m_knife_locked && m_knife_target)
+        return;
     if (game::local_player().weapon_type() != game::rules::knife)
     {
         m_knife_restore = false;
@@ -538,6 +548,7 @@ void walk_bot_t::handle_rear(const player_state& player, const combat_plan& plan
     {
         m_rear_target = 0;
         m_knife_target = 0;
+        m_knife_locked = false;
         (void)set_secondary_control(m_knife_attack, false);
         return;
     }
@@ -554,6 +565,7 @@ void walk_bot_t::handle_rear(const player_state& player, const combat_plan& plan
     }
 
     m_knife_target = 0;
+    m_knife_locked = false;
     if (m_knife_attack.pressed)
         (void)set_secondary_control(m_knife_attack, false);
     const auto held_type = game::local_player().weapon_type();
@@ -619,6 +631,8 @@ void walk_bot_t::tick()
     release_tapped_key(!cfg.enabled);
     if (!cfg.enabled)
     {
+        auto_bonus().set_auto_knife_active(false);
+        m_knife_locked = false;
         restore_knife_weapon(now);
         m_knife_restore = false;
         {
@@ -661,6 +675,7 @@ void walk_bot_t::tick()
     player_state player{};
     if (!read_player(player))
     {
+        auto_bonus().set_auto_knife_active(false);
         // A missing pawn (rather than a dead one, which stays readable while spectating) is a map load or a
         // reconnect. The controller can stay valid across the reload, so the controller alone is not enough: the
         // pawn going away is what starts the clock for the first readable frame to rebuild from scratch.
@@ -683,6 +698,7 @@ void walk_bot_t::tick()
             m_knife_watch.clear();
         }
         m_knife_target = 0;
+        m_knife_locked = false;
         m_rear_target = 0;
         (void)set_secondary_control(m_knife_attack, false);
         features::aimbot::g_walk_autofire.store(false, std::memory_order_release);
@@ -753,8 +769,10 @@ void walk_bot_t::tick()
     record(player, now);
     if (m_recording_active)
     {
+        auto_bonus().set_auto_knife_active(false);
         m_knife_restore = false;
         m_knife_target = 0;
+        m_knife_locked = false;
         m_rear_target = 0;
         features::aimbot::g_walk_autofire.store(false, std::memory_order_release);
         features::aimbot::g_walk_autofire_parts.store(0, std::memory_order_release);
@@ -820,6 +838,7 @@ void walk_bot_t::tick()
     }
     if (!focused || ui_open || movement_taken || now < m_player_until)
     {
+        auto_bonus().set_auto_knife_active(false);
         note_idle(!focused ? 2u : ui_open ? 6u : movement_taken ? 4u : 7u);
         release_keys();
         look(player, {}, true, now);
@@ -827,6 +846,7 @@ void walk_bot_t::tick()
     }
     if (!graph)
     {
+        auto_bonus().set_auto_knife_active(false);
         features::aimbot::g_walk_autofire.store(false, std::memory_order_release);
         features::aimbot::g_walk_autofire_parts.store(0, std::memory_order_release);
         note_idle(1);
@@ -838,6 +858,10 @@ void walk_bot_t::tick()
     // Fighting comes first: an enemy in sight stops the walk for the aim, a spawn-protected one is walked round
     // sideways, a hit from someone unseen turns the view while the walk goes on.
     const auto fight = combat(player, now);
+    const auto knife_engagement =
+        (fight.what == combat_plan::kind::knife && fight.enemy != 0) ||
+        (fight.what == combat_plan::kind::rear && fight.weapon == 1 && fight.enemy != 0);
+    auto_bonus().set_auto_knife_active(knife_engagement);
     // The knife leaves a different slot selected. Put the gun back as soon as the knife engagement is over, before
     // the next fight (and the auto scope) starts. The rear handler draws its own primary when that is its weapon.
     if (fight.what != combat_plan::kind::knife && fight.what != combat_plan::kind::rear)
@@ -846,6 +870,7 @@ void walk_bot_t::tick()
     if (fight.what != combat_plan::kind::knife && fight.what != combat_plan::kind::rear)
     {
         m_knife_target = 0;
+        m_knife_locked = false;
         (void)set_secondary_control(m_knife_attack, false);
     }
     const auto engaging = fight.what == combat_plan::kind::engage;

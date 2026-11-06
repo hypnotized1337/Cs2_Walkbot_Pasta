@@ -166,6 +166,7 @@ void local_state::update()
     auto weapon_data = std::uintptr_t{};
     auto active_weapon_type = std::uint32_t{};
     auto flash_alpha = 0.0f;
+    auto ducked = false;
 
     if (alive_now)
     {
@@ -176,6 +177,11 @@ void local_state::update()
             flash_alpha =
                 g_memory->process.load<float>(pawn_address + SCHEMA("C_CSPlayerPawnBase", "m_flFlashOverlayAlpha"_id));
         }
+        const auto movement_services =
+            g_memory->process.load<std::uintptr_t>(pawn_address + SCHEMA("C_BasePlayerPawn", "m_pMovementServices"_id));
+        if (movement_services)
+            ducked = g_memory->process.load<bool>(movement_services +
+                                                  SCHEMA("CCSPlayer_MovementServices", "m_bDucked"_id));
         const auto weapon_services =
             g_memory->process.load<std::uintptr_t>(pawn_address + SCHEMA("C_BasePlayerPawn", "m_pWeaponServices"_id));
         const auto weapon_handle = weapon_services
@@ -224,6 +230,7 @@ void local_state::update()
 
     publish(controller_address, pawn_address, binding.handle, observer, team, view_team, crosshair, alive_now,
             !free_for_all, active_weapon, weapon_data, active_weapon_type, tick, health, game_time, flash_alpha);
+    m_ducked.store(ducked, std::memory_order_relaxed);
 }
 
 void local_state::publish(std::uintptr_t controller_address, std::uintptr_t pawn_address, std::uint32_t pawn_handle,
@@ -277,6 +284,7 @@ void local_state::reset()
 {
     m_spectated_pawn.store(0);
     publish(0, 0, 0, 0, 0, 0, 0, false, true, 0, 0, 0, 0, 0, 0.0f, 0.0f);
+    m_ducked.store(false, std::memory_order_relaxed);
 }
 
 } // namespace game

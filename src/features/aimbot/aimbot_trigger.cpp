@@ -403,6 +403,9 @@ void aimbot_t::triggerbot(const foundation::vec3& eye_pos, const foundation::vec
     const auto pawn = game::local_player().pawn();
     if (!m_trigger_shot_scheduled)
     {
+        // This pass owns target publication: a stale target from an earlier pass must not keep auto-crouch latched
+        // when the crosshair has left the enemy, a check blocks combat or the weapon is not ready.
+        m_trigger_target_valid = false;
         if (local_checks_blocked(cfg.checks))
         {
             features::visuals::event_log().push_throttled(0x54524301u, "Trigger blocked: legit check",

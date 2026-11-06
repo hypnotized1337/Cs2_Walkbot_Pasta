@@ -196,6 +196,53 @@ private:
     bool m_clicked_panel_hidden{};
 };
 
+class auto_crouch_t
+{
+public:
+    void tick();
+    void reset();
+    // False while combat must wait for the game to report the duck. The combat worker calls tick() first, then this.
+    [[nodiscard]] bool combat_ready() const noexcept { return !m_waiting_for_duck; }
+
+private:
+    using owned_control = input_lifecycle::owned_control;
+
+    [[nodiscard]] bool set_duck(bool pressed);
+
+    owned_control m_duck{};
+    // The pawn the duck is held for, and when combat last published it. A short grace bridges the gap between
+    // combat ticks without keeping the duck after target selection is genuinely lost.
+    std::uintptr_t m_engaged_target{};
+    std::chrono::steady_clock::time_point m_target_seen_at{};
+    std::chrono::steady_clock::time_point m_waiting_since{};
+    bool m_waiting_for_duck{};
+    bool m_duck_wait_timed_out{};
+};
+
+class auto_bonus_t
+{
+public:
+    void tick();
+    void reset();
+    // Auto Knife has priority over the bonus pickup. While this is raised Auto Bonus sends no keys; clearing it is the
+    // green flag from Auto Knife that lets Auto Bonus resume.
+    void set_auto_knife_active(const bool active) noexcept
+    {
+        m_auto_knife_active.store(active, std::memory_order_release);
+    }
+
+private:
+    using owned_control = input_lifecycle::owned_control;
+
+    [[nodiscard]] bool send_key(bool pressed);
+
+    owned_control m_key{};
+    std::chrono::steady_clock::time_point m_next_tap{};
+    std::chrono::steady_clock::time_point m_press_started{};
+    std::atomic<bool> m_auto_knife_active{};
+    bool m_auto_knife_was_active{};
+};
+
 class bhop_t
 {
 public:
@@ -228,6 +275,16 @@ inline nade_helper_t& nade_helper()
 inline auto_accept_t& auto_accept()
 {
     static auto_accept_t value{};
+    return value;
+}
+inline auto_crouch_t& auto_crouch()
+{
+    static auto_crouch_t value{};
+    return value;
+}
+inline auto_bonus_t& auto_bonus()
+{
+    static auto_bonus_t value{};
     return value;
 }
 inline bhop_t& bhop()

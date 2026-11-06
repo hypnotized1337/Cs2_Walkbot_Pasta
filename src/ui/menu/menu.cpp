@@ -1,5 +1,6 @@
 #include <stdafx.hpp>
 #include <render/presentation.hpp>
+#include <ui/presentation.hpp>
 #include <platform/windows/input.hpp>
 #include <scripting/runtime.hpp>
 #include <config/first_run.hpp>
@@ -22,6 +23,12 @@
 
 namespace ui
 {
+namespace
+{
+constexpr int k_walk_page = 3;
+constexpr int k_automation_page = 4;
+} // namespace
+
 using namespace ui::menu::detail;
 
 bool menu_t::initialize(HWND hwnd)
@@ -221,11 +228,28 @@ void menu_t::draw_sidebar()
                                   ImDrawFlags_RoundCornersLeft);
     draw->AddLine({max.x - 1.0f, min.y}, {max.x - 1.0f, max.y}, packed(k_border));
 
+    // The plate logo sits above the wordmark; its PNG already has a transparent background. The source is 1188x840,
+    // so keep that aspect ratio rather than stretching it into a square.
+    constexpr auto logo_width = 180.0f;
+    constexpr auto logo_aspect = 840.0f / 1188.0f;
+    constexpr auto logo_height = logo_width * logo_aspect;
+    constexpr auto logo_top = 10.0f;
+    const auto logo_texture = ui::bound_overlay().pasta_logo_texture();
+    if (logo_texture)
+    {
+        const auto texture_id = static_cast<ImTextureID>(reinterpret_cast<std::uintptr_t>(logo_texture));
+        const auto logo_min = ImVec2{min.x + (240.0f - logo_width) * 0.5f, min.y + logo_top};
+        draw->AddImage(ImTextureRef{texture_id}, logo_min,
+                       ImVec2{logo_min.x + logo_width, logo_min.y + logo_height});
+    }
+
     const auto* brand = render::fonts().menu_brand_30;
+    const auto brand_size = brand && brand->im_font ? brand->font_size * 1.25f : 0.0f;
+    const auto text_top =
+        logo_texture ? logo_top + logo_height + 4.0f : (112.0f - brand_size) * 0.5f;
     if (brand && brand->im_font)
     {
-        constexpr auto text = std::string_view{"VESTA"};
-        const auto brand_size = brand->font_size * 1.25f;
+        constexpr auto text = std::string_view{"PASTA"};
         float width{};
         for (const auto c : text)
             width += brand->im_font->CalcTextSizeA(brand_size, FLT_MAX, 0.0f, &c, &c + 1).x;
@@ -234,24 +258,51 @@ void menu_t::draw_sidebar()
         auto x = min.x + (240.0f - width) * 0.5f;
         for (const auto c : text)
         {
-            draw->AddText(brand->im_font, brand_size, {x, min.y + (112.0f - brand_size) * 0.5f}, IM_COL32_WHITE, &c,
-                          &c + 1);
+            draw->AddText(brand->im_font, brand_size, {x, min.y + text_top}, IM_COL32_WHITE, &c, &c + 1);
             x += brand->im_font->CalcTextSizeA(brand_size, FLT_MAX, 0.0f, &c, &c + 1).x + letter_spacing;
         }
     }
 
-    static constexpr const char* labels[]{"Aimbot", "Triggerbot", "Visuals", "Walk Bot", "Misc", "Configs"};
-    static constexpr int icons[]{0, 1, 2, 3, 4, 5};
-    ImGui::SetCursorPos({20.0f, 112.0f});
+    static constexpr const char* labels[]{"Aimbot", "Triggerbot", "Visuals", "Walk Bot", "Automation", "Misc",
+                                          "Configs"};
+    static constexpr int icons[]{0, 1, 2, 3, 6, 4, 5};
+    ImGui::SetCursorPos({20.0f, logo_texture ? text_top + brand_size + 14.0f : 112.0f});
+    // Automation is a child of Walk Bot: it stays hidden until its parent has been clicked. Once revealed it keeps a
+    // narrower, indented row and a branch line in the gutter so the hierarchy stays readable.
+    ImVec2 walk_min{}, walk_max{};
     for (int i = 0; i < static_cast<int>(std::size(labels)); ++i)
     {
-        ImGui::SetCursorPosX(20.0f);
+        if (i == k_automation_page && !m_automation_unlocked)
+            continue;
+        const auto automation = i == k_automation_page;
+        ImGui::SetCursorPosX(automation ? 36.0f : 20.0f);
         ImGui::PushID(i);
         const auto active = m_page == i;
-        if (nav_button(labels[i], active, icons[i]) && !active)
+        if (nav_button(labels[i], active, icons[i], automation ? 184.0f : 200.0f))
         {
-            m_page = i;
-            reset_content_animation();
+            if (i == k_walk_page)
+                m_automation_unlocked = true;
+            if (!active)
+            {
+                m_page = i;
+                reset_content_animation();
+            }
+        }
+        const auto row_min = ImGui::GetItemRectMin();
+        const auto row_max = ImGui::GetItemRectMax();
+        if (i == k_walk_page)
+        {
+            walk_min = row_min;
+            walk_max = row_max;
+        }
+        else if (automation)
+        {
+            const auto child_mid = row_min.y + 24.0f;
+            const auto connector = packed(k_border_light);
+            const auto endpoint = packed(k_accent);
+            draw->AddLine({walk_min.x, walk_max.y + 1.0f}, {walk_min.x, child_mid}, connector, 1.5f);
+            draw->AddLine({walk_min.x, child_mid}, {row_min.x, child_mid}, endpoint, 1.5f);
+            draw->AddCircleFilled({row_min.x, child_mid}, 1.7f, endpoint, 12);
         }
         ImGui::PopID();
         if (i != static_cast<int>(std::size(labels)) - 1)
@@ -263,6 +314,9 @@ void menu_t::draw_sidebar()
 
 void menu_t::draw_content()
 {
+    // Never leave the hidden child reachable through stale page state.
+    if (m_page == k_automation_page && !m_automation_unlocked)
+        m_page = k_walk_page;
     ImGui::SetCursorPos({240.0f, 0.0f});
     ImGui::BeginChild("##content", {710.0f, 650.0f}, false, ImGuiWindowFlags_NoScrollbar);
     m_content_animation = std::min(1.0f, m_content_animation + ImGui::GetIO().DeltaTime / 0.14f);
@@ -275,9 +329,11 @@ void menu_t::draw_content()
         draw_triggerbot();
     else if (m_page == 2)
         draw_visuals();
-    else if (m_page == 3)
+    else if (m_page == k_walk_page)
         draw_walk_bot();
-    else if (m_page == 4)
+    else if (m_page == k_automation_page)
+        draw_automation();
+    else if (m_page == 5)
         draw_misc();
     else
         draw_configs();

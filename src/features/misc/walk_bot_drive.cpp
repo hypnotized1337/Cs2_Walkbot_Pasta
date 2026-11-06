@@ -1,5 +1,6 @@
 #include <stdafx.hpp>
 #include <features/misc/walk_bot_detail.hpp>
+#include <features/misc/misc.hpp>
 #include <config/misc.hpp>
 #include <config/settings.hpp>
 #include <diagnostics/journal.hpp>
@@ -685,6 +686,7 @@ void walk_bot_t::stop_walking()
 // no other thread touches the route or input state.
 void walk_bot_t::reset_state()
 {
+    auto_bonus().set_auto_knife_active(false);
     (void)set_scope_control(false);
     stop_walking();
 
@@ -695,6 +697,7 @@ void walk_bot_t::reset_state()
     m_scope_release_at = {};
     m_scope_next = {};
     m_knife_target = 0;
+    m_knife_locked = false;
     m_knife_next_switch = {};
     m_knife_next_attack = {};
     m_knife_release = {};

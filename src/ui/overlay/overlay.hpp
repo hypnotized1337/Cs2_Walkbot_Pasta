@@ -38,6 +38,9 @@ public:
     ID3D11RenderTargetView* rtv() const { return m_rtv; }
     ID3D11DepthStencilView* dsv() const { return m_dsv; }
     ID3D11ShaderResourceView* ct_preview_texture() const { return m_ct_preview_texture; }
+    ID3D11ShaderResourceView* pasta_logo_texture() const { return m_pasta_logo_texture; }
+    [[nodiscard]] std::uint32_t pasta_logo_width() const noexcept { return m_pasta_logo_width; }
+    [[nodiscard]] std::uint32_t pasta_logo_height() const noexcept { return m_pasta_logo_height; }
     ID3D11ShaderResourceView* steam_avatar_texture(std::uint64_t steamid, std::string_view display_name = {});
 
     bool launch(foundation::shutdown_action quiesce = {});
@@ -208,6 +211,9 @@ private:
     ID3D11RenderTargetView* m_rtv{};
     ID3D11DepthStencilView* m_dsv{};
     ID3D11ShaderResourceView* m_ct_preview_texture{};
+    ID3D11ShaderResourceView* m_pasta_logo_texture{};
+    std::uint32_t m_pasta_logo_width{};
+    std::uint32_t m_pasta_logo_height{};
     std::unordered_map<std::uint64_t, ID3D11ShaderResourceView*> m_steam_avatars{};
     std::unordered_map<std::uint64_t, std::chrono::steady_clock::time_point> m_missing_steam_avatars{};
     std::uint32_t m_ct_preview_width{};

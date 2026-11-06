@@ -126,6 +126,8 @@ set(vesta_sources
     src/features/visuals/radar.cpp
     src/features/visuals/sound.cpp
     src/features/misc/auto_accept.cpp
+    src/features/misc/auto_bonus.cpp
+    src/features/misc/auto_crouch.cpp
 	 src/features/misc/auto_stop.cpp
     src/features/misc/bhop.cpp
     src/features/misc/nade_helper.cpp
@@ -158,6 +160,7 @@ set(vesta_sources
     src/ui/menu/aimbot_page.cpp
     src/ui/menu/triggerbot_page.cpp
     src/ui/menu/visuals_page.cpp
+    src/ui/menu/automation_page.cpp
     src/ui/menu/misc_page.cpp
     src/ui/menu/walk_bot_page.cpp
     src/ui/menu/configs_page.cpp

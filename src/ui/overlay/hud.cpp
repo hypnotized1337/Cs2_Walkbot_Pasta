@@ -29,7 +29,7 @@ constexpr ImU32 k_wm_text = IM_COL32(248, 248, 242, 255);
 constexpr ImU32 k_wm_muted = IM_COL32(150, 150, 160, 255);
 
 // Uppercase, matching the sidebar wordmark.
-constexpr const char* k_wm_brand = "VESTA";
+constexpr const char* k_wm_brand = "PASTA";
 
 enum class stat_icon
 {
@@ -593,7 +593,7 @@ struct watermark_metrics
     }
 };
 
-// "VESTA" uses the menu's brand font (as the sidebar logo) at a much smaller size; the stats use its regular font.
+// "PASTA" uses the menu's brand font (as the sidebar logo) at a much smaller size; the stats use its regular font.
 [[nodiscard]] watermark_metrics measure_watermark(const float dpi_scale, const float user_scale,
                                                   const watermark_chips& chips)
 {

@@ -29,18 +29,18 @@ struct failure_text
     switch (failure)
     {
         case startup_failure::game_connection:
-            return {L"CS2 is not running.", L"Start CS2 first, then start Vesta."};
+            return {L"CS2 is not running.", L"Start CS2 first, then start PASTA."};
         case startup_failure::input_unavailable:
             return {L"Input setup failed.",
-                    L"Close other tools that capture the keyboard or mouse, then start Vesta again."};
+                    L"Close other tools that capture the keyboard or mouse, then start PASTA again."};
         case startup_failure::modules_not_found:
-            return {L"CS2 is still loading.", L"Wait for the CS2 main menu, then start Vesta again."};
+            return {L"CS2 is still loading.", L"Wait for the CS2 main menu, then start PASTA again."};
         case startup_failure::addresses_failed:
-            return {L"This Vesta version does not support the current CS2 update.",
-                    L"Download the latest Vesta release."};
+            return {L"This PASTA version does not support the current CS2 update.",
+                    L"Download the latest PASTA release."};
         case startup_failure::schema_failed:
-            return {L"This Vesta version cannot read the game data of the current CS2 update.",
-                    L"Download the latest Vesta release."};
+            return {L"This PASTA version cannot read the game data of the current CS2 update.",
+                    L"Download the latest PASTA release."};
         case startup_failure::count:
             break;
     }

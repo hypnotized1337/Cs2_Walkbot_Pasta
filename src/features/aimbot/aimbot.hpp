@@ -100,6 +100,18 @@ public:
     {
         return m_view_engaged_target.load(std::memory_order_acquire);
     }
+    // When a concrete view target was last published (steady_clock ticks, 0 = never). Unlike view_engaged_ticks(),
+    // this does not advance while the trigger is held without a valid target.
+    [[nodiscard]] std::int64_t view_target_ticks() const noexcept
+    {
+        return m_view_target_ticks.load(std::memory_order_acquire);
+    }
+    // The target the previous combat tick selected with the aimbot or triggerbot (0 = none). Auto-crouch reads this
+    // before the next aim tick and holds the duck for it.
+    [[nodiscard]] std::uintptr_t current_engaged_target() const noexcept
+    {
+        return m_current_engaged_target.load(std::memory_order_acquire);
+    }
     void sync_seed_phase(int tick, std::chrono::steady_clock::time_point observed_at) noexcept
     {
         if (simulation::seed_timing::observe_phase(tick, observed_at, m_seed_phase_tick, m_seed_phase_tick_at,
@@ -361,13 +373,18 @@ private:
     std::chrono::steady_clock::time_point m_spray_off_target_since{};
     std::chrono::steady_clock::time_point m_spray_cooldown_until{};
     std::atomic<std::int64_t> m_view_engaged_ticks{};
+    std::atomic<std::int64_t> m_view_target_ticks{};
     std::atomic<std::uintptr_t> m_view_engaged_target{};
+    std::atomic<std::uintptr_t> m_current_engaged_target{};
     void note_view_engaged(const std::uintptr_t target) noexcept
     {
+        const auto now = std::chrono::steady_clock::now().time_since_epoch().count();
         if (target)
+        {
             m_view_engaged_target.store(target, std::memory_order_release);
-        m_view_engaged_ticks.store(std::chrono::steady_clock::now().time_since_epoch().count(),
-                                   std::memory_order_release);
+            m_view_target_ticks.store(now, std::memory_order_release);
+        }
+        m_view_engaged_ticks.store(now, std::memory_order_release);
     }
     std::chrono::steady_clock::time_point m_trigger_release_time{};
     int m_trigger_press_shots{-1};

@@ -442,9 +442,22 @@ void combat(control control)
                 VESTA_PERF_SCOPE(ballistics_tick);
                 simulation::ballistics().tick();
             }
+            // Crouch first: the aimbot and triggerbot only run once the game reports the duck (with a short fail-open
+            // timeout), so a trigger press cannot race the crouch key.
+            {
+                VESTA_PERF_SCOPE(auto_crouch_tick);
+                features::misc::auto_crouch().tick();
+            }
+            // A trigger already held from the previous tick must still run so it can release. New trigger presses are
+            // ordinary aim ticks and stay behind the crouch gate.
+            if (features::misc::auto_crouch().combat_ready() || features::aimbot::aim().seed_input_pending())
             {
                 VESTA_PERF_SCOPE(aim_tick);
                 features::aimbot::aim().tick();
+            }
+            {
+                VESTA_PERF_SCOPE(auto_bonus_tick);
+                features::misc::auto_bonus().tick();
             }
             {
                 VESTA_PERF_SCOPE(grenade_aim_tick);
@@ -454,6 +467,8 @@ void combat(control control)
         else
         {
             features::aimbot::aim().reset();
+            features::misc::auto_crouch().reset();
+            features::misc::auto_bonus().reset();
         }
 
         combat_profile.reset();

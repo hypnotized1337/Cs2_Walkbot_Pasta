@@ -101,10 +101,8 @@ void open_log_folder()
 void draw_general_tab()
 {
     auto& p = config::general_settings;
-    // Left: automation first, then the movement binds; right: the action binds and support. Both columns stay below the
-    // page height (568) with the support status line shown, so nothing scrolls.
-    card_in_column("automation", "AUTOMATION", 1, 0, [&] { toggle_row("Auto Accept Match", p.auto_accept); });
     // The game's own binds: what the features press (movement, attack, use, reload, buy menu) has to match them.
+    // Automation no longer lives here; it has its own top-level tab.
     auto& keys = p.m_game_controls;
     card_in_column("game_movement", "GAME MOVEMENT BINDS", 7, 0,
                    [&]

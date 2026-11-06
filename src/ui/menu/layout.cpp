@@ -703,6 +703,20 @@ void draw_nav_icon(ImDrawList* draw, int icon, ImVec2 center, ImU32 color)
         svg_segment(draw, svg_point(center, 10.8f, 13.2f), svg_point(center, 15.2f, 20.6f), color);
         svg_segment(draw, svg_point(center, 10.8f, 13.2f), svg_point(center, 6.0f, 20.2f), color);
     }
+    else if (icon == 6)
+    {
+        // Automation: a gear.
+        draw->AddCircle(center, 5.8f, color, 24, 1.6f);
+        draw->AddCircle(center, 2.2f, color, 16, 1.5f);
+        for (int i = 0; i < 8; ++i)
+        {
+            const auto angle = static_cast<float>(i) * 0.7853981634f;
+            const auto c = std::cos(angle);
+            const auto s = std::sin(angle);
+            svg_segment(draw, {center.x + c * 5.2f, center.y + s * 5.2f},
+                        {center.x + c * 8.4f, center.y + s * 8.4f}, color, 1.6f);
+        }
+    }
     else if (icon == 5)
     {
         // Configs: three sliders.
@@ -727,9 +741,9 @@ void draw_nav_icon(ImDrawList* draw, int icon, ImVec2 center, ImU32 color)
     }
 }
 
-bool nav_button(const char* label, bool active, int icon)
+bool nav_button(const char* label, bool active, int icon, const float width)
 {
-    ImGui::InvisibleButton(label, {200.0f, 48.0f});
+    ImGui::InvisibleButton(label, {width, 48.0f});
     const auto clicked = ImGui::IsItemClicked();
     const auto hovered = ImGui::IsItemHovered();
     pointer_cursor_if_hovered();

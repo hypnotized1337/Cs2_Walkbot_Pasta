@@ -31,7 +31,7 @@ int fail_startup(app::startup_failure failure)
     message += L"\n\n";
     message += text.action;
     message += L"\n\nDetails: %TEMP%\\vesta\\logs";
-    ::MessageBoxW(nullptr, message.c_str(), L"Vesta", MB_OK | MB_ICONERROR);
+    ::MessageBoxW(nullptr, message.c_str(), L"PASTA", MB_OK | MB_ICONERROR);
     return 1;
 }
 
@@ -58,8 +58,8 @@ int run(int argc, char** argv)
         diagnostics::emit(diagnostics::event::startup_instance_failed, diagnostics::severity::error,
                           diagnostics::code_domain::win32, instance.error());
         const auto message =
-            std::format(L"Vesta could not initialize its single-instance guard (Win32 {}).", instance.error());
-        ::MessageBoxW(nullptr, message.c_str(), L"Vesta startup", MB_OK | MB_ICONERROR);
+            std::format(L"PASTA could not initialize its single-instance guard (Win32 {}).", instance.error());
+        ::MessageBoxW(nullptr, message.c_str(), L"PASTA startup", MB_OK | MB_ICONERROR);
         return 1;
     }
 
@@ -81,9 +81,9 @@ int run(int argc, char** argv)
                           diagnostics::code_domain::mode, static_cast<std::uint32_t>(storage.stage));
         wchar_t message[256]{};
         std::swprintf(message, std::size(message),
-                      L"Vesta user data initialization failed (stage %u, code %lu). Original files were preserved.",
+                      L"PASTA user data initialization failed (stage %u, code %lu). Original files were preserved.",
                       static_cast<unsigned>(storage.stage), static_cast<unsigned long>(storage.error));
-        ::MessageBoxW(nullptr, message, L"Vesta user data", MB_OK | MB_ICONERROR);
+        ::MessageBoxW(nullptr, message, L"PASTA user data", MB_OK | MB_ICONERROR);
         return 1;
     }
     diagnostics::emit(diagnostics::event::startup_storage_ready);
@@ -222,14 +222,14 @@ int main(int argc, char** argv)
         diagnostics::emit(diagnostics::event::bootstrap_exception, diagnostics::severity::error,
                           diagnostics::code_domain::system, static_cast<std::uint32_t>(error.code().value()));
         wchar_t message[160]{};
-        std::swprintf(message, std::size(message), L"Vesta initialization failed (system error %d).",
+        std::swprintf(message, std::size(message), L"PASTA initialization failed (system error %d).",
                       error.code().value());
-        ::MessageBoxW(nullptr, message, L"Vesta startup", MB_OK | MB_ICONERROR);
+        ::MessageBoxW(nullptr, message, L"PASTA startup", MB_OK | MB_ICONERROR);
     }
     catch (...)
     {
         diagnostics::emit(diagnostics::event::bootstrap_exception, diagnostics::severity::error);
-        ::MessageBoxW(nullptr, L"Vesta initialization failed. Resources were released.", L"Vesta startup",
+        ::MessageBoxW(nullptr, L"PASTA initialization failed. Resources were released.", L"PASTA startup",
                       MB_OK | MB_ICONERROR);
     }
     return result;

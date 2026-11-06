@@ -31,6 +31,7 @@ private:
     void end_combat_page();
     void draw_aimbot();
     void draw_triggerbot();
+    void draw_automation();
     void draw_visuals();
     void draw_walk_bot();
     void draw_misc();
@@ -42,6 +43,9 @@ private:
     bool m_open_pending{};
     HWND m_hwnd{};
     int m_page{};
+    // Automation is a child of Walk Bot, revealed by selecting its parent rather than shown as a top-level tab on a
+    // fresh menu.
+    bool m_automation_unlocked{};
     int m_weapon_group{-1};
     int m_visual_group{};
     int m_misc_group{};

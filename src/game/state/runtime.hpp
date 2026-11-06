@@ -87,6 +87,7 @@ public:
     [[nodiscard]] std::int32_t health() const { return m_health.load(); }
     [[nodiscard]] float game_time() const { return m_game_time.load(); }
     [[nodiscard]] float flash_alpha() const { return m_flash_alpha.load(); }
+    [[nodiscard]] bool ducked() const { return m_ducked.load(); }
 
     [[nodiscard]] bool is_enemy(std::int32_t other_team) const
     {
@@ -117,6 +118,7 @@ private:
     std::atomic<std::int32_t> m_health{};
     std::atomic<float> m_game_time{};
     std::atomic<float> m_flash_alpha{};
+    std::atomic<bool> m_ducked{};
     std::shared_ptr<const local_snapshot> m_snapshot{std::make_shared<const local_snapshot>()};
 };
 

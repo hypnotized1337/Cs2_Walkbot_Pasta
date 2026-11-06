@@ -58,6 +58,7 @@ void aimbot_t::reset()
     m_seed_memo_yaw = {};
     m_last_time = 0.0f;
     m_aim_pawn = 0;
+    m_current_engaged_target.store(0, std::memory_order_release);
     m_aim_selection_world.reset();
     m_aim_selection_target = {};
     m_aim_selection_view = {};
@@ -189,6 +190,7 @@ void aimbot_t::reset_aim_tracking()
     m_aim_sent_since_sample = {};
     m_aim_pending_since = {};
     m_aim_pawn = 0;
+    m_current_engaged_target.store(0, std::memory_order_release);
     m_aim_selection_world.reset();
     m_aim_selection_target = {};
     m_aim_tracking_lag = 0.0f;
@@ -363,6 +365,7 @@ bool aimbot_t::select_and_aim(const combat_frame& frame, const config::combat_pr
     if (selected_target.player)
     {
         note_view_engaged(selected_target.player->pawn);
+        m_current_engaged_target.store(selected_target.player->pawn, std::memory_order_release);
         aimbot(frame.eye, frame.view_angles, selected_target, cfg.aimbot);
     }
     return true;
@@ -371,6 +374,7 @@ bool aimbot_t::select_and_aim(const combat_frame& frame, const config::combat_pr
 void aimbot_t::tick()
 {
     refresh_runtime_config();
+    m_current_engaged_target.store(0, std::memory_order_release);
     const auto ctx = ballistics().ctx();
     if (ctx.valid)
     {
@@ -543,6 +547,10 @@ void aimbot_t::tick()
             return;
         }
     }
+    // Publish the trigger target even between bursts: auto-crouch keeps its duck held for the whole engagement,
+    // not only while the trigger button happens to be down.
+    if (trigger_requested && m_trigger_target_valid)
+        m_current_engaged_target.store(m_trigger_target.pawn, std::memory_order_release);
     flush_recoil_input();
 }
 

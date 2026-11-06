@@ -95,8 +95,8 @@ const std::unordered_map<std::string_view, const char*>& russian()
         {"Overlay is in compatibility mode and may be hidden in true fullscreen. Set CS2 to Fullscreen Windowed.",
          "Оверлей в режиме совместимости и может быть скрыт в настоящем полноэкранном режиме. Включите в CS2 "
          "«Полноэкранный в окне»."},
-        {"Lua is unavailable: its data folder could not be prepared. Check free disk space, then restart Vesta.",
-         "Lua недоступен: не удалось подготовить его папку данных. Проверьте свободное место и перезапустите Vesta."},
+        {"Lua is unavailable: its data folder could not be prepared. Check free disk space, then restart PASTA.",
+         "Lua недоступен: не удалось подготовить его папку данных. Проверьте свободное место и перезапустите PASTA."},
         {"The previous session ended unexpectedly. Save a report in Misc > General > Diagnostic Report.",
          "Прошлый сеанс завершился неожиданно. Сохраните отчёт: Разное > Общие > Диагностический отчёт."},
         {"Keyboard blocking could not start. Auto Stop and the grenade helper may not hold movement keys.",
@@ -105,7 +105,7 @@ const std::unordered_map<std::string_view, const char*>& russian()
         {"Warning", "Предупреждение"},
         {"Notice", "Сообщение"},
         {"Open the menu to close this message.", "Откройте меню, чтобы закрыть это сообщение."},
-        {"Welcome to Vesta", "Добро пожаловать в Vesta"},
+        {"Welcome to PASTA", "Добро пожаловать в PASTA"},
         {"Step %d of %d", "Шаг %d из %d"},
         {"Choose your language. It applies at once and is saved with your settings.",
          "Выберите язык. Он применяется сразу и сохраняется вместе с настройками."},
@@ -114,16 +114,16 @@ const std::unordered_map<std::string_view, const char*>& russian()
          "Эти клавиши работают в игре. Измените их, если они мешают. Изменения применяются сразу и сохраняются в "
          "hotkeys.cfg."},
         {"Open / close the menu", "Открыть / закрыть меню"},
-        {"Exit Vesta", "Выйти из Vesta"},
+        {"Exit PASTA", "Выйти из PASTA"},
         {"The two actions need different keys.", "Для двух действий нужны разные клавиши."},
         {"This key cannot be used.", "Эту клавишу нельзя использовать."},
         {"The new keys work now, but hotkeys.cfg could not be saved.",
          "Новые клавиши уже работают, но сохранить hotkeys.cfg не удалось."},
         {"Movement keys are released while the menu is open, so your character does not keep running.",
          "Клавиши движения отпускаются, пока меню открыто, поэтому персонаж не продолжает бежать."},
-        {"Settings, cache and logs live in %TEMP%\\vesta. Cleaning tools may remove it; Vesta then starts with default "
+        {"Settings, cache and logs live in %TEMP%\\vesta. Cleaning tools may remove it; PASTA then starts with default "
          "settings.",
-         "Настройки, кэш и журналы лежат в %TEMP%\\vesta. Программы очистки могут её удалить, тогда Vesta запустится с "
+         "Настройки, кэш и журналы лежат в %TEMP%\\vesta. Программы очистки могут её удалить, тогда PASTA запустится с "
          "настройками по умолчанию."},
         {"Hotkeys", "Горячие клавиши"},
         {"Good to know", "Полезно знать"},
@@ -133,9 +133,9 @@ const std::unordered_map<std::string_view, const char*>& russian()
          "Что-то не так? Разное > Общие > Диагностический отчёт сохраняет отчёт, который можно приложить к "
          "сообщению об ошибке. Там же можно повторить этот гайд."},
         {"Performance", "Производительность"},
-        {"Vesta is external: it runs next to the game as its own program and uses your computer's resources, mostly "
+        {"PASTA is external: it runs next to the game as its own program and uses your computer's resources, mostly "
          "the CPU, and the GPU for some features.",
-         "Vesta — внешняя (external) программа: она работает рядом с игрой и использует ресурсы компьютера, в первую "
+         "PASTA — внешняя (external) программа: она работает рядом с игрой и использует ресурсы компьютера, в первую "
          "очередь процессор, а для некоторых функций и видеокарту."},
         {"If the game uses all or almost all of your hardware:",
          "Если игра занимает все или почти все ресурсы железа:"},
@@ -556,8 +556,15 @@ const std::unordered_map<std::string_view, const char*>& russian()
         {"Reload", "Перезагрузить"},
 
         // --- misc: general ----------------------------------------------
-        {"AUTOMATION", "АВТОМАТИЗАЦИЯ"},
+        {"Automation", "Автоматизация"},
+        {"MATCH AUTOMATION", "АВТОМАТИЗАЦИЯ МАТЧА"},
+        {"COMBAT AUTOMATION", "БОЕВАЯ АВТОМАТИЗАЦИЯ"},
+        {"BUY AUTOMATION", "АВТОМАТИЗАЦИЯ ЗАКУПКИ"},
         {"Auto Accept Match", "Автопринятие матча"},
+        {"Auto Crouch (Beta)", "Авто-присед (бета)"},
+        {"Auto Bonus Weapon (Beta)", "Авто бонусное оружие (бета)"},
+        {"Pickup Key", "Клавиша подбора"},
+        {"Interval", "Интервал"},
         {"GRENADES", "ГРАНАТЫ"},
         {"LINEUP HELPER", "ПОМОЩНИК РАСКИДОК"},
         {"GRENADE ASSIST", "ДОВОДКА ГРАНАТ"},
@@ -601,7 +608,7 @@ const std::unordered_map<std::string_view, const char*>& russian()
         {"GPU Effects", "GPU-эффекты"},
         {"Restart to change GPU effects. The base overlay uses the display adapter; off keeps 2D ESP and the menu, "
          "while chams, no flash, no smoke and bloom are disabled.",
-         "После изменения перезапустите Vesta. Базовый оверлей использует видеокарту; выключение сохраняет 2D ESP и "
+         "После изменения перезапустите PASTA. Базовый оверлей использует видеокарту; выключение сохраняет 2D ESP и "
          "меню, но отключает chams, no flash, no smoke и bloom."},
         {"Maximum FPS", "Максимум FPS"},
         {"CPU Priority", "Приоритет CPU"},
@@ -779,9 +786,9 @@ const std::unordered_map<std::string_view, const char*>& russian()
          "Отчёт сохранён на рабочем столе. Приложите его к issue на GitHub."},
         {"Could not save the report.", "Не удалось сохранить отчёт."},
         {"Lua is unavailable: its data folder could not be prepared. Check free disk space and folder permissions, "
-         "then restart Vesta.",
+         "then restart PASTA.",
          "Lua недоступен: не удалось подготовить его папку данных. Проверьте свободное место и права на папку, затем "
-         "перезапустите Vesta."},
+         "перезапустите PASTA."},
         {"The previous session ended unexpectedly. Save a report and attach it to your GitHub issue.",
          "Прошлый сеанс завершился неожиданно. Сохраните отчёт и приложите его к issue на GitHub."},
         {"File Name", "Имя файла"},

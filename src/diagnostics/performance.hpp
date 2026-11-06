@@ -58,6 +58,8 @@ enum class zone : std::uint8_t
     aim_trigger,
     aim_choose,
     aim_flush,
+    auto_crouch_tick,
+    auto_bonus_tick,
     count
 };
 

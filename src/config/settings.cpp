@@ -2108,6 +2108,20 @@ static void from_json(const json& j, general_profile::auto_stop& a)
     a.required_shoot_speed = std::clamp(a.required_shoot_speed, 0.0f, 60.0f);
 }
 
+static void to_json(json& j, const general_profile::auto_bonus& a)
+{
+    j = json{{"enabled", a.enabled}, {"key", a.key}, {"interval_ms", a.interval_ms}};
+}
+
+static void from_json(const json& j, general_profile::auto_bonus& a)
+{
+    read_field(j, "enabled", a.enabled);
+    read_field(j, "key", a.key);
+    read_field(j, "interval_ms", a.interval_ms);
+    a.key = std::clamp(a.key, 0, 255);
+    a.interval_ms = std::clamp(a.interval_ms, 250, 5000);
+}
+
 static void to_json(json& j, const general_profile& m)
 {
     j = json{{"m_grenades", m.m_grenades},
@@ -2137,6 +2151,8 @@ static void to_json(json& j, const general_profile& m)
                               {"border", m.palette.border},
                               {"hover", m.palette.hover}}},
              {"auto_accept", m.auto_accept},
+             {"auto_crouch", m.auto_crouch},
+             {"m_auto_bonus", m.m_auto_bonus},
              {"obs_bypass", m.obs_bypass},
              {"limit_fps", m.limit_fps},
              {"fps_limit", m.fps_limit},
@@ -2182,6 +2198,8 @@ static void from_json(const json& j, general_profile& m)
         read_field(p, "hover", m.palette.hover);
     }
     read_field(j, "auto_accept", m.auto_accept);
+    read_field(j, "auto_crouch", m.auto_crouch);
+    read_field(j, "m_auto_bonus", m.m_auto_bonus);
     read_field(j, "obs_bypass", m.obs_bypass);
     read_field(j, "limit_fps", m.limit_fps);
     read_field(j, "fps_limit", m.fps_limit);

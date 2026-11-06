@@ -35,6 +35,7 @@
 #include <resources/fonts/notosans_medium.hpp>
 #include <resources/fonts/weapons.hpp>
 #include <resources/images/ct.hpp>
+#include <resources/images/pasta_logo.hpp>
 #include <resources/watermark_loss_icon.hpp>
 #include "imgui.h"
 #include "imgui_impl_dx11.h"
@@ -412,7 +413,7 @@ bool overlay_t::wait_for_signal(HANDLE signal, std::uint64_t observed_transition
     }
 }
 
-// The exit key: releases everything Vesta may be holding in the game and asks the overlay to stop.
+// The exit key: releases everything PASTA may be holding in the game and asks the overlay to stop.
 void overlay_t::release_input_for_exit()
 {
     ::ClipCursor(nullptr);
@@ -906,6 +907,7 @@ void overlay_t::shutdown() noexcept
         }
     };
     release(m_ct_preview_texture);
+    release(m_pasta_logo_texture);
     for (auto& [steamid, avatar] : m_steam_avatars)
         release(avatar);
     m_steam_avatars.clear();
@@ -1453,7 +1455,7 @@ void overlay_t::request_file(const file_request kind)
             std::optional<std::wstring> chosen{};
             if (kind == file_request::choose_config_folder)
             {
-                chosen = pick_folder(m_hwnd, L"Choose a folder for Vesta configs");
+                chosen = pick_folder(m_hwnd, L"Choose a folder for PASTA configs");
             }
             else
             {
@@ -1470,12 +1472,12 @@ void overlay_t::request_file(const file_request kind)
                 if (kind == file_request::import_lua)
                 {
                     ofn.lpstrFilter = L"Lua scripts (*.lua)\0*.lua\0";
-                    ofn.lpstrTitle = L"Import Lua script into Vesta";
+                    ofn.lpstrTitle = L"Import Lua script into PASTA";
                 }
                 else
                 {
-                    ofn.lpstrFilter = L"Vesta config (*.cfg)\0*.cfg\0";
-                    ofn.lpstrTitle = L"Import a Vesta config";
+                    ofn.lpstrFilter = L"PASTA config (*.cfg)\0*.cfg\0";
+                    ofn.lpstrTitle = L"Import a PASTA config";
                 }
                 if (::GetOpenFileNameW(&ofn))
                     chosen = std::wstring{path.c_str()};
@@ -2057,32 +2059,30 @@ bool overlay_t::resize_graphics(const std::uint32_t width, const std::uint32_t h
     return true;
 }
 
-bool overlay_t::load_preview_asset()
+namespace
 {
-    const auto com_result = ::CoInitializeEx(nullptr, COINIT_MULTITHREADED);
-    if (FAILED(com_result) && com_result != RPC_E_CHANGED_MODE)
-    {
-        return false;
-    }
-    const auto uninitialize_com = SUCCEEDED(com_result);
-
+[[nodiscard]] ID3D11ShaderResourceView* texture_from_png(ID3D11Device* device, const std::uint8_t* data,
+                                                         const std::size_t size, std::uint32_t& width,
+                                                         std::uint32_t& height)
+{
+    ID3D11ShaderResourceView* view{};
     IWICImagingFactory* factory{};
     IWICStream* stream{};
     IWICBitmapDecoder* decoder{};
     IWICBitmapFrameDecode* frame{};
     IWICFormatConverter* converter{};
     ID3D11Texture2D* texture{};
-    bool loaded{};
 
     do
     {
+        if (!device || !data || size == 0 || size > std::numeric_limits<DWORD>::max())
+            break;
         if (FAILED(::CoCreateInstance(CLSID_WICImagingFactory, nullptr, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&factory))))
             break;
         if (FAILED(factory->CreateStream(&stream)))
             break;
-        if (FAILED(stream->InitializeFromMemory(
-                const_cast<BYTE*>(reinterpret_cast<const BYTE*>(resources::images::ct_png)),
-                static_cast<DWORD>(resources::images::ct_png_size))))
+        if (FAILED(stream->InitializeFromMemory(const_cast<BYTE*>(reinterpret_cast<const BYTE*>(data)),
+                                                static_cast<DWORD>(size))))
             break;
         if (FAILED(factory->CreateDecoderFromStream(stream, nullptr, WICDecodeMetadataCacheOnLoad, &decoder)))
             break;
@@ -2094,17 +2094,17 @@ bool overlay_t::load_preview_asset()
                                          WICBitmapPaletteTypeCustom)))
             break;
 
-        UINT width{}, height{};
-        if (FAILED(converter->GetSize(&width, &height)) || width == 0 || height == 0)
+        UINT decoded_width{}, decoded_height{};
+        if (FAILED(converter->GetSize(&decoded_width, &decoded_height)) || decoded_width == 0 || decoded_height == 0)
             break;
-        const auto stride = width * 4u;
-        std::vector<std::uint8_t> pixels(static_cast<std::size_t>(stride) * height);
+        const auto stride = decoded_width * 4u;
+        std::vector<std::uint8_t> pixels(static_cast<std::size_t>(stride) * decoded_height);
         if (FAILED(converter->CopyPixels(nullptr, stride, static_cast<UINT>(pixels.size()), pixels.data())))
             break;
 
         D3D11_TEXTURE2D_DESC description{};
-        description.Width = width;
-        description.Height = height;
+        description.Width = decoded_width;
+        description.Height = decoded_height;
         description.MipLevels = 1;
         description.ArraySize = 1;
         description.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
@@ -2115,14 +2115,13 @@ bool overlay_t::load_preview_asset()
         D3D11_SUBRESOURCE_DATA initial_data{};
         initial_data.pSysMem = pixels.data();
         initial_data.SysMemPitch = stride;
-        if (FAILED(m_device->CreateTexture2D(&description, &initial_data, &texture)))
+        if (FAILED(device->CreateTexture2D(&description, &initial_data, &texture)))
             break;
-        if (FAILED(m_device->CreateShaderResourceView(texture, nullptr, &m_ct_preview_texture)))
+        if (FAILED(device->CreateShaderResourceView(texture, nullptr, &view)))
             break;
 
-        m_ct_preview_width = width;
-        m_ct_preview_height = height;
-        loaded = true;
+        width = decoded_width;
+        height = decoded_height;
     } while (false);
 
     if (texture)
@@ -2137,9 +2136,27 @@ bool overlay_t::load_preview_asset()
         stream->Release();
     if (factory)
         factory->Release();
+    return view;
+}
+} // namespace
+
+bool overlay_t::load_preview_asset()
+{
+    const auto com_result = ::CoInitializeEx(nullptr, COINIT_MULTITHREADED);
+    if (FAILED(com_result) && com_result != RPC_E_CHANGED_MODE)
+        return false;
+    const auto uninitialize_com = SUCCEEDED(com_result);
+
+    m_ct_preview_texture = texture_from_png(m_device, resources::images::ct_png,
+                                            sizeof(resources::images::ct_png), m_ct_preview_width,
+                                            m_ct_preview_height);
+    m_pasta_logo_texture = texture_from_png(m_device, resources::images::pasta_logo_png,
+                                            sizeof(resources::images::pasta_logo_png), m_pasta_logo_width,
+                                            m_pasta_logo_height);
+
     if (uninitialize_com)
         ::CoUninitialize();
-    return loaded;
+    return m_ct_preview_texture != nullptr;
 }
 
 ID3D11ShaderResourceView* overlay_t::steam_avatar_texture(const std::uint64_t steamid,

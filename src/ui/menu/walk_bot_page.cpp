@@ -34,7 +34,7 @@ void menu_t::draw_walk_bot()
                                           });
                    });
     // Spray lives with the walk bot's other combat switches: one toggle here, its burst tuning in the row's popup.
-    const auto combat_rows = walk.autofire_spray ? 8 : 7;
+    const auto combat_rows = walk.autofire_spray ? 6 : 5;
     card_in_column("walk_combat", "COMBAT", combat_rows, 0,
                    [&]
                    {
@@ -58,15 +58,6 @@ void menu_t::draw_walk_bot()
                                         });
                        if (walk.autofire_spray)
                            slider_row("Burst Bullet Count", walk.spray_burst_count, 3, 30);
-                       toggle_popup_row("Auto Knife", walk.auto_knife, 4,
-                                        [&]
-                                        {
-                                            slider_row("Distance", walk.auto_knife_distance, 80.0f, 600.0f, " u",
-                                                       10.0f);
-                                            slider_row("Respawn Grace (ms)", walk.auto_knife_respawn_grace_ms, 0, 5000);
-                                            toggle_row("Knife Only When Target Is AFK", walk.auto_knife_afk_only);
-                                            toggle_row("Show Eligibility Debug", walk.auto_knife_debug);
-                                        });
                        toggle_popup_row(
                            "Rear Defense", walk.rear_defense, 5,
                            [&]
@@ -78,7 +69,6 @@ void menu_t::draw_walk_bot()
                                static constexpr const char* weapons[]{"Primary", "Knife"};
                                select_row("Weapon", walk.rear_defense_weapon, weapons);
                            });
-                       toggle_row("Auto Scope", walk.auto_scope);
                        toggle_row("React To Hits", walk.react_to_hits);
                    });
     // Recording: press the key, walk the route yourself (jumps and crouches are kept), press it again. Routes are
@@ -110,96 +100,6 @@ void menu_t::draw_walk_bot()
                                          platform::windows::runtime_storage::paths().root / L"walkbot");
                              });
         });
-    // Auto buy, in the switch's popup: one preset per mode (or the default one), each a list of buy-menu codes with a
-    // side and a money condition ("25" for CT under $2000), items added and removed as needed.
-    using walk_settings = config::general_profile::walk_bot;
-    walk.buy_edit = std::clamp(walk.buy_edit, 0, static_cast<int>(walk_settings::buy_mode_count) - 1);
-    auto& preset = walk.buy_presets[static_cast<std::size_t>(walk.buy_edit)];
-    preset.count = std::clamp(preset.count, 0, walk_settings::k_buy_items);
-    const bool preset_editable = walk.buy_edit == walk_settings::buy_default || preset.custom;
-    const int buy_rows = 1 + (walk.buy_edit != walk_settings::buy_default ? 1 : 0) +
-                         (preset_editable ? 1 + preset.count + (preset.count < walk_settings::k_buy_items ? 1 : 0) : 0);
-    card_in_column(
-        "walk_round", "ROUND", 2, 1,
-        [&]
-        {
-            toggle_popup_row(
-                "Auto Buy", walk.auto_buy, buy_rows,
-                [&]
-                {
-                    static constexpr const char* presets[]{"Default", "Premier", "Competitive",
-                                                           "Wingman", "Casual",  "Deathmatch"};
-                    select_row("Preset", walk.buy_edit, presets);
-                    if (walk.buy_edit != walk_settings::buy_default)
-                        toggle_row("Own Preset", preset.custom);
-                    if (!preset_editable)
-                        return;
-                    toggle_row("One Random Item", preset.random_one);
-                    int remove = -1;
-                    for (int i = 0; i < preset.count; ++i)
-                    {
-                        auto& item = preset.items[static_cast<std::size_t>(i)];
-                        // The row names the item by its code and condition; the popup edits it.
-                        static constexpr const char* side_names[]{"", " T", " CT"};
-                        const auto label =
-                            std::format("{} {}{}{}", render::localization::tr("Item"),
-                                        item.code[0] ? item.code.data() : "?", side_names[std::clamp(item.side, 0, 2)],
-                                        item.money_rule == 1   ? std::format(" < ${}", item.money)
-                                        : item.money_rule == 2 ? std::format(" >= ${}", item.money)
-                                                               : std::string{});
-                        const auto row = std::format("{}###buy_item_{}", label, i);
-                        settings_popup_row(row.c_str(), 6,
-                                           [&]
-                                           {
-                                               toggle_row("Enabled", item.enabled);
-                                               text_input_row("Buy Code", item.code.data(), item.code.size());
-                                               static constexpr const char* sides[]{"Both Sides", "T", "CT"};
-                                               select_row("Side", item.side, sides);
-                                               static constexpr const char* rules[]{"Any Money", "Less Than",
-                                                                                    "At Least"};
-                                               select_row("Money", item.money_rule, rules);
-                                               slider_row("Amount", item.money, 0, 16000, "$");
-                                               if (button_row("Remove Item", "Remove", row_action_icon::none))
-                                                   remove = i;
-                                           });
-                    }
-                    if (remove >= 0)
-                    {
-                        for (int i = remove; i + 1 < preset.count; ++i)
-                            preset.items[static_cast<std::size_t>(i)] = preset.items[static_cast<std::size_t>(i + 1)];
-                        preset.items[static_cast<std::size_t>(--preset.count)] = {};
-                    }
-                    if (preset.count < walk_settings::k_buy_items &&
-                        button_row("Add Item", "Add", row_action_icon::none))
-                    {
-                        preset.items[static_cast<std::size_t>(preset.count)] = {true, {}, 0, 0, 2000};
-                        ++preset.count;
-                    }
-                });
-            toggle_row("Auto Reload", walk.auto_reload);
-        });
-    card_in_column("walk_match", "MATCH", 2, 1,
-                   [&]
-                   {
-                       toggle_popup_row("Auto Rejoin", walk.auto_rejoin, 2,
-                                        [&]
-                                        {
-                                            static constexpr const char* game_modes[]{
-                                                "Deathmatch", "Casual", "Competitive", "Wingman", "Premier"};
-                                            select_row("Game Mode", walk.game_mode, game_modes);
-                                            walk.game_mode = std::clamp(walk.game_mode, 0, 4);
-                                            static constexpr const char* teams[]{"Terrorists", "Counter-Terrorists"};
-                                            select_row("Team", walk.team, teams);
-                                            walk.team = std::clamp(walk.team, 0, 1);
-                                        });
-                       toggle_popup_row("Auto Disconnect", walk.auto_disconnect, 3,
-                                        [&]
-                                        {
-                                            slider_row("Score", walk.disconnect_score, 0, 2000);
-                                            slider_row("Minutes On Server", walk.disconnect_minutes, 0, 60, " min");
-                                            slider_row("Random Extra Time", walk.disconnect_spread, 0, 100, "%");
-                                        });
-                   });
 
     end_cards();
     ImGui::EndChild();

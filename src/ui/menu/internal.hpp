@@ -748,7 +748,7 @@ void svg_polyline(ImDrawList* draw, std::span<const ImVec2> points, ImU32 color,
 
 void draw_nav_icon(ImDrawList* draw, int icon, ImVec2 center, ImU32 color);
 
-bool nav_button(const char* label, bool active, int icon);
+bool nav_button(const char* label, bool active, int icon, float width = 200.0f);
 
 void begin_cards(const char* id);
 
