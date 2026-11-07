@@ -187,10 +187,12 @@ private:
         bool penetrated{};
     };
 
+    // `focus_pawn` is the enemy the game reports under the crosshair. When the camera ray misses every capsule, the
+    // trace falls back to the nearest allowed hitbox of that pawn instead of reporting no target.
     [[nodiscard]] trigger_result trace_direction(const foundation::vec3& eye_pos, const foundation::vec3& direction,
                                                  const std::vector<game::player_snapshot>& players,
-                                                 const config::combat_profile::triggerbot& cfg,
-                                                 int hitbox_parts) const;
+                                                 const config::combat_profile::triggerbot& cfg, int hitbox_parts,
+                                                 std::uintptr_t focus_pawn = 0) const;
     void triggerbot(const foundation::vec3& eye_pos, const foundation::vec3& view_angles,
                     const std::vector<game::player_snapshot>& players, const config::combat_profile::triggerbot& cfg);
 

@@ -214,6 +214,11 @@ private:
     // combat ticks without keeping the duck after target selection is genuinely lost.
     std::uintptr_t m_engaged_target{};
     std::chrono::steady_clock::time_point m_target_seen_at{};
+    // Exposure gate. Auto Crouch only ducks while the enemy stays decently exposed from the lower, crouched eye;
+    // ducking away from a target that was peeking over cover made the bot lose the fight and re-crouch in a cycle.
+    std::chrono::steady_clock::time_point m_exposure_ok_at{};
+    std::chrono::steady_clock::time_point m_exposure_bad_at{};
+    std::chrono::steady_clock::time_point m_exposure_retry_at{};
     std::chrono::steady_clock::time_point m_waiting_since{};
     bool m_waiting_for_duck{};
     bool m_duck_wait_timed_out{};

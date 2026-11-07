@@ -8,30 +8,19 @@ namespace features::aimbot
 aimbot_t::trigger_result aimbot_t::trace_direction(const foundation::vec3& eye_pos, const foundation::vec3& direction,
                                                    const std::vector<game::player_snapshot>& players,
                                                    const config::combat_profile::triggerbot& cfg,
-                                                   const int hitbox_parts) const
+                                                   const int hitbox_parts, const std::uintptr_t focus_pawn) const
 {
     constexpr auto max_range{8192.0f};
     // Trigger prediction follows the sampled target state only. Network ping is not
     // an aim-ahead horizon; server lag compensation consumes the historical sample.
+    // The aim (the walk bot's hand or the aimbot itself) always sits on the target's current bone, so the trace has to
+    // test the same geometry. The shooter's own velocity is deliberately not part of this lead: for a hitscan shot it
+    // only moves the ray's origin, and subtracting it displaced the traced skeleton opposite to the player's movement —
+    // up to 17 units while walking, more than a head hitbox. That is what left the crosshair on a standing enemy while
+    // every trigger pass traced past him.
     const auto prediction_time =
         cfg.predictive ? std::clamp(static_cast<float>(cfg.delay) * 0.001f + game::rules::simulation_step, 0.0f, 0.12f)
                        : 0.0f;
-    auto local_velocity = foundation::vec3{};
-    if (cfg.predictive)
-    {
-        const auto pawn = game::local_player().pawn();
-        if (pawn)
-        {
-            local_velocity = game::bound_memory().process.load<foundation::vec3>(
-                pawn + SCHEMA("C_BaseEntity", "m_vecAbsVelocity"_id));
-            if (!std::isfinite(local_velocity.x) || !std::isfinite(local_velocity.y) ||
-                !std::isfinite(local_velocity.z))
-            {
-                local_velocity = {};
-            }
-        }
-    }
-
 
     struct direct_candidate
     {
@@ -74,7 +63,7 @@ aimbot_t::trigger_result aimbot_t::trace_direction(const foundation::vec3& eye_p
             {
                 target_velocity = player.velocity;
             }
-            const auto offset = (target_velocity - local_velocity) * prediction_time;
+            const auto offset = target_velocity * prediction_time;
             for (auto& bone : bones.bones)
             {
                 bone.position += offset;
@@ -110,6 +99,61 @@ aimbot_t::trigger_result aimbot_t::trace_direction(const foundation::vec3& eye_p
         }
     }
 
+    // The walk bot's autofire: the game's own crosshair names the enemy it is fighting even when the instantaneous
+    // camera ray misses every capsule — the hand is still closing on the bone, or the punch of the last shot moved the
+    // view after the bones were read. Aim at the nearest allowed hitbox of that enemy instead of reporting no target:
+    // a lined-up enemy must never be watched without a shot.
+    auto shot_direction = direction;
+    if (!best.player && focus_pawn != 0)
+    {
+        auto found = false;
+        auto nearest_offset = 0.0f;
+        for (const auto& player : players)
+        {
+            if (player.pawn != focus_pawn || player.health <= 0 || player.invulnerable || !player.bones.is_valid() ||
+                player.hitboxes.count <= 0)
+            {
+                continue;
+            }
+            for (const auto& hitbox : player.hitboxes)
+            {
+                if (hitbox.index < 0 || !player.bones.covers(hitbox.bone))
+                {
+                    continue;
+                }
+                const auto hitgroup = game::hitbox_data().hitgroup_from_hitbox(hitbox.index);
+                if ((hitbox_parts & simulation::aim_part_of(hitbox, hitgroup)) == 0)
+                {
+                    continue;
+                }
+                const auto capsule =
+                    game::place_hitbox(player.bones.bones[static_cast<std::size_t>(hitbox.bone)], hitbox);
+                const auto to = capsule.center() - eye_pos;
+                const auto distance = to.length();
+                if (!(distance > 1.0f) || distance >= max_range)
+                {
+                    continue;
+                }
+                // How far off the view the hitbox centre is, as the tangent of the angle: no arccosine per hitbox.
+                const auto along = to.x * direction.x + to.y * direction.y + to.z * direction.z;
+                if (along <= 0.0f)
+                {
+                    continue;
+                }
+                const auto lateral = (to - direction * along).length();
+                const auto offset = lateral / along;
+                if (found && offset >= nearest_offset)
+                {
+                    continue;
+                }
+                found = true;
+                nearest_offset = offset;
+                best = {&player, player.bones, distance, hitbox.index, hitgroup};
+                shot_direction = to / distance;
+            }
+        }
+    }
+
     if (!best.player || best.hitbox < 0 || best.distance >= max_range)
         return {};
 
@@ -118,12 +162,12 @@ aimbot_t::trigger_result aimbot_t::trace_direction(const foundation::vec3& eye_p
     result.bones = best.bones;
     result.hitbox = best.hitbox;
     result.hitgroup = best.hitgroup;
-    result.point = eye_pos + direction * best.distance;
+    result.point = eye_pos + shot_direction * best.distance;
     if (simulation::collision().valid())
     {
         ballistics_t::penetration::result passage{};
         if (!simulation::ballistics().pen().run_seed(
-                eye_pos, direction, *best.player, best.bones, hitbox_parts,
+                eye_pos, shot_direction, *best.player, best.bones, hitbox_parts,
                 cfg.checks.walls == config::combat_profile::wall_policy::penetration, 1.0f, best.hitbox, passage))
             return {};
         result.damage = passage.damage;
@@ -199,6 +243,13 @@ void aimbot_t::triggerbot(const foundation::vec3& eye_pos, const foundation::vec
                                 ? g_walk_autofire_parts.load(std::memory_order_acquire)
                                 : 0;
     const auto target_parts = walk_parts ? walk_parts : cfg.hitbox_parts;
+    // The pawn the game reports under the crosshair. For the walk bot's autofire that is the enemy its own hand is on,
+    // and it is what the trace falls back to when the camera ray sits a fraction of a degree off the bone. The
+    // standalone triggerbot stays strict: it may only fire at a hitbox the ray actually crosses.
+    const auto crosshair = walk_parts != 0 ? game::local_player().crosshair_id() : 0;
+    const auto focus_pawn = crosshair > 0 && crosshair < 0x7fff
+                                ? game::entity_index().lookup_index(static_cast<std::uint32_t>(crosshair))
+                                : std::uintptr_t{};
 
     const auto& ctx = ballistics().ctx();
     // The spray holds the trigger for one burst at a time; the game then cycles the weapon while the press is down.
@@ -245,7 +296,7 @@ void aimbot_t::triggerbot(const foundation::vec3& eye_pos, const foundation::vec
             return false;
         foundation::vec3 forward{};
         view_angles.to_directions(&forward, nullptr, nullptr);
-        const auto start = trace_direction(eye_pos, forward, players, cfg, target_parts);
+        const auto start = trace_direction(eye_pos, forward, players, cfg, target_parts, focus_pawn);
         if (!start.player)
             return false;
         cancel_scheduled();
@@ -338,7 +389,7 @@ void aimbot_t::triggerbot(const foundation::vec3& eye_pos, const foundation::vec
             m_spray_check_at = now + spray_check_period;
             foundation::vec3 forward{};
             view_angles.to_directions(&forward, nullptr, nullptr);
-            const auto on_target = trace_direction(eye_pos, forward, players, cfg, target_parts);
+            const auto on_target = trace_direction(eye_pos, forward, players, cfg, target_parts, focus_pawn);
             if (on_target.player)
             {
                 m_spray_off_target_since = {};
@@ -421,7 +472,7 @@ void aimbot_t::triggerbot(const foundation::vec3& eye_pos, const foundation::vec
         trace_angles.to_directions(&forward, nullptr, nullptr);
         // Bone selection is strict: autofire may only fire at the parts the walk bot's own aim selected. Falling
         // back to every part here would shoot the head while the user has it unchecked.
-        auto result = trace_direction(eye_pos, forward, players, cfg, target_parts);
+        auto result = trace_direction(eye_pos, forward, players, cfg, target_parts, focus_pawn);
         if (!result.player)
         {
             const auto id = game::local_player().crosshair_id();
@@ -502,7 +553,7 @@ void aimbot_t::triggerbot(const foundation::vec3& eye_pos, const foundation::vec
         {
             foundation::vec3 forward{};
             view_angles.to_directions(&forward, nullptr, nullptr);
-            const auto fresh = trace_direction(eye_pos, forward, players, cfg, target_parts);
+            const auto fresh = trace_direction(eye_pos, forward, players, cfg, target_parts, focus_pawn);
             if (!fresh.player)
             {
                 note(25, 0.0f, 0.0f);

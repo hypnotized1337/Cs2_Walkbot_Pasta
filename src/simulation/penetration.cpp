@@ -128,19 +128,6 @@ bool ballistics_t::penetration::run_seed(const foundation::vec3& origin, const f
     }
 
     const auto direction = input_direction.normalized();
-    const auto hitbox_enabled = [hitbox_parts](int index)
-    {
-        int part{};
-        if (index == 0)
-            part = config::combat_profile::aim_part::head;
-        else if (index >= 1 && index <= 6)
-            part = config::combat_profile::aim_part::body;
-        else if (index >= 7 && index <= 12)
-            part = config::combat_profile::aim_part::legs;
-        else if (index >= 13 && index <= 18)
-            part = config::combat_profile::aim_part::arms;
-        return part && (hitbox_parts & part) != 0;
-    };
 
     auto target_distance = m_weapon_data.range;
     int target_hitbox = -1;
@@ -159,7 +146,15 @@ bool ballistics_t::penetration::run_seed(const foundation::vec3& origin, const f
             target_hitbox = box.index;
         }
     }
-    if (target_hitbox < 0 || !hitbox_enabled(target_hitbox) ||
+    if (target_hitbox < 0)
+    {
+        return false;
+    }
+    // The hitbox-to-part mapping has one owner, aim_part_of(). This function used to carry its own index ranges, which
+    // drifted from the hitgroup mapping the aiming and tracing code uses and silently rejected every arm and leg shot
+    // the trigger's mask had allowed.
+    const auto group = game::hitbox_data().hitgroup_from_hitbox(target_hitbox);
+    if ((hitbox_parts & aim_part_of(target_hitbox, group)) == 0 ||
         (required_hitbox >= 0 && target_hitbox != required_hitbox))
     {
         return false;
@@ -178,7 +173,6 @@ bool ballistics_t::penetration::run_seed(const foundation::vec3& origin, const f
     }
     auto damage = passage->damage;
     const auto penetrated = passage->penetrations > 0;
-    const auto group = game::hitbox_data().hitgroup_from_hitbox(target_hitbox);
     detail::scale_damage(group, target.armor, target.has_helmet, target.team, m_weapon_data.armor_ratio,
                          m_weapon_data.headshot_multiplier, damage);
 
