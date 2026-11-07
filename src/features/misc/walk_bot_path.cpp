@@ -5,7 +5,6 @@
 #include <config/settings.hpp>
 #include <diagnostics/journal.hpp>
 #include <game/state/services.hpp>
-#include <unordered_map>
 
 #include <algorithm>
 #include <ranges>
@@ -465,23 +464,35 @@ bool walk_bot_t::plan_hunt(const simulation::nav_graph& graph, const player_stat
 {
     const auto players = game::world().players();
     std::vector<walk_logic::hunt_candidate> candidates;
-    std::unordered_map<std::uintptr_t, foundation::vec3> positions;
+    // A flat list, not a hash map: this runs every tick while hunting, and a handful of players is cheaper to scan
+    // than to rehash.
+    std::vector<std::pair<std::uintptr_t, foundation::vec3>> positions;
     if (players)
+    {
+        candidates.reserve(players->size());
+        positions.reserve(players->size());
         for (const auto& other : *players)
         {
             if (other.health <= 0 || !other.pawn || other.pawn == player.pawn ||
                 !game::local_player().is_enemy(other.team))
                 continue;
             candidates.push_back({other.pawn, other.origin.distance(player.origin)});
-            positions[other.pawn] = other.origin;
+            positions.emplace_back(other.pawn, other.origin);
         }
+    }
     const auto target = walk_logic::choose_hunt_target(candidates, m_hunt_target);
     if (!target)
     {
         m_hunt_target = 0;
         return false;
     }
-    const auto where = positions[target];
+    foundation::vec3 where{};
+    for (const auto& [pawn, origin] : positions)
+        if (pawn == target)
+        {
+            where = origin;
+            break;
+        }
     std::shared_ptr<const path> current;
     {
         std::scoped_lock lock(m_route_mutex);

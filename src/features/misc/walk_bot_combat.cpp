@@ -284,6 +284,7 @@ walk_bot_t::combat_plan walk_bot_t::combat(const player_state& player, const clo
     };
 
     const game::player_snapshot* fight = nullptr;
+    aim_choice fight_aim{};
     float fight_score = 0.0f;
     const game::player_snapshot* protected_one = nullptr;
     float protected_distance = 1200.0f;
@@ -324,6 +325,7 @@ walk_bot_t::combat_plan walk_bot_t::combat(const player_state& player, const clo
         {
             fight = &other;
             fight_score = score;
+            fight_aim = aim;
         }
     }
 
@@ -507,12 +509,12 @@ walk_bot_t::combat_plan walk_bot_t::combat(const player_state& player, const clo
         m_react_until = {};
         if (now >= m_fight_react_until)
         {
-            const auto aim = choose_aim_point(*fight, cfg.aim_hitboxes, cfg.aim_body_lethal, player.eye,
-                                              player.view, in_sight);
-            // No valid point means no selected bone is visible; do not fall back to the head.
-            if (!aim.valid)
+            // No valid point means no selected bone is visible; do not fall back to the head. The point was already
+            // resolved (with its line-of-sight test) when this enemy won the selection, so it is reused here.
+            if (!fight_aim.valid)
                 return {};
-            return {combat_plan::kind::engage, {gaze::mode::fight, aim.point, 0.0f, 0.0f, aim.part}, {}};
+            return {combat_plan::kind::engage,
+                    {gaze::mode::fight, fight_aim.point, 0.0f, 0.0f, fight_aim.part}, {}};
         }
     }
     // The enemy just fought stays the target for a moment after a sight line flickers (an arm, a box edge), so the
@@ -542,11 +544,16 @@ walk_bot_t::combat_plan walk_bot_t::combat(const player_state& player, const clo
         // Sideways round it, keeping some distance; the side stays until it is blocked (then the other one).
         const auto toward = flat_direction(protected_one->origin - player.origin);
         const foundation::vec3 side{-toward.y * m_evade_side, toward.x * m_evade_side, 0.0f};
-        if (world.valid())
+        // Both sides can be blocked (a protected enemy in a corner): without a pause the side flipped on every tick
+        // and the feet jittered in place.
+        if (world.valid() && now >= m_evade_next)
         {
             const auto knee = player.origin + foundation::vec3{0.0f, 0.0f, 26.0f};
             if (world.trace_ray(knee, knee + side * 48.0f).hit)
+            {
                 m_evade_side = -m_evade_side;
+                m_evade_next = now + std::chrono::milliseconds(350);
+            }
         }
         const auto away = protected_distance < 450.0f ? toward * -0.5f : foundation::vec3{};
         return {combat_plan::kind::evade, {gaze::mode::fight, head_of(*protected_one), 0.0f}, side + away};

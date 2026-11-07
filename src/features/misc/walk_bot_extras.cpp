@@ -180,15 +180,26 @@ void walk_bot_t::auto_buy(const player_state& player, const clock::time_point no
     const auto& preset = buy_preset_for(cfg, mode);
     std::array<walk_logic::buy_entry, walk_settings::k_buy_items> entries{};
     const auto used = static_cast<std::size_t>(std::clamp(preset.count, 0, walk_settings::k_buy_items));
+    // The fixed buffer is null-terminated by the editor and the config reader, but bound the view to its slot rather
+    // than trusting the terminator.
+    const auto code_view = [](const auto& code)
+    {
+        const auto end = std::find(code.begin(), code.end(), '\0');
+        return std::string_view{code.data(), static_cast<std::size_t>(end - code.begin())};
+    };
     for (std::size_t i = 0; i < used; ++i)
     {
         const auto& item = preset.items[i];
-        entries[i] = {item.enabled, std::string_view{item.code.data()}, item.side, item.money_rule, item.money};
+        entries[i] = {item.enabled, code_view(item.code), item.side, item.money_rule, item.money};
     }
-    m_buy_queue = walk_logic::buy_keys(
-        std::span{entries.data(), used}, player.team, player.money, preset.random_one,
-        std::uniform_real_distribution<float>(0.0f, 1.0f)(m_random),
-        static_cast<std::uint16_t>(std::clamp(snapshot->general.m_game_controls.buy_menu, 1, 255)));
+    const auto menu_key = static_cast<std::uint16_t>(std::clamp(snapshot->general.m_game_controls.buy_menu, 1, 255));
+    m_buy_queue = walk_logic::buy_keys(std::span{entries.data(), used}, player.team, player.money,
+                                       preset.random_one, std::uniform_real_distribution<float>(0.0f, 1.0f)(m_random),
+                                       menu_key);
+    // The player (or a previous round) already has the menu open: pressing the menu key first would close it and the
+    // item digits would go to the game as weapon switches. Keep only the codes and the closing key.
+    if (player.buy_menu_open && !m_buy_queue.empty() && m_buy_queue.front() == menu_key)
+        m_buy_queue.erase(m_buy_queue.begin());
     m_buy_deathmatch = deathmatch;
     m_buy_waiting_menu = false;
     m_buy_first_key = {};

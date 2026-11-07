@@ -64,21 +64,25 @@ bool walk_bot_t::read_player(player_state& out) const
     out.moved = pawn_flag(SCHEMA("C_CSPlayerPawnBase", "m_bHasMovedSinceSpawn"_id));
     if (const auto spawn_offset = SCHEMA("C_CSPlayerPawnBase", "m_flLastSpawnTimeIndex"_id); spawn_offset > 0)
         out.spawn_time = process.load<float>(pawn + spawn_offset);
-    if (const auto services = process.load<std::uintptr_t>(pawn + SCHEMA("C_BasePlayerPawn", "m_pWeaponServices"_id)))
-    {
-        // m_hMyWeapons: a count and a pointer to the handles.
-        const auto list = services + SCHEMA("CPlayer_WeaponServices", "m_hMyWeapons"_id);
-        const auto count = std::clamp(process.load<std::int32_t>(list), 0, 16);
-        const auto handles = process.load<std::uintptr_t>(list + 8);
-        std::array<std::uint32_t, 16> held{};
-        if (count > 0 && handles && process.copy(handles, held.data(), static_cast<std::size_t>(count) * 4))
-            for (int i = 0; i < count && !out.has_main_weapon; ++i)
-                if (const auto weapon = game::entity_index().lookup(held[static_cast<std::size_t>(i)]))
-                    if (const auto vdata =
-                            process.load<std::uintptr_t>(weapon + SCHEMA("C_BaseEntity", "m_nSubclassID"_id) + 0x8))
-                        out.has_main_weapon = walk_logic::main_weapon_type(
-                            process.load<std::uint32_t>(vdata + SCHEMA("CCSWeaponBaseVData", "m_WeaponType"_id)));
-    }
+    // The weapon in hand usually answers this without walking the inventory: reading the slot list costs up to
+    // sixteen entity lookups plus a vdata read each tick, and it is only needed when the hand is not a main weapon.
+    out.has_main_weapon = walk_logic::main_weapon_type(game::local_player().weapon_type());
+    if (!out.has_main_weapon)
+        if (const auto services = process.load<std::uintptr_t>(pawn + SCHEMA("C_BasePlayerPawn", "m_pWeaponServices"_id)))
+        {
+            // m_hMyWeapons: a count and a pointer to the handles.
+            const auto list = services + SCHEMA("CPlayer_WeaponServices", "m_hMyWeapons"_id);
+            const auto count = std::clamp(process.load<std::int32_t>(list), 0, 16);
+            const auto handles = process.load<std::uintptr_t>(list + 8);
+            std::array<std::uint32_t, 16> held{};
+            if (count > 0 && handles && process.copy(handles, held.data(), static_cast<std::size_t>(count) * 4))
+                for (int i = 0; i < count && !out.has_main_weapon; ++i)
+                    if (const auto weapon = game::entity_index().lookup(held[static_cast<std::size_t>(i)]))
+                        if (const auto vdata =
+                                process.load<std::uintptr_t>(weapon + SCHEMA("C_BaseEntity", "m_nSubclassID"_id) + 0x8))
+                            out.has_main_weapon = walk_logic::main_weapon_type(
+                                process.load<std::uint32_t>(vdata + SCHEMA("CCSWeaponBaseVData", "m_WeaponType"_id)));
+        }
     if (const auto services_offset = SCHEMA("CCSPlayerController", "m_pInGameMoneyServices"_id);
         services_offset > 0 && out.controller)
         if (const auto services = process.load<std::uintptr_t>(out.controller + services_offset))
@@ -827,19 +831,20 @@ void walk_bot_t::tick()
     // lags a frame behind that confirmation.
     const auto scope_confirmed = m_scope_state == scope_state::scoped;
     const auto scope_wait = cfg.auto_scope && sniper && !weapon.is_scoped && !scope_confirmed;
-    features::aimbot::g_walk_autofire.store(cfg.autofire && focused && !ui_open && !scope_wait,
-                                            std::memory_order_release);
-    // Stop the held spray when the player takes the movement back, or when a grenade throw, the buy menu or another
-    // feature owns the movement. Auto Stop is the trigger's own brake and must not cancel the burst.
-    if (now < m_player_until || (movement_taken && !auto_stop().active()))
-    {
-        features::aimbot::g_walk_autofire.store(false, std::memory_order_release);
-        features::aimbot::g_walk_autofire_parts.store(0, std::memory_order_release);
-    }
     if (!focused || ui_open || movement_taken || now < m_player_until)
     {
         auto_bonus().set_auto_knife_active(false);
         note_idle(!focused ? 2u : ui_open ? 6u : movement_taken ? 4u : 7u);
+        // Stop the held spray when the player takes the movement back, or when a grenade throw, the buy menu or
+        // another feature owns the movement. Auto Stop is the trigger's own brake and must not cancel the burst.
+        const bool auto_stop_brake =
+            movement_taken && auto_stop().active() && focused && !ui_open && now >= m_player_until && cfg.autofire &&
+            !scope_wait;
+        if (!auto_stop_brake)
+        {
+            features::aimbot::g_walk_autofire.store(false, std::memory_order_release);
+            features::aimbot::g_walk_autofire_parts.store(0, std::memory_order_release);
+        }
         release_keys();
         look(player, {}, true, now);
         return;
@@ -862,6 +867,10 @@ void walk_bot_t::tick()
         (fight.what == combat_plan::kind::knife && fight.enemy != 0) ||
         (fight.what == combat_plan::kind::rear && fight.weapon == 1 && fight.enemy != 0);
     auto_bonus().set_auto_knife_active(knife_engagement);
+    // Publish the permission only once the plan is known. The trigger worker runs at 250 Hz and could otherwise see
+    // a true published for the current tick before handle_knife() suspends the gun autofire for a knife engagement.
+    features::aimbot::g_walk_autofire.store(cfg.autofire && !scope_wait && !knife_engagement,
+                                            std::memory_order_release);
     // The knife leaves a different slot selected. Put the gun back as soon as the knife engagement is over, before
     // the next fight (and the auto scope) starts. The rear handler draws its own primary when that is its weapon.
     if (fight.what != combat_plan::kind::knife && fight.what != combat_plan::kind::rear)
@@ -941,14 +950,17 @@ void walk_bot_t::tick()
 
     scan_obstacles(*route, player, now);
     const auto view = drive(*graph, *route, player, now);
+    bool route_dropped = false;
     {
         std::scoped_lock lock(m_route_mutex);
-        if (m_path != route)
-        {
-            // drive() gave up on a crossing and dropped the route; the next tick plans again.
-            look(player, fight.what == combat_plan::kind::react ? fight.view : view, false, now);
-            return;
-        }
+        route_dropped = m_path != route;
+    }
+    if (route_dropped)
+    {
+        // drive() gave up on a crossing and dropped the route; the next tick plans again. look() sends input, so it
+        // stays outside the lock the render thread also takes.
+        look(player, fight.what == combat_plan::kind::react ? fight.view : view, false, now);
+        return;
     }
 
     const auto progress = m_progress.load(std::memory_order_acquire);

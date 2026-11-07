@@ -70,10 +70,15 @@ walk_bot_t::gaze walk_bot_t::drive(const simulation::nav_graph& graph, const pat
     // player's own level (stacked floors: the line can run straight below or above the player).
     float nearest_score = std::numeric_limits<float>::max();
     float nearest_progress = progress;
+    // The route is ordered by distance: beyond the scan window (or the next action) nothing can be nearer, so the
+    // walk stops scanning there instead of visiting the whole route every tick.
+    const auto scan_end = std::min(progress + 240.0f, cap);
     for (const auto& point : route)
     {
-        if (point.distance < progress - 48.0f || point.distance > progress + 240.0f || point.distance > cap)
+        if (point.distance < progress - 48.0f)
             continue;
+        if (point.distance > scan_end)
+            break;
         if (!same_level(player, point.position))
             continue;
         const auto dz = std::abs(player.origin.z - point.position.z);
@@ -267,8 +272,12 @@ walk_bot_t::gaze walk_bot_t::drive(const simulation::nav_graph& graph, const pat
         }
         // The ceiling over a ladder can be low too.
         for (const auto& point : route)
+        {
+            if (point.distance > pending->distance + 48.0f)
+                break;
             if (point.duck && std::abs(point.distance - pending->distance) < 48.0f)
                 duck = true;
+        }
         const bool done = player.on_ground && !player.on_ladder &&
                           distance_2d(player.origin, pending->goal) < (up ? 40.0f : 64.0f) &&
                           std::abs(player.origin.z - pending->goal.z) < 28.0f;
@@ -306,11 +315,15 @@ walk_bot_t::gaze walk_bot_t::drive(const simulation::nav_graph& graph, const pat
             }
         }
         for (const auto& point : route)
-            if (point.duck && point.distance > progress - 8.0f && point.distance < progress + 40.0f)
+        {
+            if (point.distance >= progress + 40.0f)
+                break;
+            if (point.duck && point.distance > progress - 8.0f)
             {
                 duck = true;
                 break;
             }
+        }
     }
 
     // A stuck response from watch_progress(): one jump (a crouch jump) to get over what blocks the feet.
@@ -407,9 +420,14 @@ void walk_bot_t::watch_progress(const simulation::nav_graph& graph, const path& 
     const auto progress = m_progress.load(std::memory_order_acquire);
     float deviation = std::numeric_limits<float>::max();
     for (const auto& point : route)
-        if (point.distance > progress - 64.0f && point.distance < progress + 300.0f &&
-            same_level(player, point.position))
+    {
+        if (point.distance < progress - 64.0f)
+            continue;
+        if (point.distance > progress + 300.0f)
+            break;
+        if (same_level(player, point.position))
             deviation = std::min(deviation, distance_2d(player.origin, point.position));
+    }
     if (player.on_ground)
     {
         if (deviation < 72.0f)
@@ -493,6 +511,12 @@ void walk_bot_t::scan_obstacles(const path& route, const player_state& player, c
     const auto interactive = simulation::interactive_entities();
     if (!interactive)
         return;
+    // The next stretch of the line is the same for every door and breakable, so it is sampled once (lazily, once an
+    // entity is near enough to be tested) instead of twice per sample per entity.
+    constexpr int k_line_samples = 15;
+    std::array<foundation::vec3, k_line_samples> line{};
+    std::array<foundation::vec3, k_line_samples> past{};
+    bool line_ready = false;
     for (const auto& entity : *interactive)
     {
         const auto type = entity.door ? obstacle::kind::door : obstacle::kind::breakable;
@@ -505,6 +529,16 @@ void walk_bot_t::scan_obstacles(const path& route, const player_state& player, c
         const auto origin = entity.origin;
         if (!std::isfinite(origin.x) || origin.distance(player.origin) > 420.0f)
             continue;
+        if (!line_ready)
+        {
+            for (int i = 0; i < k_line_samples; ++i)
+            {
+                const auto along = static_cast<float>(i) * 10.0f;
+                line[static_cast<std::size_t>(i)] = point_at(route, progress + along);
+                past[static_cast<std::size_t>(i)] = point_at(route, progress + along + 40.0f);
+            }
+            line_ready = true;
+        }
         const auto rotation = entity.angles;
         const auto collision = entity.entity + SCHEMA("C_BaseModelEntity", "m_Collision"_id);
         const auto mins = process.load<foundation::vec3>(collision + SCHEMA("CCollisionProperty", "m_vecMins"_id));
@@ -517,9 +551,10 @@ void walk_bot_t::scan_obstacles(const path& route, const player_state& player, c
         { return origin + foundation::vec3{c * local.x - s * local.y, s * local.x + c * local.y, local.z}; };
         const auto center = to_world((mins + maxs) * 0.5f);
         // The next stretch of the line against the box, widened by the player's radius.
-        for (float along = 0.0f; along <= 140.0f; along += 10.0f)
+        for (int sample = 0; sample < k_line_samples; ++sample)
         {
-            const auto feet = point_at(route, progress + along);
+            const auto& feet = line[static_cast<std::size_t>(sample)];
+            const auto along = static_cast<float>(sample) * 10.0f;
             const auto d = feet - origin;
             const foundation::vec3 local{c * d.x + s * d.y, -s * d.x + c * d.y, d.z};
             constexpr float k_radius = 16.0f;
@@ -567,7 +602,7 @@ void walk_bot_t::scan_obstacles(const path& route, const player_state& player, c
             // From the player to a point past this one along the way: the first point inside the widened box
             // usually lies just before a thin door or a vent's grate, and the line to it alone never crosses the
             // object (which threw every door and vent out until now).
-            const auto beyond = point_at(route, progress + along + 40.0f);
+            const auto& beyond = past[static_cast<std::size_t>(sample)];
             bool blocked = false;
             for (const float height : {20.0f, 44.0f})
                 blocked = blocked || crosses_box(player.origin + foundation::vec3{0.0f, 0.0f, height},
@@ -784,6 +819,7 @@ void walk_bot_t::reset_state()
     m_react_until = {};
     m_react_point = {};
     m_evade_side = 1.0f;
+    m_evade_next = {};
 
     m_prefire_point = {};
     m_prefire_valid = false;

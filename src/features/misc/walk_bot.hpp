@@ -363,6 +363,7 @@ private:
     clock::time_point m_react_until{};
     foundation::vec3 m_react_point{};
     float m_evade_side{1.0f};
+    clock::time_point m_evade_next{}; // how soon the evade side may flip again (both sides blocked)
 
     // Auto buy and auto reload.
     std::vector<std::uint16_t> m_buy_queue{};
@@ -407,7 +408,7 @@ private:
 
     // Recording.
     walk_logic::recording m_recording{};
-    bool m_record_key_was_down{};
+    bool m_record_key_was_down{true}; // a key held at startup must be pressed again before it records
     std::string m_recordings_map{};
     int m_recordings_team{};
     std::vector<walk_logic::recording> m_recordings{};
