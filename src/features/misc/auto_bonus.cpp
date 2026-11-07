@@ -58,6 +58,7 @@ void auto_bonus_t::tick()
 
     const auto now = std::chrono::steady_clock::now();
     const auto auto_knife_active = m_auto_knife_active.load(std::memory_order_acquire);
+    const auto health_shot_active = m_auto_health_shot_active.load(std::memory_order_acquire);
     if (m_key.binding.device != game::input_device::keyboard ||
         m_key.binding.virtual_key != static_cast<std::uint16_t>(key))
     {
@@ -85,6 +86,23 @@ void auto_bonus_t::tick()
     {
         // The hold can start and end between two Auto Bonus ticks; the settle still applies instead of tapping now.
         m_auto_knife_was_active = false;
+        m_next_tap = std::max(m_next_tap, now + k_retry);
+    }
+
+    // The health shot is drawing, injecting or restoring the weapon. A pickup tap here can switch the slot to the
+    // bonus weapon and cancel the draw or the injection, so release the current tap and defer until it is idle.
+    if (health_shot_active)
+    {
+        if (m_key.pressed && !send_key(false))
+            return;
+        m_press_started = {};
+        m_next_tap = now + k_retry;
+        m_auto_health_shot_was_active = true;
+        return;
+    }
+    if (m_auto_health_shot_was_active)
+    {
+        m_auto_health_shot_was_active = false;
         m_next_tap = std::max(m_next_tap, now + k_retry);
     }
 

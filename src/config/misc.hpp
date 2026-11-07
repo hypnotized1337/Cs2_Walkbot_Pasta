@@ -287,6 +287,16 @@ struct general_profile
         std::array<buy_preset, buy_mode_count> buy_presets{};
         int buy_edit{}; // the preset the menu shows
         bool auto_reload{true};
+        // Auto health shot: a standalone automation (it does not need the walk bot). Below `health_shot_health`, once
+        // `health_shot_damage_ms` have passed since the last hit, while Auto Knife is idle and while the bot is not
+        // aiming at or shooting anyone, the game bind that draws the health shot (use weapon_healthshot, X by default)
+        // is pressed until the syringe is in hand, the primary attack is held for the injection, and a firearm is
+        // drawn again.
+        bool auto_health_shot{false};
+        int health_shot_health{50}; // use the health shot below this health
+        int health_shot_damage_ms{5000}; // wait this long after taking damage before using
+        int health_shot_key{'X'};   // the game bind that draws the health shot
+        bool health_shot_debug{false}; // draws the Auto Health Shot state on screen
 
         bool auto_rejoin{false};
         int game_mode{0}; // match_logic::game_mode: deathmatch, casual, competitive, wingman, premier

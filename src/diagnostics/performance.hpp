@@ -60,6 +60,7 @@ enum class zone : std::uint8_t
     aim_flush,
     auto_crouch_tick,
     auto_bonus_tick,
+    auto_health_shot_tick,
     count
 };
 

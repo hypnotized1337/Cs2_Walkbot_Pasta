@@ -16,6 +16,8 @@ void menu_t::draw_automation()
 
     // Auto Buy preset editor state, kept here with the other automation controls.
     using walk_settings = config::general_profile::walk_bot;
+    walk.health_shot_health = std::clamp(walk.health_shot_health, 1, 99);
+    walk.health_shot_damage_ms = std::clamp(walk.health_shot_damage_ms, 0, 15000);
     walk.buy_edit = std::clamp(walk.buy_edit, 0, static_cast<int>(walk_settings::buy_mode_count) - 1);
     auto& preset = walk.buy_presets[static_cast<std::size_t>(walk.buy_edit)];
     preset.count = std::clamp(preset.count, 0, walk_settings::k_buy_items);
@@ -113,7 +115,7 @@ void menu_t::draw_automation()
         });
 
     card_in_column(
-        "automation_combat", "COMBAT AUTOMATION", 5, 1,
+        "automation_combat", "COMBAT AUTOMATION", 6, 1,
         [&]
         {
             toggle_row("Auto Crouch (Beta)", p.auto_crouch);
@@ -131,6 +133,14 @@ void menu_t::draw_automation()
                                  slider_row("Respawn Grace (ms)", walk.auto_knife_respawn_grace_ms, 0, 5000);
                                  toggle_row("Knife Only When Target Is AFK", walk.auto_knife_afk_only);
                                  toggle_row("Show Eligibility Debug", walk.auto_knife_debug);
+                             });
+            toggle_popup_row("Auto Health Shot", walk.auto_health_shot, 4,
+                             [&]
+                             {
+                                 slider_row("Health Below", walk.health_shot_health, 1, 99);
+                                 slider_row("No Damage For", walk.health_shot_damage_ms, 0, 15000, " ms");
+                                 keybind_row("Use Bind", walk.health_shot_key, true);
+                                 toggle_row("Show Debug", walk.health_shot_debug);
                              });
             toggle_row("Auto Reload", walk.auto_reload);
         });

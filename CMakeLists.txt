@@ -128,6 +128,7 @@ set(vesta_sources
     src/features/misc/auto_accept.cpp
     src/features/misc/auto_bonus.cpp
     src/features/misc/auto_crouch.cpp
+    src/features/misc/auto_health_shot.cpp
 	 src/features/misc/auto_stop.cpp
     src/features/misc/bhop.cpp
     src/features/misc/nade_helper.cpp

@@ -455,6 +455,12 @@ void combat(control control)
                 VESTA_PERF_SCOPE(aim_tick);
                 features::aimbot::aim().tick();
             }
+            // The health shot runs before Auto Bonus so its weapon-slot reservation is visible to the same tick's
+            // pickup tap; otherwise a bonus switch could cancel the syringe draw or the injection.
+            {
+                VESTA_PERF_SCOPE(auto_health_shot_tick);
+                features::misc::auto_health_shot().tick();
+            }
             {
                 VESTA_PERF_SCOPE(auto_bonus_tick);
                 features::misc::auto_bonus().tick();
@@ -469,6 +475,7 @@ void combat(control control)
             features::aimbot::aim().reset();
             features::misc::auto_crouch().reset();
             features::misc::auto_bonus().reset();
+            features::misc::auto_health_shot().reset();
         }
 
         combat_profile.reset();

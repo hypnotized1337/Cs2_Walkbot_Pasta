@@ -1947,6 +1947,11 @@ static void to_json(json& j, const general_profile::walk_bot& w)
              {"buy_edit", w.buy_edit},
              {"buy_presets", buy_presets_json(w)},
              {"auto_reload", w.auto_reload},
+             {"auto_health_shot", w.auto_health_shot},
+             {"health_shot_health", w.health_shot_health},
+             {"health_shot_damage_ms", w.health_shot_damage_ms},
+             {"health_shot_key", w.health_shot_key},
+             {"health_shot_debug", w.health_shot_debug},
              {"auto_rejoin", w.auto_rejoin},
              {"game_mode", w.game_mode},
              {"team", w.team},
@@ -2025,6 +2030,14 @@ static void from_json(const json& j, general_profile::walk_bot& w)
     w.buy_edit = std::clamp(w.buy_edit, 0, static_cast<int>(general_profile::walk_bot::buy_mode_count) - 1);
     read_buy_presets(j, w);
     read_field(j, "auto_reload", w.auto_reload);
+    read_field(j, "auto_health_shot", w.auto_health_shot);
+    read_field(j, "health_shot_health", w.health_shot_health);
+    w.health_shot_health = std::clamp(w.health_shot_health, 1, 99);
+    read_field(j, "health_shot_damage_ms", w.health_shot_damage_ms);
+    w.health_shot_damage_ms = std::clamp(w.health_shot_damage_ms, 0, 15000);
+    read_field(j, "health_shot_key", w.health_shot_key);
+    w.health_shot_key = std::clamp(w.health_shot_key, 0, 255);
+    read_field(j, "health_shot_debug", w.health_shot_debug);
     read_field(j, "auto_rejoin", w.auto_rejoin);
     read_field(j, "game_mode", w.game_mode);
     w.game_mode = std::clamp(w.game_mode, 0, 4);

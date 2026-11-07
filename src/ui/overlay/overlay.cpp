@@ -573,6 +573,7 @@ void overlay_t::draw_world(render::draw::draw_list& draw_list)
         features::visuals::grenade_prediction().on_render(draw_list);
         features::misc::nade_helper().on_render(draw_list);
         features::misc::walk_bot().on_render(draw_list);
+        features::misc::auto_health_shot().on_render(draw_list);
         features::visuals::bullet_impacts().on_render(draw_list);
         features::aimbot::aim().on_render(draw_list);
     }
