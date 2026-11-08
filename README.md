@@ -2,7 +2,7 @@
 
 PASTA is a Windows x64 external assist for Counter-Strike 2, forked from
 [Vesta](https://github.com/Read1dno/vesta). It reads game memory read-only and
-draws in a separate DirectX 11 overlay: no injection, no driver, no elevation.
+draws in a separate DirectX 11 overlay: no injection, no driver.
 
 Vesta already ships the aimbot/RCS, triggerbot and Auto Stop, ESP/chams, radar
 and world visuals, Walk Bot routing, configs and localization. PASTA keeps all
@@ -73,6 +73,15 @@ lineups or Bunny Hop/Edge Jump, which makes this a bad fit if you use them.
 
 PASTA makes no anti-cheat guarantee. Use it at your own risk.
 
+## Loader
+
+`pasta_loader.exe` is a small launcher for the same folder as `vesta.exe`. It
+requests administrator rights when it starts, so it can read CS2 even when Steam
+or the game is elevated. It opens with a **Load** button; pressing it starts
+Steam and Counter-Strike 2 with `-applaunch 730` if needed, waits briefly for the
+six modules Vesta attaches to, then starts `vesta.exe`. It does not inject a DLL
+or modify the game; Vesta still attaches and reads memory as an external program.
+
 ## Build and run
 
 Requires Windows 10/11 x64, Visual Studio 2022 with **Desktop development with
@@ -84,9 +93,13 @@ cmake --build --preset release --parallel
 ```
 
 Output is `build/bin/vesta.exe`; the internal name is kept for config and data
-compatibility. Start CS2, run the executable, press `Insert` for the menu and
-`End` to exit. Change those keys in `%TEMP%\vesta\configs\hotkeys.cfg` and
-restart if needed.
+compatibility. The default build also produces `build/bin/pasta_loader.exe`
+(`cmake --build --preset release --target pasta_loader` builds it alone).
+
+Run `pasta_loader.exe`, approve the UAC prompt, and press **Load** to start CS2
+and PASTA together. Alternatively, start CS2 yourself and run `vesta.exe`. Press
+`Insert` for the menu and `End` to exit. Change those keys in
+`%TEMP%\vesta\configs\hotkeys.cfg` and restart if needed.
 
 ## Data and license
 

@@ -1,0 +1,6 @@
+#pragma once
+
+#define IDR_INTER_REGULAR 101
+#define IDR_INTER_SEMIBOLD 102
+#define IDR_INTER_BOLD 103
+#define IDR_PASTA_LOGO 104

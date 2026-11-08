@@ -35,6 +35,9 @@ PowerShell:
 - Use `-m`, not `/m`, in Git Bash: MSYS rewrites `/m` to `M:/`.
 - Close `vesta.exe` before linking. If the link fails with `LNK1168`, the old process still owns `build/bin/vesta.exe`.
 - Output: `build/bin/vesta.exe` (plus `vesta.pdb`). Build artifacts are ignored.
+- `pasta_loader` is a separate launcher target: `build/bin/pasta_loader.exe` requests administrator rights, opens
+  an idle window with a **Load** button, starts Steam/CS2, waits briefly for the game modules, then runs `vesta.exe`.
+  It does not inject; build it with `--target pasta_loader` when needed.
 - `debug-local` is the local Visual Studio 18 preset. It reuses `build/debug`. The `debug`, `release` and `profile`
   presets target Visual Studio 17 2022 for CI; do not change them to fix a local build.
 - Configure embeds `configs/legit.cfg` as the built-in default profile. If that file is absent, CMake warns and falls
@@ -96,7 +99,8 @@ Walk-bot invariants:
 - Prefer `std::scoped_lock`, `std::atomic` with explicit memory orders, `std::clamp` and `std::isfinite`.
 - Comments explain why and invariants, not what. Keep them; this codebase is intentionally comment-heavy.
 - Do not add third-party dependencies without asking. ImGui is pinned to a verified commit; do not bump it casually.
-- Process access is external and read-only. The binary must stay `asInvoker` (no elevation, no UIAccess).
+- Process access is external and read-only. Vesta must stay `asInvoker` (no elevation, no UIAccess). The
+  `pasta_loader` is the exception: it is a separate launcher and must request administrator rights.
 - Config fields: add the field in `src/config/misc.hpp` (or `combat.hpp`/`visuals.hpp`), serialize and deserialize
   it in `src/config/settings.cpp` with clamps, then add the UI row in the matching `src/ui/menu/*` page. Keep the UI
   range and the JSON clamp in sync. New fields must survive missing keys and round-trip.

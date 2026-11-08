@@ -16,6 +16,8 @@ Third-party components remain under the licenses named below.
 | cs2-dumper-derived schema traversal | MIT | https://github.com/a2x/cs2-dumper |
 | Kenney Interface Sounds | CC0-1.0 | https://github.com/Calinou/kenney-interface-sounds |
 | LaSonotheque / BigSoundBank grapefruit foley | CC0-1.0 | https://bigsoundbank.com/gore-grapefruit-6-s2600.html |
+| Inter | SIL Open Font License 1.1 | https://github.com/rsms/inter |
 
 Library revisions are pinned and fetched by CMake from the upstream projects.
-Notices for embedded audio assets remain in `src/resources/sounds/LICENSE.md`.
+Notices for embedded audio assets remain in `src/resources/sounds/LICENSE.md`. The Inter license text is embedded
+with the loader sources in `loader/assets/fonts/OFL.txt`.

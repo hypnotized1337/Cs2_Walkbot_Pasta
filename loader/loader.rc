@@ -1,0 +1,7 @@
+#include <windows.h>
+#include "resources.h"
+
+IDR_INTER_REGULAR RCDATA "assets/fonts/Inter-Regular.ttf"
+IDR_INTER_SEMIBOLD RCDATA "assets/fonts/Inter-SemiBold.ttf"
+IDR_INTER_BOLD RCDATA "assets/fonts/Inter-Bold.ttf"
+IDR_PASTA_LOGO RCDATA "assets/pasta_logo.png"

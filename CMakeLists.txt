@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 3.20)
 project(vesta VERSION 1.2.3 LANGUAGES C CXX)
+enable_language(RC)
 
 # Dear ImGui, unmodified upstream v1.92.3, fetched at configure time into the dependency cache (build/_deps), not
 # kept in the source tree. The tag is only a convenient name: the commit it resolves to is verified below.
@@ -337,6 +338,36 @@ foreach(config DEBUG RELEASE RELWITHDEBINFO MINSIZEREL)
         PDB_OUTPUT_DIRECTORY_${config} "${CMAKE_SOURCE_DIR}/build/bin"
     )
 endforeach()
+
+# Standalone launcher: starts Steam and CS2 when needed, waits for the game modules Vesta attaches to, then starts
+# vesta.exe from its own folder. It is deliberately a separate process and target; Vesta remains external. The
+# launcher requests administrator rights because it must be able to read CS2 when Steam or the game is elevated.
+set(pasta_loader_ui_sources
+    loader/astral/app/app.cpp
+    loader/astral/app/assets.cpp
+    loader/astral/gfx/device.cpp
+    loader/astral/gfx/drawlist.cpp
+    loader/astral/gfx/font.cpp
+    loader/astral/gfx/image.cpp
+    loader/astral/gfx/renderer.cpp
+    loader/astral/ui/ui.cpp
+    loader/astral/ui/widgets.cpp
+)
+add_executable(pasta_loader WIN32 loader/main.cpp loader/launcher.cpp loader/loader.rc ${pasta_loader_ui_sources})
+target_compile_definitions(pasta_loader PRIVATE UNICODE _UNICODE WIN32_LEAN_AND_MEAN NOMINMAX)
+target_include_directories(pasta_loader PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src" "${CMAKE_CURRENT_SOURCE_DIR}/loader" "${CMAKE_CURRENT_SOURCE_DIR}/loader/astral")
+target_link_libraries(pasta_loader PRIVATE user32 gdi32 ole32 advapi32 d3d11 dxgi d3dcompiler dcomp dwrite windowscodecs shell32 shlwapi)
+set_target_properties(pasta_loader PROPERTIES OUTPUT_NAME "pasta_loader" PDB_NAME "pasta_loader")
+foreach(config DEBUG RELEASE RELWITHDEBINFO MINSIZEREL)
+    set_target_properties(pasta_loader PROPERTIES
+        RUNTIME_OUTPUT_DIRECTORY_${config} "${CMAKE_SOURCE_DIR}/build/bin"
+        PDB_OUTPUT_DIRECTORY_${config} "${CMAKE_SOURCE_DIR}/build/bin"
+    )
+endforeach()
+if(MSVC)
+    target_compile_options(pasta_loader PRIVATE /utf-8 /W4)
+    target_link_options(pasta_loader PRIVATE "/MANIFESTUAC:level='requireAdministrator' uiAccess='false'")
+endif()
 
 include(FetchContent)
 
