@@ -15,27 +15,6 @@ jobs:
     runs-on: windows-2022
     steps:
       - uses: actions/checkout@v5
-      - name: Check release capabilities
-        id: capabilities
-        env:
-          GH_TOKEN: ${{ github.token }}
-        shell: pwsh
-        run: |
-          $repository = gh api "repos/${{ github.repository }}" | ConvertFrom-Json
-          if ($LASTEXITCODE -ne 0) {
-            throw "Failed to read repository visibility."
-          }
-
-          $immutableEnabled = $false
-          $immutableJson = gh api "repos/${{ github.repository }}/immutable-releases" 2>$null
-          if ($LASTEXITCODE -eq 0) {
-            $immutableSettings = $immutableJson | ConvertFrom-Json
-            $immutableEnabled = [bool]$immutableSettings.enabled
-          }
-
-          $isPublic = -not $repository.private
-          "is_public=$($isPublic.ToString().ToLowerInvariant())" >> $env:GITHUB_OUTPUT
-          "immutable_releases=$($immutableEnabled.ToString().ToLowerInvariant())" >> $env:GITHUB_OUTPUT
       # Every third-party library is downloaded at configure time from its pinned upstream release.
       - name: Configure
         run: cmake --preset release
@@ -43,25 +22,23 @@ jobs:
         run: cmake --build --preset release --parallel
       # GitHub only offers artifact attestations for public repositories owned by a user.
       - name: Attest vesta.exe
-        if: steps.capabilities.outputs.is_public == 'true'
+        if: github.event.repository.private == false
         uses: actions/attest@v4
         with:
           subject-path: build/bin/vesta.exe
       - name: Attest pasta_loader.exe
-        if: steps.capabilities.outputs.is_public == 'true'
+        if: github.event.repository.private == false
         uses: actions/attest@v4
         with:
           subject-path: build/bin/pasta_loader.exe
       - name: Publish GitHub release
         env:
           GH_TOKEN: ${{ github.token }}
-          IS_PUBLIC: ${{ steps.capabilities.outputs.is_public }}
-          IMMUTABLE_RELEASES: ${{ steps.capabilities.outputs.immutable_releases }}
+          IS_PUBLIC: ${{ github.event.repository.private == false }}
         shell: pwsh
         run: |
           $tag = "${{ github.ref_name }}"
           $isPublic = $env:IS_PUBLIC -eq 'true'
-          $immutableEnabled = $env:IMMUTABLE_RELEASES -eq 'true'
           # Both executables come from this same verified build.
           $assets = @(
             "build/bin/vesta.exe"
@@ -149,15 +126,3 @@ jobs:
 
           gh release edit $tag --draft=false
           if ($LASTEXITCODE -ne 0) { throw "Failed to publish release." }
-
-          if ($immutableEnabled) {
-            $published = gh api `
-              -H "X-GitHub-Api-Version: 2026-03-10" `
-              "repos/${{ github.repository }}/releases/tags/$tag" `
-              | ConvertFrom-Json
-            if ($LASTEXITCODE -ne 0 -or -not $published.immutable) {
-              throw "GitHub published $tag without immutable protection."
-            }
-          } else {
-            Write-Host "Immutable releases are not enabled for this repository; $tag was published without immutability."
-          }
