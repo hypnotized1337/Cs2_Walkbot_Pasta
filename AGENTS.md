@@ -33,11 +33,13 @@ PowerShell:
 ```
 
 - Use `-m`, not `/m`, in Git Bash: MSYS rewrites `/m` to `M:/`.
-- Close `vesta.exe` before linking. If the link fails with `LNK1168`, the old process still owns `build/bin/vesta.exe`.
-- Output: `build/bin/vesta.exe` (plus `vesta.pdb`). Build artifacts are ignored.
+- Close `pasta.exe` before linking. If the link fails with `LNK1168`, the old process still owns `build/bin/pasta.exe`.
+- Output: `build/bin/pasta.exe` (plus `pasta.pdb`). Build artifacts are ignored.
 - `pasta_loader` is a separate launcher target: `build/bin/pasta_loader.exe` requests administrator rights, opens
-  an idle window with a **Load** button, starts Steam/CS2, waits briefly for the game modules, then runs `vesta.exe`.
+  an idle window with a **Load** button, starts Steam/CS2, waits briefly for the game modules, then runs `pasta.exe`.
   It does not inject; build it with `--target pasta_loader` when needed.
+- Pushing to `main` runs `.github/workflows/release.yml`, which builds and publishes both executables as a new release.
+  `.github/workflows/build.yml` builds pull requests without publishing.
 - `debug-local` is the local Visual Studio 18 preset. It reuses `build/debug`. The `debug`, `release` and `profile`
   presets target Visual Studio 17 2022 for CI; do not change them to fix a local build.
 - Configure embeds `configs/legit.cfg` as the built-in default profile. If that file is absent, CMake warns and falls
@@ -55,7 +57,7 @@ PowerShell:
 - Walk-bot recordings: `%TEMP%\vesta\walkbot\<map>\<t|ct>\*.route`.
 - Logs/journal: `%TEMP%\vesta\logs`.
 - Trace, when `VESTA_SEED_TRACE_DIR` is set: `config-at-launch.json`, `schema.json`, `scene.jsonl` in its parent.
-- Edit the live cache only while `vesta.exe` is closed; the app writes it from the running process. Do not edit a
+- Edit the live cache only while `pasta.exe` is closed; the app writes it from the running process. Do not edit a
   user's named config unless the task asks for it.
 
 ## Threads and shared state

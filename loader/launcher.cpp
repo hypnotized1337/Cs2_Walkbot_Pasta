@@ -456,22 +456,22 @@ std::optional<failure> launch(const std::atomic<bool>& cancelled, const progress
     if (!find_process(L"cs2.exe"))
         return failure{L"Counter-Strike 2 closed.", L"The game exited before PASTA could start."};
 
-    if (find_process(L"vesta.exe"))
+    if (find_process(L"pasta.exe"))
     {
         report(100, L"PASTA is already running.", L"Press Insert in game to open the menu.");
         return std::nullopt;
     }
 
     const auto directory = executable_directory();
-    const auto vesta = directory / L"vesta.exe";
+    const auto pasta = directory / L"pasta.exe";
     std::error_code file_error;
-    if (!std::filesystem::is_regular_file(vesta, file_error))
-        return failure{L"vesta.exe was not found.",
-                       L"Keep pasta_loader.exe in the same folder as vesta.exe."};
+    if (!std::filesystem::is_regular_file(pasta, file_error))
+        return failure{L"pasta.exe was not found.",
+                       L"Keep pasta_loader.exe in the same folder as pasta.exe."};
 
-    report(94, L"Starting PASTA", L"Launching vesta.exe.");
+    report(94, L"Starting PASTA", L"Launching pasta.exe.");
     std::wstring error;
-    if (!start_process(vesta, L"", directory, error))
+    if (!start_process(pasta, L"", directory, error))
         return failure{L"Could not start PASTA.", std::move(error)};
 
     report(100, L"PASTA is running.", L"Press Insert in game to open the menu.");

@@ -42,7 +42,7 @@
         "VESTA_PERF_LOG": "OFF",
         "VESTA_WINDOWED_PROFILE": "OFF",
         "VESTA_WINDOWED_SESSION": "OFF",
-        "VESTA_OUTPUT_NAME": "vesta"
+        "VESTA_OUTPUT_NAME": "pasta"
       }
     },
     {
@@ -52,7 +52,7 @@
       "binaryDir": "${sourceDir}/build/profile",
       "cacheVariables": {
         "VESTA_PERF_LOG": "ON",
-        "VESTA_OUTPUT_NAME": "vesta-profile"
+        "VESTA_OUTPUT_NAME": "pasta-profile"
       }
     }
   ],

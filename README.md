@@ -75,11 +75,11 @@ PASTA makes no anti-cheat guarantee. Use it at your own risk.
 
 ## Loader
 
-`pasta_loader.exe` is a small launcher for the same folder as `vesta.exe`. It
+`pasta_loader.exe` is a small launcher for the same folder as `pasta.exe`. It
 requests administrator rights when it starts, so it can read CS2 even when Steam
 or the game is elevated. It opens with a **Load** button; pressing it starts
 Steam and Counter-Strike 2 with `-applaunch 730` if needed, waits briefly for the
-six modules Vesta attaches to, then starts `vesta.exe`. It does not inject a DLL
+six modules Vesta attaches to, then starts `pasta.exe`. It does not inject a DLL
 or modify the game; Vesta still attaches and reads memory as an external program.
 
 ## Build and run
@@ -92,14 +92,22 @@ cmake --preset release
 cmake --build --preset release --parallel
 ```
 
-Output is `build/bin/vesta.exe`; the internal name is kept for config and data
-compatibility. The default build also produces `build/bin/pasta_loader.exe`
-(`cmake --build --preset release --target pasta_loader` builds it alone).
+Output is `build/bin/pasta.exe`; the internal project name and data paths remain
+Vesta for config compatibility. The default build also produces
+`build/bin/pasta_loader.exe` (`cmake --build --preset release --target
+pasta_loader` builds it alone).
 
 Run `pasta_loader.exe`, approve the UAC prompt, and press **Load** to start CS2
-and PASTA together. Alternatively, start CS2 yourself and run `vesta.exe`. Press
+and PASTA together. Alternatively, start CS2 yourself and run `pasta.exe`. Press
 `Insert` for the menu and `End` to exit. Change those keys in
 `%TEMP%\vesta\configs\hotkeys.cfg` and restart if needed.
+
+## Releases
+
+Every push to `main` builds both executables and publishes a new release tagged
+`v<version>-build.<run>-<commit>`. The release notes list the commits since the
+previous release, and both `pasta.exe` and `pasta_loader.exe` are attached. Pull
+requests run the build check without publishing a release.
 
 ## Data and license
 

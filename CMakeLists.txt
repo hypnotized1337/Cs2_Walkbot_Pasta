@@ -20,7 +20,7 @@ endif()
 set(VESTA_IMGUI_DIR ${imgui_SOURCE_DIR})
 
 if(NOT DEFINED VESTA_OUTPUT_NAME)
-    set(VESTA_OUTPUT_NAME "vesta")
+    set(VESTA_OUTPUT_NAME "pasta")
 endif()
 
 set(CMAKE_CXX_STANDARD 23)
@@ -314,7 +314,7 @@ if(MSVC)
         $<$<CONFIG:Release>:/LTCG;/OPT:REF;/OPT:ICF;/DEBUG:FULL>
         $<$<CONFIG:Release>:/SUBSYSTEM:WINDOWS>
         $<$<CONFIG:Release>:/ENTRY:mainCRTStartup>
-        $<$<CONFIG:Release>:/PDBALTPATH:vesta.pdb>
+        $<$<CONFIG:Release>:/PDBALTPATH:${VESTA_OUTPUT_NAME}.pdb>
     )
 else()
     target_compile_options(${PROJECT_NAME} PRIVATE
@@ -340,7 +340,7 @@ foreach(config DEBUG RELEASE RELWITHDEBINFO MINSIZEREL)
 endforeach()
 
 # Standalone launcher: starts Steam and CS2 when needed, waits for the game modules Vesta attaches to, then starts
-# vesta.exe from its own folder. It is deliberately a separate process and target; Vesta remains external. The
+# pasta.exe from its own folder. It is deliberately a separate process and target; Vesta remains external. The
 # launcher requests administrator rights because it must be able to read CS2 when Steam or the game is elevated.
 set(pasta_loader_ui_sources
     loader/astral/app/app.cpp

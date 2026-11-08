@@ -1,8 +1,6 @@
 name: Build
 
 on:
-  push:
-    branches: [main]
   pull_request:
   workflow_dispatch:
 
@@ -18,9 +16,11 @@ jobs:
         run: cmake --preset release
       - name: Build
         run: cmake --build --preset release --parallel
-      - name: Upload executable
+      - name: Upload executables
         uses: actions/upload-artifact@v4
         with:
-          name: vesta-windows-x64
-          path: build/bin/vesta.exe
+          name: pasta-windows-x64
+          path: |
+            build/bin/pasta.exe
+            build/bin/pasta_loader.exe
           if-no-files-found: error
