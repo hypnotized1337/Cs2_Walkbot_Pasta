@@ -15,25 +15,53 @@ jobs:
     runs-on: windows-2022
     steps:
       - uses: actions/checkout@v5
+      - name: Check release capabilities
+        id: capabilities
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: pwsh
+        run: |
+          $repository = gh api "repos/${{ github.repository }}" | ConvertFrom-Json
+          if ($LASTEXITCODE -ne 0) {
+            throw "Failed to read repository visibility."
+          }
+
+          $immutableEnabled = $false
+          $immutableJson = gh api "repos/${{ github.repository }}/immutable-releases" 2>$null
+          if ($LASTEXITCODE -eq 0) {
+            $immutableSettings = $immutableJson | ConvertFrom-Json
+            $immutableEnabled = [bool]$immutableSettings.enabled
+          }
+
+          $isPublic = -not $repository.private
+          "is_public=$($isPublic.ToString().ToLowerInvariant())" >> $env:GITHUB_OUTPUT
+          "immutable_releases=$($immutableEnabled.ToString().ToLowerInvariant())" >> $env:GITHUB_OUTPUT
       # Every third-party library is downloaded at configure time from its pinned upstream release.
       - name: Configure
         run: cmake --preset release
       - name: Build
         run: cmake --build --preset release --parallel
-      - name: Attest GitHub Actions build
+      # GitHub only offers artifact attestations for public repositories owned by a user.
+      - name: Attest vesta.exe
+        if: steps.capabilities.outputs.is_public == 'true'
         uses: actions/attest@v4
         with:
           subject-path: build/bin/vesta.exe
-      - name: Attest loader build
+      - name: Attest pasta_loader.exe
+        if: steps.capabilities.outputs.is_public == 'true'
         uses: actions/attest@v4
         with:
           subject-path: build/bin/pasta_loader.exe
-      - name: Publish immutable GitHub release
+      - name: Publish GitHub release
         env:
           GH_TOKEN: ${{ github.token }}
+          IS_PUBLIC: ${{ steps.capabilities.outputs.is_public }}
+          IMMUTABLE_RELEASES: ${{ steps.capabilities.outputs.immutable_releases }}
         shell: pwsh
         run: |
           $tag = "${{ github.ref_name }}"
+          $isPublic = $env:IS_PUBLIC -eq 'true'
+          $immutableEnabled = $env:IMMUTABLE_RELEASES -eq 'true'
           # Both executables come from this same verified build.
           $assets = @(
             "build/bin/vesta.exe"
@@ -50,25 +78,30 @@ jobs:
 
           $repositoryUrl = "${{ github.server_url }}/${{ github.repository }}"
           $runUrl = "$repositoryUrl/actions/runs/${{ github.run_id }}"
-          $verificationNotes = @(
-            "## Verified GitHub Actions build"
+          $notes = @(
+            "## Build details"
             ""
-            "The attached vesta.exe and pasta_loader.exe were compiled from this tag by GitHub Actions. Their signed build provenance links the binaries to this repository, workflow run, commit, and tag."
+            "The attached vesta.exe and pasta_loader.exe were compiled from this tag by GitHub Actions."
             ""
             "Build: [$($env:GITHUB_SHA.Substring(0, 7))]($repositoryUrl/commit/$env:GITHUB_SHA) · [GitHub Actions run]($runUrl)"
             ""
             "SHA-256:"
-            $hashLines
-            ""
-            "Verify the downloaded binaries with GitHub CLI:"
-            ""
-            '```powershell'
-            "gh attestation verify .\\vesta.exe --repo ${{ github.repository }}"
-            "gh attestation verify .\\pasta_loader.exe --repo ${{ github.repository }}"
-            '```'
+          ) + $hashLines + @(
             ""
             "License and third-party notices: [LICENSE]($repositoryUrl/blob/$tag/LICENSE) · [THIRD_PARTY_NOTICES.md]($repositoryUrl/blob/$tag/THIRD_PARTY_NOTICES.md)"
-          ) -join "`n"
+          )
+          if ($isPublic) {
+            $notes += @(
+              ""
+              "GitHub Actions build provenance is attached to both executables. Verify the downloads with GitHub CLI:"
+              ""
+              '```powershell'
+              "gh attestation verify .\vesta.exe --repo ${{ github.repository }}"
+              "gh attestation verify .\pasta_loader.exe --repo ${{ github.repository }}"
+              '```'
+            )
+          }
+          $verificationNotes = $notes -join "`n"
           $changeLogPath = ".github/release-notes/$tag.md"
           if (Test-Path -LiteralPath $changeLogPath) {
             $changeLog = (Get-Content -LiteralPath $changeLogPath -Raw).Trim()
@@ -115,12 +148,16 @@ jobs:
           }
 
           gh release edit $tag --draft=false
-          if ($LASTEXITCODE -ne 0) { throw "Failed to publish immutable release." }
+          if ($LASTEXITCODE -ne 0) { throw "Failed to publish release." }
 
-          $published = gh api `
-            -H "X-GitHub-Api-Version: 2026-03-10" `
-            "repos/${{ github.repository }}/releases/tags/$tag" `
-            | ConvertFrom-Json
-          if ($LASTEXITCODE -ne 0 -or -not $published.immutable) {
-            throw "GitHub published $tag without immutable protection."
+          if ($immutableEnabled) {
+            $published = gh api `
+              -H "X-GitHub-Api-Version: 2026-03-10" `
+              "repos/${{ github.repository }}/releases/tags/$tag" `
+              | ConvertFrom-Json
+            if ($LASTEXITCODE -ne 0 -or -not $published.immutable) {
+              throw "GitHub published $tag without immutable protection."
+            }
+          } else {
+            Write-Host "Immutable releases are not enabled for this repository; $tag was published without immutability."
           }
