@@ -339,9 +339,10 @@ foreach(config DEBUG RELEASE RELWITHDEBINFO MINSIZEREL)
     )
 endforeach()
 
-# Standalone launcher: starts Steam and CS2 when needed, waits for the game modules Vesta attaches to, then starts
-# pasta.exe from its own folder. It is deliberately a separate process and target; Vesta remains external. The
-# launcher requests administrator rights because it must be able to read CS2 when Steam or the game is elevated.
+# Standalone launcher: checks the public release feed, installs pasta.exe in Documents\PASTA, starts Steam and CS2
+# when needed, waits for the game modules Vesta attaches to, then starts that installed copy. It is deliberately a
+# separate process and target; Vesta remains external. The launcher requests administrator rights because it must be
+# able to read CS2 when Steam or the game is elevated.
 set(pasta_loader_ui_sources
     loader/astral/app/app.cpp
     loader/astral/app/assets.cpp
@@ -356,7 +357,7 @@ set(pasta_loader_ui_sources
 add_executable(pasta_loader WIN32 loader/main.cpp loader/launcher.cpp loader/loader.rc ${pasta_loader_ui_sources})
 target_compile_definitions(pasta_loader PRIVATE UNICODE _UNICODE WIN32_LEAN_AND_MEAN NOMINMAX)
 target_include_directories(pasta_loader PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src" "${CMAKE_CURRENT_SOURCE_DIR}/loader" "${CMAKE_CURRENT_SOURCE_DIR}/loader/astral")
-target_link_libraries(pasta_loader PRIVATE user32 gdi32 ole32 advapi32 d3d11 dxgi d3dcompiler dcomp dwrite windowscodecs shell32 shlwapi)
+target_link_libraries(pasta_loader PRIVATE user32 gdi32 ole32 advapi32 d3d11 dxgi d3dcompiler dcomp dwrite windowscodecs shell32 shlwapi winhttp)
 set_target_properties(pasta_loader PROPERTIES OUTPUT_NAME "pasta_loader" PDB_NAME "pasta_loader")
 foreach(config DEBUG RELEASE RELWITHDEBINFO MINSIZEREL)
     set_target_properties(pasta_loader PROPERTIES
@@ -427,3 +428,4 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(nlohmann_json)
 target_link_libraries(${PROJECT_NAME} PRIVATE nlohmann_json::nlohmann_json)
+target_link_libraries(pasta_loader PRIVATE nlohmann_json::nlohmann_json)

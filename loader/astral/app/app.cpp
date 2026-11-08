@@ -141,6 +141,8 @@ void App::screenStatus(const Rect& panel, float alpha, const ViewState& state, A
     Theme& t = theme();
     Rect content(panel.x, panel.y + kBarHeight, panel.w, panel.h - kBarHeight);
     const bool running = state.phase == Phase::running;
+    const bool downloading = state.phase == Phase::downloading;
+    const bool busy = running || downloading;
     const int progress = std::clamp(state.progress, 0, 100);
 
     if (m_assets.cs2Hero.valid()) {
@@ -161,17 +163,20 @@ void App::screenStatus(const Rect& panel, float alpha, const ViewState& state, A
                              t.radius);
     }
 
-    const std::wstring fallback = running ? L"Launching PASTA" : (state.phase == Phase::success ? L"PASTA  is  running" : L"Could not start PASTA");
+    const std::wstring fallback = downloading ? L"Downloading PASTA" :
+                                  (running ? L"Launching PASTA" :
+                                             (state.phase == Phase::success ? L"PASTA  is  running"
+                                                                            : L"Could not start PASTA"));
     const std::string status = fit_text(fonts().body, to_utf8(state.status.empty() ? fallback : state.status),
-                                        content.w - 36.f - (running ? 52.f : 0.f));
+                                        content.w - 36.f - (busy ? 52.f : 0.f));
     const std::string detail = fit_text(fonts().caption, to_utf8(state.detail), content.w - 36.f);
 
     const float textX = content.x + 18.f;
     const float textW = content.w - 36.f;
     const float statusY = content.y + 9.f;
-    ui::text(fonts().body, Rect(textX, statusY, textW - (running ? 52.f : 0.f), 17.f), status.c_str(),
+    ui::text(fonts().body, Rect(textX, statusY, textW - (busy ? 52.f : 0.f), 17.f), status.c_str(),
              t.text.alpha(alpha), AlignH::Left, AlignV::Middle);
-    if (running) {
+    if (busy) {
         const std::string percent = std::to_string(progress) + "%";
         ui::text(fonts().caption, Rect(textX, statusY, textW, 17.f), percent.c_str(), t.text.alpha(0.72f * alpha),
                  AlignH::Right, AlignV::Middle);
@@ -190,10 +195,10 @@ void App::screenStatus(const Rect& panel, float alpha, const ViewState& state, A
         logoMark(&m_assets.logo, logoBox, alpha * (0.92f + beat * 0.08f));
     }
 
-    if (running) drawProgress(Rect(textX, content.y + 151.f, textW, 3.f), progress, alpha);
+    if (busy) drawProgress(Rect(textX, content.y + 151.f, textW, 3.f), progress, alpha);
 
     Rect action(panel.x + 14.f, panel.b() - 10.f - 34.f, panel.w - 28.f, 34.f);
-    if (running) {
+    if (busy) {
         if (gameRow("pasta.cancel", action, nullptr, state.cancelling ? "Cancelling..." : "Cancel") &&
             !state.cancelling) {
             actions.cancel = true;

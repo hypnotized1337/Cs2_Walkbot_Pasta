@@ -31,6 +31,7 @@ constexpr int kWindowHeight = kMaxPanelHeight + kMargin * 2;
 
 enum class load_phase {
     idle,
+    updating,
     running,
     success,
     failure,
@@ -43,6 +44,7 @@ std::wstring g_status;
 std::wstring g_detail;
 int g_progress = 0;
 bool g_cancelling = false;
+bool g_update_failed = false;
 std::thread g_worker;
 
 struct WindowState {
@@ -78,7 +80,7 @@ WindowState* g_state = nullptr;
 
 void set_status(const int progress, std::wstring status, std::wstring detail) {
     const std::scoped_lock lock(g_state_mutex);
-    if (g_phase != load_phase::running) return;
+    if (g_phase != load_phase::running && g_phase != load_phase::updating) return;
     g_status = std::move(status);
     g_detail = std::move(detail);
     g_progress = std::clamp(progress, 0, 100);
@@ -89,6 +91,7 @@ app::ViewState snapshot() {
     const std::scoped_lock lock(g_state_mutex);
     switch (g_phase) {
     case load_phase::idle: view.phase = app::Phase::idle; break;
+    case load_phase::updating: view.phase = app::Phase::downloading; break;
     case load_phase::running: view.phase = app::Phase::running; break;
     case load_phase::success: view.phase = app::Phase::success; break;
     case load_phase::failure: view.phase = app::Phase::failure; break;
@@ -127,10 +130,60 @@ void worker_main() {
     }
 }
 
+void update_worker() {
+    const auto failure = loader::prepare(g_cancel, set_status);
+
+    const std::scoped_lock lock(g_state_mutex);
+    if (g_cancel.load(std::memory_order_relaxed)) {
+        g_phase = load_phase::failure;
+        g_status = L"Update cancelled";
+        g_detail = L"PASTA was not updated. Try again when ready.";
+        g_progress = 0;
+        g_cancelling = false;
+        g_update_failed = true;
+        return;
+    }
+
+    g_cancelling = false;
+    if (failure) {
+        g_phase = load_phase::failure;
+        g_status = failure->status;
+        g_detail = failure->detail;
+        g_progress = 0;
+        g_update_failed = true;
+    } else {
+        g_phase = load_phase::idle;
+        g_status.clear();
+        g_detail.clear();
+        g_progress = 0;
+        g_update_failed = false;
+    }
+}
+
+void start_update_check() {
+    {
+        const std::scoped_lock lock(g_state_mutex);
+        if (g_phase == load_phase::updating || g_phase == load_phase::running) return;
+    }
+    if (g_worker.joinable()) g_worker.join();
+
+    g_cancel.store(false, std::memory_order_relaxed);
+    {
+        const std::scoped_lock lock(g_state_mutex);
+        g_phase = load_phase::updating;
+        g_status = L"Checking for updates";
+        g_detail = L"Contacting the PASTA release feed.";
+        g_progress = 0;
+        g_cancelling = false;
+        g_update_failed = false;
+    }
+    g_worker = std::thread(update_worker);
+}
+
 void start_loading() {
     {
         const std::scoped_lock lock(g_state_mutex);
-        if (g_phase == load_phase::running) return;
+        if (g_phase == load_phase::updating || g_phase == load_phase::running) return;
     }
     if (g_worker.joinable()) g_worker.join();
 
@@ -142,6 +195,7 @@ void start_loading() {
         g_detail = L"Checking Steam and Counter-Strike 2.";
         g_progress = 0;
         g_cancelling = false;
+        g_update_failed = false;
     }
     g_worker = std::thread(worker_main);
 }
@@ -149,9 +203,9 @@ void start_loading() {
 void request_cancel() {
     g_cancel.store(true, std::memory_order_relaxed);
     const std::scoped_lock lock(g_state_mutex);
-    if (g_phase == load_phase::running) {
+    if (g_phase == load_phase::running || g_phase == load_phase::updating) {
         g_cancelling = true;
-        g_status = L"Cancelling";
+        g_status = g_phase == load_phase::updating ? L"Cancelling update" : L"Cancelling";
         g_detail = L"Stopping the current step.";
     }
 }
@@ -370,6 +424,7 @@ int WINAPI wWinMain(const HINSTANCE instance, HINSTANCE, PWSTR, const int showCo
         ShowWindow(state.window, showCommand == SW_SHOWMINIMIZED ? SW_SHOWNORMAL : showCommand);
         UpdateWindow(state.window);
         SetForegroundWindow(state.window);
+        start_update_check();
     }
 
     LARGE_INTEGER frequency = {};
@@ -412,7 +467,15 @@ int WINAPI wWinMain(const HINSTANCE instance, HINSTANCE, PWSTR, const int showCo
         const app::Actions actions = state.app.frame(dt, view);
         ui::endFrame();
 
-        if (actions.load) start_loading();
+        if (actions.load) {
+            bool retry_update = false;
+            {
+                const std::scoped_lock lock(g_state_mutex);
+                retry_update = g_update_failed;
+            }
+            if (retry_update) start_update_check();
+            else start_loading();
+        }
         if (actions.cancel) request_cancel();
         if (state.app.closeRequested()) g_cancel.store(true, std::memory_order_relaxed);
 

@@ -75,12 +75,13 @@ PASTA makes no anti-cheat guarantee. Use it at your own risk.
 
 ## Loader
 
-`pasta_loader.exe` is a small launcher for the same folder as `pasta.exe`. It
-requests administrator rights when it starts, so it can read CS2 even when Steam
-or the game is elevated. It opens with a **Load** button; pressing it starts
-Steam and Counter-Strike 2 with `-applaunch 730` if needed, waits briefly for the
-six modules Vesta attaches to, then starts `pasta.exe`. It does not inject a DLL
-or modify the game; Vesta still attaches and reads memory as an external program.
+`pasta_loader.exe` installs and launches `pasta.exe`. It requests administrator
+rights when it starts, so it can read CS2 even when Steam or the game is
+elevated. It checks the latest release first, then shows a **Load** button;
+pressing it starts Steam and Counter-Strike 2 with `-applaunch 730` if needed,
+waits briefly for the six modules Vesta attaches to, then starts the installed
+copy. It does not inject a DLL or modify the game; Vesta still attaches and reads
+memory as an external program.
 
 ## Build and run
 
@@ -97,17 +98,29 @@ Vesta for config compatibility. The default build also produces
 `build/bin/pasta_loader.exe` (`cmake --build --preset release --target
 pasta_loader` builds it alone).
 
-Run `pasta_loader.exe`, approve the UAC prompt, and press **Load** to start CS2
-and PASTA together. Alternatively, start CS2 yourself and run `pasta.exe`. Press
-`Insert` for the menu and `End` to exit. Change those keys in
-`%TEMP%\vesta\configs\hotkeys.cfg` and restart if needed.
+Download only `pasta_loader.exe`. On startup it checks the latest GitHub release;
+when `%USERPROFILE%\Documents\PASTA\pasta.exe` is missing or older, the loader
+shows a progress page and installs the release `pasta.exe` there. The release tag
+is recorded in `version.txt` beside it. Approve the UAC prompt and press **Load**
+to start CS2 and PASTA together.
+
+Automatic downloads use the public GitHub Releases API. The repository and its
+release assets must be publicly readable: private assets cannot be fetched
+anonymously. If the feed is unreachable, an already installed copy remains
+usable.
+
+Alternatively, start CS2 yourself and run the installed
+`Documents\PASTA\pasta.exe`. Press `Insert` for the menu and `End` to exit. Change
+those keys in `%TEMP%\vesta\configs\hotkeys.cfg` and restart if needed.
 
 ## Releases
 
 Every push to `main` builds both executables and publishes a new release tagged
 `v<version>-build.<run>-<commit>`. The release notes list the commits since the
-previous release, and both `pasta.exe` and `pasta_loader.exe` are attached. Pull
-requests run the build check without publishing a release.
+previous release, and both `pasta.exe` and `pasta_loader.exe` are attached. The
+loader compares that build number with its installed copy and downloads
+`pasta.exe` when a newer release appears. Pull requests run the build check
+without publishing a release.
 
 ## Data and license
 

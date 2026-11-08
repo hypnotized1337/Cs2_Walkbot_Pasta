@@ -35,9 +35,12 @@ PowerShell:
 - Use `-m`, not `/m`, in Git Bash: MSYS rewrites `/m` to `M:/`.
 - Close `pasta.exe` before linking. If the link fails with `LNK1168`, the old process still owns `build/bin/pasta.exe`.
 - Output: `build/bin/pasta.exe` (plus `pasta.pdb`). Build artifacts are ignored.
-- `pasta_loader` is a separate launcher target: `build/bin/pasta_loader.exe` requests administrator rights, opens
-  an idle window with a **Load** button, starts Steam/CS2, waits briefly for the game modules, then runs `pasta.exe`.
-  It does not inject; build it with `--target pasta_loader` when needed.
+- `pasta_loader` is a separate launcher target: `build/bin/pasta_loader.exe` requests administrator rights, checks
+  the public GitHub release feed against `%USERPROFILE%\Documents\PASTA\version.txt`, downloads a missing or newer
+  `pasta.exe` into that folder with a progress page, then opens **Load** to start Steam/CS2, wait for the game
+  modules, and run the installed copy. If the feed is unreachable, an existing Documents copy (or a legacy
+  `pasta.exe` next to the loader) is still usable. It does not inject; build it with `--target pasta_loader` when
+  needed. Private release assets cannot be downloaded anonymously, so the release repository must be public.
 - Pushing to `main` runs `.github/workflows/release.yml`, which builds and publishes both executables as a new release.
   `.github/workflows/build.yml` builds pull requests without publishing.
 - `debug-local` is the local Visual Studio 18 preset. It reuses `build/debug`. The `debug`, `release` and `profile`
@@ -53,6 +56,8 @@ PowerShell:
   `*.cfg`. Loading a named config copies it into the live cache; saving writes the live settings to the named file.
 - Startup applies the embedded default profile, then overlays `current.cfg`. Missing or new keys inherit the
   embedded profile, which is why `configs/legit.cfg` matters.
+- Loader install: `%USERPROFILE%\Documents\PASTA\pasta.exe` and `version.txt`; the loader updates it from the
+  latest release at startup.
 - Data root: `%TEMP%\vesta` (`configs`, `logs`, `cache`, `nav`, `walkbot`).
 - Walk-bot recordings: `%TEMP%\vesta\walkbot\<map>\<t|ct>\*.route`.
 - Logs/journal: `%TEMP%\vesta\logs`.

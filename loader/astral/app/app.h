@@ -8,6 +8,7 @@ namespace app {
 
 enum class Phase {
     idle,
+    downloading,
     running,
     success,
     failure,
