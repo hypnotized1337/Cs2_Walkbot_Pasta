@@ -1,258 +1,154 @@
 # PASTA
 
-PASTA is a Windows x64 external assist for Counter-Strike 2, built from the
-open-source [Vesta](https://github.com/Read1dno/vesta) project. It attaches to
-the game as an ordinary user process, reads game memory read-only, and draws its
-menu and visuals in a separate DirectX 11 overlay. There is no DLL injection, no
-kernel driver, and no elevation.
+PASTA is a Windows x64 external assist for Counter-Strike 2, forked from the
+open-source [Vesta](https://github.com/Read1dno/vesta) project. It reads game
+memory read-only and draws in a separate DirectX 11 overlay: no injection, no
+kernel driver, no elevation.
 
-This fork keeps Vesta's combat, visuals, radar and Walk Bot, removes the Lua
-runtime and the grenade/movement modules, and turns the automation features into
-a first-class part of the interface.
+Comparison below is against Vesta `main` as of November 2026.
 
-> Version 1.2.3 · Windows 10/11 x64 · C++23 · Visual Studio 2022 or newer
->
-> Educational and research use only. See [License and credit](#license-and-credit).
+## What Vesta already provides
 
-## Features
+Vesta already ships the aimbot and RCS, the conventional and seed triggerbot,
+Auto Stop, player ESP and chams, the radar, world/projectile/bomb visuals,
+profiles, English/Russian localization and the base Walk Bot routing and combat
+systems. PASTA keeps all of it. This page only covers what changed.
 
-### Combat
+## Differences at a glance
 
-- Aimbot with always/hold/toggle activation, fixed, distance-scaled and
-  target-attached FOV, configurable hitboxes and multipoints, prediction,
-  smoothing and a humanizer.
-- Visibility, smoke, flash, airborne, immunity, penetration and lethal checks.
-- Independent recoil control that also works together with the active aim
-  solution.
-- Per-weapon-group overrides for every combat setting.
-- Triggerbot with conventional and seed-based firing, pre-shot delay, post-shot
-  lockout, timing randomization, hitbox groups, prediction, penetration, minimum
-  damage and lethal logic.
-- Auto Stop on the Triggerbot page: prepares weapon accuracy before a requested
-  shot.
-
-### Visuals and information
-
-- Player ESP and chams: boxes, skeleton, head marker, view line, name, health,
-  armor, weapon, ammo, distance, money, ping and information flags.
-- Separate visible and occluded chams materials, on-hit poses, death effects and
-  a drag-and-drop ESP editor.
-- Off-screen arrows, sound ESP, spectator list, hitboxes, bloom and Legit Sync
-  for visibility, radar, sound and smoke.
-- World information: dropped weapons and items, projectile timers and paths,
-  grenade radii, inferno bounds, planted-bomb marker, bomb timer/defuse panel and
-  a calculated bomb safe zone.
-- Bullet tracers, hitmarkers, hit sounds, damage popups, event log, reconstructed
-  crosshair, watermark and keybind list.
-- Radar with players, view direction, health, armor, weapons, money, kits,
-  grenades, the bomb, dropped items, projectiles and inferno bounds.
-
-### Walk Bot
-
-The Walk Bot has its own top-level page instead of living inside a Misc tab.
-
-- Routes over the map's navigation mesh, either to random points or along routes
-  you recorded yourself. Jumps, crouches and ladders are kept in recordings.
-- Per-map and per-side route storage under `%TEMP%\vesta\walkbot`.
-- Hunt enemies, turn the camera, break vents and boards, and open doors on the
-  way.
-- Route display and navigation-mesh overlay with configurable colour and
-  thickness.
-- Its own combat layer: a player-like aim hand, autofire using the Triggerbot
-  settings, spray mode, rear defense, reaction to unseen hits, and automatic
-  scope handling.
-- Auto buy with per-game-mode presets and an editable item list, plus auto
-  reload.
-- Owned input only: the menu, the player's mouse, the aimbot and the trigger
-  always win, and every held key is released on disable, death, focus loss or
-  reset.
-
-### Automation
-
-A dedicated Automation page, shown as a child of Walk Bot, collects the round
-and match automation:
-
-- **Match automation** — Auto Accept, Auto Rejoin (game mode and team) and Auto
-  Disconnect (score, minutes on server, randomized extra time).
-- **Buy automation** — default, Premier, Competitive, Wingman, Casual and
-  Deathmatch presets, or a custom item list with buy codes, side, money rules and
-  a "one random item" option.
-- **Combat automation** — Auto Crouch, Auto Scope, Auto Bonus Weapon, Auto Knife,
-  Auto Health Shot and Auto Reload.
-
-Auto Crouch holds duck while any hitbox of the engaged enemy is still reachable.
-It releases only when the target dies or is fully behind cover (with a short
-release grace), instead of standing up mid-fight because the crouched angle
-temporarily looks worse. Auto Health Shot waits for a quiet moment, draws the
-syringe, lets the deploy animation finish, injects, then restores a firearm.
-
-### Interface
-
-- Six top-level pages: Aimbot, Triggerbot, Visuals, Walk Bot, Automation and
-  Misc. The Automation row glides out of the Walk Bot section and retracts when
-  another page is selected.
-- Configs live under **Misc → Configs**, next to General and Overlay.
-- English and Russian interface, DPI scaling, custom palette, movable panels and
-  portable configs.
-- Configurable menu and exit hotkeys, with movement keys released while the menu
-  is open.
-
-## How PASTA differs from Vesta
-
-Vesta is the upstream project this fork is based on. Both are external,
-read-only overlays with the same base combat and visual systems. The differences
-are deliberate:
-
-| Area | PASTA | Vesta |
+| Area | Vesta | PASTA |
 | --- | --- | --- |
-| Navigation | Six pages; Walk Bot and Automation are top-level workflows | Four pages; tools grouped into Misc tabs |
-| Automation | Dedicated page for match, buy and combat automation | Auto Accept plus walk-bot buy/reload controls inside Misc |
-| Walk Bot | Its own page with route, combat and recording controls | A tab inside Misc |
-| Scripting | No scripting runtime | Sandboxed Lua 5.4 API, hot reload, scripts and Web Radar |
-| Grenades | No grenade helper | Nade Helper lineups, grenade aim assist and trajectory preview |
-| Movement | No Bunny Hop or Edge Jump (Auto Stop remains on Triggerbot) | Bunny Hop and Edge Jump in the Movement tab |
-| Dependencies | ImGui, FreeType, meshoptimizer, LZ4, Zstandard, nlohmann/json | The same plus Lua 5.4 |
-| Code size | About 16,000 lines removed with the dropped modules | Correspondingly larger surface |
+| Sidebar | Aimbot, Triggerbot, Visuals, Misc | Adds Walk Bot and Automation as top-level pages |
+| Automation | Auto Accept, rejoin/disconnect and buy/reload inside Misc | Dedicated page, plus new combat automation |
+| Walk Bot | Tab inside Misc | Own page, with new combat controls |
+| Scripting | Lua 5.4 sandbox, scripts and Web Radar | Removed entirely |
+| Grenades | Nade Helper, aim assist, trajectory preview | Removed entirely |
+| Movement | Bunny Hop and Edge Jump | Removed entirely |
+| Dependencies | Seven third-party libraries | Six (Lua is gone) |
+| Code size | Baseline | About 16,000 lines and 60 files smaller |
 
-### What this fork gains
+## Automation is now a first-class page
 
-1. **One place for automation.** Match, buy and combat automation are grouped on
-   a single page instead of being scattered through Misc and the walker.
-2. **A clearer Walk Bot workflow.** Route source, recording, navigation-mesh
-   display and combat behaviour are on one page, with the Automation child
-   sliding out only while the Walk Bot section is open.
-3. **A crouch that stays down.** Auto Crouch now holds while any part of the
-   target is reachable and only releases on death, target loss or full
-   occlusion. The old rule that counted exposed hitboxes could stand the player
-   up in the middle of a fight.
-4. **A smaller trust surface.** There is no Lua sandbox, no third-party script
-   execution, no browser radar and no local tunnel. Nothing outside the compiled
-   binary can change settings or press game keys.
-5. **Less code to keep working after a CS2 update.** Removing the scripting
-   runtime and the grenade and movement modules drops dozens of files and one
-   third-party dependency, which shortens the build and narrows the part of the
-   code that touches game data.
-6. **Configs where you expect them.** Profiles sit next to General and Overlay in
-   Misc, so the sidebar stays short.
+Upstream keeps match automation and the walker's buy/reload settings scattered
+through Misc. PASTA gives them their own page and adds a combat automation layer
+that upstream does not have.
 
-### What it gives up
+### New combat automation
 
-These are real tradeoffs, not hidden wins:
+- **Auto Crouch** holds duck only while an aim or trigger engagement is active
+  and the target is still reachable. It samples every hitbox from the camera and
+  stays down while any of them is visible. The gate needs 100 ms of confirmed
+  sight before ducking and 150 ms of confirmed occlusion before releasing, so a
+  single frame cannot start a crouch/release cycle. It releases on target death,
+  target loss or full cover, and fails open if collision data is unavailable
+  rather than silently disabling itself. This is deliberately less clever than
+  judging how much of the target the crouch exposes: the old approach stood the
+  player up mid-fight whenever the lower angle looked worse.
+- **Auto Health Shot** waits until health is below a threshold, no damage has
+  been taken for a configurable window, no enemy is within a configurable
+  distance, and combat is not aiming or firing. It then presses the draw bind,
+  waits 600 ms for the deploy animation, holds primary attack until the syringe
+  is consumed, and restores the primary or sidearm. Draw and restore attempts are
+  bounded, failures go on a five-second cooldown, and an optional debug overlay
+  shows the exact blocking reason.
+- **Auto Knife** draws the knife inside 80–600 units, closes the distance and
+  secondary-attacks. It can require the target to be stationary, respects a
+  post-respawn grace period, and keeps the knife selected until the target dies
+  or leaves its leash so the firearm cannot win back the slot mid-chase.
+- **Auto Scope** taps secondary attack, verifies the scope is up, and after a
+  kill switches to the knife to leave the scope and back to the primary for the
+  next target.
+- **Auto Bonus Weapon** taps the pickup key on a configurable interval, and
+  pauses while the health shot owns the weapon slot.
 
-- No Lua scripts or the Web Radar, so there is no script ecosystem and no
-  browser radar.
-- No grenade lineups, grenade aim assist or trajectory preview.
-- No Bunny Hop or Edge Jump; Auto Stop is still available for the trigger.
-- A fixed feature set is not an upgrade for someone who relies on any of the
-  removed modules.
+### Automation that already existed upstream
 
-Like any external assist, PASTA offers no anti-cheat guarantee. Valve's
-detection systems change independently of this project; use it at your own risk.
+Auto Accept, Auto Rejoin, Auto Disconnect, Auto Buy and Auto Reload are Vesta
+features. PASTA surfaces them together and keeps the buy preset/item editor
+(buy codes, side, money rules, one-random-item) on the same page rather than
+inside the walker.
 
-## Quick start
+## Walk Bot moves out of Misc
 
-1. Start Counter-Strike 2.
-2. Run `vesta.exe` (the binary keeps the upstream internal name).
-3. Press `Insert` to open the menu. Press `End` to exit PASTA.
+Upstream's Walk Bot is a tab inside Misc. PASTA promotes it to its own sidebar
+page and makes Automation a child of it, with the row animated in and out.
 
-If those keys clash with something, change them in
-`%TEMP%\vesta\configs\hotkeys.cfg` and restart. The menu and exit keys can also
-be changed in the first-run guide or in **Misc → General**.
+The routing engine is unchanged. The fork adds controls that upstream does not
+expose there:
 
-## Build
+- **Rear Defense** turns onto an enemy behind the player and engages with its own
+  distance, FOV, smoothing, hitbox and weapon settings.
+- **Spray Mode** adds burst count and burst cooldown on top of the trigger-based
+  autofire.
+- **Auto Scope** and **Auto Knife** work through the walker's engagement state
+  rather than as separate tools.
+- **Route Display** exposes route colour/thickness and navigation-mesh drawing,
+  with recordings kept per map and side under `%TEMP%\vesta\walkbot`.
 
-Requirements:
+Own Aim, Autofire and React To Hits remain the upstream walker features.
 
-- Windows 10/11 x64.
-- Visual Studio 2022 with **Desktop development with C++**.
-- CMake 3.20+ and Git.
+## Smaller surface
 
-Release build:
+The fork removes three whole feature areas rather than hiding them:
+
+- **Lua and Web Radar.** The runtime, sandbox, scripts page, API docs, bundled
+  radar and its browser tunnel are gone. Nothing can load third-party code into
+  the process, and Lua 5.4 is no longer a dependency.
+- **Grenades.** Nade Helper, grenade aim assist and trajectory preview are gone.
+  Radar projectile paths remain because the radar still uses them.
+- **Movement.** Bunny Hop and Edge Jump are gone; Auto Stop stays on the
+  Triggerbot page.
+
+Together that removes 60 files and about 16,000 lines. The practical benefit is
+not a benchmark: it is less code that can break after a CS2 update, one fewer
+runtime dependency, and no script-trust boundary to reason about.
+
+## What it gives up
+
+- No Lua scripts or browser radar.
+- No grenade lineups or trajectory preview.
+- No Bunny Hop or Edge Jump.
+- A fixed feature set is not an upgrade for anyone who relies on those.
+
+Like any external assist, PASTA makes no anti-cheat guarantee. Valve's detection
+systems change independently of this project; use it at your own risk.
+
+## Build and run
+
+Requirements: Windows 10/11 x64, Visual Studio 2022 with **Desktop development
+with C++**, CMake 3.20+ and Git.
 
 ```powershell
 cmake --preset release
 cmake --build --preset release --parallel
 ```
 
-The executable is written to `build/bin/vesta.exe`. CMake downloads the pinned
-third-party dependencies during the first configure; the repository vendors
-none of them. Dear ImGui is verified against its pinned commit at configure
-time.
+The executable is written to `build/bin/vesta.exe`; the internal name is kept for
+config and data compatibility. Start Counter-Strike 2, run the executable, press
+`Insert` for the menu and `End` to exit. Change those keys in
+`%TEMP%\vesta\configs\hotkeys.cfg` and restart if they clash. Debug builds use
+the `debug` preset; close the running executable before linking.
 
-Local debug build on this machine (Visual Studio 18 preset, reuses
-`build/debug`):
+## Data
 
-```bash
-CMAKE="/c/Program Files/Microsoft Visual Studio/18/Community/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/bin/cmake.exe"
-"$CMAKE" --preset debug-local
-"$CMAKE" --build --preset debug-local --target vesta -- -m
-```
+- `%TEMP%\vesta\configs\current.cfg` — live settings cache.
+- `%TEMP%\vesta\configs\hotkeys.cfg` — menu and exit keys.
+- `%TEMP%\vesta\logs`, `cache`, `nav` — diagnostics, parsed data and nav meshes.
+- `%TEMP%\vesta\walkbot\<map>\<side>\*.route` — recorded routes.
+- Named configs: the folder in `HKCU\Software\Vesta\ConfigFolder` (default
+  `Documents\VESTA`). **Misc → Configs** loads and saves them.
 
-Use `-m`, not `/m`, in Git Bash: MSYS rewrites `/m` to `M:/`. Close `vesta.exe`
-before linking, or the link fails with `LNK1168`.
+Edit `current.cfg` only while PASTA is closed; the running process rewrites it.
 
-## Data and configuration
-
-PASTA keeps its runtime data outside the repository, in `%TEMP%\vesta`:
-
-| Path | Contents |
-| --- | --- |
-| `configs/current.cfg` | Live settings cache, written by the running app |
-| `configs/hotkeys.cfg` | Menu and exit keys |
-| `logs/` | Logs and the crash journal |
-| `cache/` | Parsed game and map data |
-| `nav/` | Navigation-mesh caches |
-| `walkbot/<map>/<side>/*.route` | Recorded Walk Bot routes |
-
-Named configs live in the folder stored in
-`HKCU\Software\Vesta\ConfigFolder` (by default `Documents\VESTA`). Loading a
-named config copies it into the live cache; saving writes the live settings back
-to the named file. The config format is unchanged from Vesta, so existing
-profiles load, but settings for removed modules have no matching controls.
-
-Edit the live cache only while `vesta.exe` is closed: the running process
-rewrites it when settings change.
-
-## Architecture
-
-The process is split into workers started in `src/app/runtime_session.cpp`:
-
-- **Game state** at 64 Hz, owning map and match transitions.
-- **Movement** at 1 ms active / 4 ms idle, running Auto Stop and the Walk Bot.
-- **Combat** at 250 Hz, running aim, ballistics and the trigger.
-- **Seed trigger**, **render/overlay** and **diagnostics** workers.
-
-The Walk Bot is the largest stateful subsystem. Its movement state is written
-only by `walk_bot_t::tick()` on the movement worker; the render thread may draw
-its route and cached navigation-mesh edges but never mutates movement state.
-Route data shared with the render thread is copied under `m_route_mutex` before
-drawing or planning. Configuration is immutable per snapshot: workers read a
-published `shared_ptr<const runtime_snapshot>` instead of the live settings.
-
-Input is owned and transition-based. Every held key is released on disable,
-death, reset or focus loss, and the menu, player input, aimbot and trigger take
-priority over automation.
-
-## Verification
-
-There is no unit-test target yet. Changes are verified with a compile and, when
-possible, a live run; compiling alone does not exercise gameplay behaviour. For
-runtime issues, include the contents of `%TEMP%\vesta\logs`, the active config
-and the map/scenario. The overlay and the game are separate windows, so visual
-problems need a screenshot or a short clip.
-
-## License and credit
+## Credit and license
 
 PASTA is a derivative of [Vesta](https://github.com/Read1dno/vesta) by Read1dno,
-used under the Apache License 2.0. The original copyright and attribution are
-retained in [`LICENSE`](LICENSE) and [`NOTICE`](NOTICE). Third-party components
-and their licenses are listed in
+under the Apache License 2.0. Copyright and attribution remain in
+[`LICENSE`](LICENSE) and [`NOTICE`](NOTICE); third-party licenses are in
 [`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md).
 
-The PASTA name and branding are local to this fork. Internal identifiers
-(`vesta.exe`, `%TEMP%\vesta`, `HKCU\Software\Vesta`) are kept for compatibility
-with existing configs and data directories.
+The PASTA branding is local to this fork. Internal names (`vesta.exe`,
+`%TEMP%\vesta`, `HKCU\Software\Vesta`) are kept for compatibility.
 
-This project is provided for educational and research purposes. You are
-responsible for complying with the terms of service of any software you use it
-with.
+Provided for educational and research purposes. You are responsible for
+complying with the terms of service of any software you use it with.
