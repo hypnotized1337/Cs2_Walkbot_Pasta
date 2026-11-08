@@ -43,7 +43,6 @@ locations locations::under(std::filesystem::path root)
     value.configs = value.root / L"configs";
     value.cache = value.root / L"cache";
     value.logs = value.root / L"logs";
-    value.lua = value.root / L"lua";
     value.mesh_cache = value.cache / L"chams";
     value.research_logs = value.logs / L"research";
     return value;

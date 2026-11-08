@@ -2,7 +2,6 @@
 #include <platform/windows/storage.hpp>
 #include <diagnostics/health.hpp>
 #include <ui/presentation.hpp>
-#include <scripting/runtime.hpp>
 #include <game/input/bindings.hpp>
 #include <config/hotkeys.hpp>
 #include <features/visuals/visuals.hpp>
@@ -86,8 +85,6 @@ void export_diagnostic_report()
     summary += readiness::name(geometry.cause);
     summary += " overlay=";
     summary += readiness::name(diagnostics::health().overlay.snapshot().value);
-    summary += " scripting=";
-    summary += readiness::name(diagnostics::health().scripting.snapshot().value);
     summary += system_summary();
     const auto result =
         diagnostics::export_report(diagnostics::default_logs_directory(), diagnostics::desktop_directory(), summary);
@@ -152,133 +149,6 @@ void draw_general_tab()
                            ImGui::TextColored(status_failed ? ImVec4{1.0f, 0.42f, 0.45f, 1.0f} : k_text_muted, "%s",
                                               render::localization::tr(status));
                    });
-}
-
-void draw_grenades_tab()
-{
-    auto& p = config::general_settings;
-    auto& n = p.m_nade_helper;
-    auto& assist = config::combat_settings.global.grenade_aim;
-    card_in_column(
-        "lineups", "LINEUP HELPER", 2, 0,
-        [&]
-        {
-            toggle_popup_row("Lineup Helper", n.enabled, 4,
-                             [&]
-                             {
-                                 settings_popup_row(
-                                     "Geometry", 5,
-                                     [&]
-                                     {
-                                         slider_row("Draw Distance", n.draw_distance, 200.0f, 4000.0f, "u", 10.0f);
-                                         slider_row("Marker Distance", n.stand_distance, 60.0f, 800.0f, "u", 5.0f);
-                                         slider_row("Stand Radius", n.stand_radius, 6.0f, 64.0f, "u", 1.0f);
-                                         slider_row("Release Radius", n.release_radius, 1.0f, 16.0f, "u", 0.5f);
-                                         slider_row("Height Tolerance", n.height_tolerance, 1.0f, 24.0f, "u", 0.5f);
-                                     });
-                                 settings_popup_row("Display", 2,
-                                                    [&]
-                                                    {
-                                                        toggle_row("Show Throw Type", n.show_action);
-                                                        toggle_row("Show Distance", n.show_distance);
-                                                    });
-                                 settings_popup_row("Plaque Style", 3,
-                                                    [&]
-                                                    {
-                                                        color_row("Background", n.plaque_background);
-                                                        color_row("Text", n.plaque_text);
-                                                        color_row("Accent", n.plaque_accent);
-                                                    });
-                                 settings_popup_row("Marker Style", 3,
-                                                    [&]
-                                                    {
-                                                        color_row("Stand Marker", n.stand_marker);
-                                                        color_row("Stand Marker Active", n.stand_marker_active);
-                                                        color_row("Aim Marker", n.aim_marker);
-                                                    });
-                             });
-            toggle_popup_row("Lineup Aim Assist", n.aim_assist, 3,
-                             [&]
-                             {
-                                 keybind_row("Aim Key", n.aim_key);
-                                 toggle_row("Auto Release", n.auto_release);
-                                 settings_popup_row("Aim Tuning", 3,
-                                                    [&]
-                                                    {
-                                                        slider_row("Smoothing", n.aim_smoothing, 1, 30);
-                                                        slider_row("Lock Threshold", n.aim_threshold, 0.05f, 3.0f,
-                                                                   "deg", 0.05f);
-                                                        slider_row("Settle Time", n.lock_time_ms, 0, 250, "ms");
-                                                    });
-                             });
-        });
-
-    card_in_column("grenade_assist", "GRENADE ASSIST", 1, 1,
-                   [&]
-                   {
-                       toggle_popup_row("Enemy Aim Assist", assist.enabled, 2,
-                                        [&]
-                                        {
-                                            keybind_row("Activation Key", assist.key);
-                                            settings_popup_row("Aim Tuning", 2,
-                                                               [&]
-                                                               {
-                                                                   slider_row("Target FOV", assist.fov, 1, 180);
-                                                                   slider_row("Smoothing", assist.smoothing, 1, 50);
-                                                               });
-                                        });
-                   });
-
-    card_in_column(
-        "trajectory", "TRAJECTORY", 1, 1,
-        [&]
-        {
-            toggle_popup_row(
-                "Trajectory Preview", p.m_grenades.enabled, 4,
-                [&]
-                {
-                    toggle_row("Local Prediction Only", p.m_grenades.local_only);
-                    settings_popup_row("Line Style", 3,
-                                       [&]
-                                       {
-                                           color_row("Line Color", p.m_grenades.color);
-                                           slider_row("Line Thickness", p.m_grenades.thickness, 0.5f, 8.0f, "px",
-                                                      0.25f);
-                                           toggle_popup_row("Bloom", p.m_grenades.bloom, 2,
-                                                            [&]
-                                                            {
-                                                                color_row("Bloom Color", p.m_grenades.bloom_color);
-                                                                slider_row("Bloom Radius", p.m_grenades.bloom_radius,
-                                                                           0.5f, 12.0f, "px", 0.5f);
-                                                            });
-                                       });
-                    toggle_popup_row("Bounce Points", p.m_grenades.show_bounces, 2,
-                                     [&]
-                                     {
-                                         color_row("Point Color", p.m_grenades.bounce_color);
-                                         slider_row("Point Size", p.m_grenades.bounce_size, 1.0f, 16.0f, "px", 0.5f);
-                                     });
-                    toggle_popup_row("End Point", p.m_grenades.show_endpoint, 2,
-                                     [&]
-                                     {
-                                         color_row("Point Color", p.m_grenades.endpoint_color);
-                                         slider_row("Point Size", p.m_grenades.endpoint_size, 2.0f, 24.0f, "px", 0.5f);
-                                     });
-                });
-        });
-}
-
-void draw_movement_tab()
-{
-    auto& p = config::general_settings;
-    card("movement", "MOVEMENT", 2,
-         [&]
-         {
-             toggle_popup_row("Enable Bunny Hop", p.m_bunny_hop.enabled, 1,
-                              [&] { keybind_row("Activation Key", p.m_bunny_hop.activation_key); });
-             toggle_popup_row("Enable Edge Jump", p.m_edge_jump.enabled, 1,
-                              [&] { keybind_row("Activation Key", p.m_edge_jump.activation_key); });
-         });
 }
 
 void draw_overlay_tab()
@@ -381,17 +251,18 @@ void draw_overlay_tab()
                    });
 }
 
-void draw_lua_tab()
+// Configs moved out of the sidebar into the Misc tab: the same library card, drawn beside General and Overlay.
+void draw_configs_tab()
 {
-    draw_script_library();
+    draw_config_library();
 }
+
 } // namespace
 
 void menu_t::draw_misc()
 {
-    static constexpr void (*tab_pages[])(){draw_general_tab, draw_overlay_tab, draw_movement_tab, draw_grenades_tab,
-                                           draw_lua_tab};
-    static constexpr const char* tabs[]{"General", "Overlay", "Movement", "Grenades", "Lua API"};
+    static constexpr void (*tab_pages[])(){draw_general_tab, draw_overlay_tab, draw_configs_tab};
+    static constexpr const char* tabs[]{"General", "Overlay", "Configs"};
     static_assert(std::size(tabs) == std::size(tab_pages));
     ImGui::SetCursorPos({24.0f, 24.0f});
     for (int i = 0; i < static_cast<int>(std::size(tabs)); ++i)

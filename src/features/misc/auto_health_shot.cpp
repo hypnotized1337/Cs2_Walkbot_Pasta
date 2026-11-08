@@ -1,10 +1,12 @@
 #include <stdafx.hpp>
 #include <features/misc/misc.hpp>
+#include <foundation/identity.hpp>
 #include <features/misc/walk_bot_logic.hpp>
 #include <features/aimbot/aimbot.hpp>
 #include <config/settings.hpp>
 #include <game/input/bindings.hpp>
 #include <game/input/action_state.hpp>
+#include <game/memory/bound_services.hpp>
 #include <game/state/constants.hpp>
 #include <game/state/services.hpp>
 #include <platform/windows/input.hpp>
@@ -56,6 +58,46 @@ constexpr std::uint16_t k_pistol_key{'2'};
         return false;
     const auto game = ::FindWindowW(nullptr, L"Counter-Strike 2");
     return game && ::GetAncestor(::GetForegroundWindow(), GA_ROOT) == game;
+}
+
+// The local player's position, read the way the walk bot's knife range reads it: pawn -> game scene node ->
+// m_vecAbsOrigin. The sampled player list cannot supply it: the world sampler collects only the *other* players, so
+// the local pawn is never in it and looking it up there always failed.
+[[nodiscard]] bool read_local_origin(foundation::vec3& origin)
+{
+    const auto pawn = game::local_player().pawn();
+    if (!pawn)
+        return false;
+    const auto& process = game::bound_memory().process;
+    const auto node = process.load<std::uintptr_t>(pawn + SCHEMA("C_BaseEntity", "m_pGameSceneNode"_id));
+    if (!node || !process.copy(node + SCHEMA("CGameSceneNode", "m_vecAbsOrigin"_id), &origin, sizeof(origin)))
+        return false;
+    return std::isfinite(origin.x) && std::isfinite(origin.y) && std::isfinite(origin.z);
+}
+
+// Distance from the local player to the nearest living enemy, or a negative value when there is none. The use waits
+// while an enemy is this close: drawing and injecting keep the hands and the weapon slot busy for well over a second,
+// which is the worst moment for someone to come round a corner. Teammates do not count, or a player moving with their
+// team could never use a health shot at all.
+[[nodiscard]] float nearest_enemy_distance()
+{
+    const auto players = game::world().players();
+    if (!players)
+        return -1.0f;
+    auto origin = foundation::vec3{};
+    if (!read_local_origin(origin))
+        return -1.0f;
+    const auto self = game::local_player().pawn();
+    auto nearest = -1.0f;
+    for (const auto& player : *players)
+    {
+        if (!player.pawn || player.pawn == self || player.health <= 0 || !game::local_player().is_enemy(player.team))
+            continue;
+        const auto distance = player.origin.distance(origin);
+        if (nearest < 0.0f || distance < nearest)
+            nearest = distance;
+    }
+    return nearest;
 }
 
 [[nodiscard]] bool send_binding(const game::input_binding& binding, const bool down)
@@ -170,6 +212,7 @@ void auto_health_shot_t::publish_debug(const block reason) noexcept
     m_debug_attempts.store(m_attempts, std::memory_order_relaxed);
     m_debug_attack.store(m_attack.pressed, std::memory_order_relaxed);
     m_debug_key.store(m_key.pressed || m_slot.pressed, std::memory_order_relaxed);
+    m_debug_near.store(static_cast<int>(std::lround(m_near_distance)), std::memory_order_relaxed);
     m_debug_next_ms.store(static_cast<int>(left), std::memory_order_relaxed);
 }
 
@@ -268,6 +311,7 @@ void auto_health_shot_t::tick()
 
     const auto threshold = std::clamp(cfg.health_shot_health, 1, 99);
     const auto damage_window = std::chrono::milliseconds(std::clamp(cfg.health_shot_damage_ms, 0, 15000));
+    const auto near_limit = static_cast<float>(std::clamp(cfg.health_shot_near_distance, 0, 2000));
     auto blocked = block::none;
 
     if (m_phase == phase::idle)
@@ -288,6 +332,13 @@ void auto_health_shot_t::tick()
         {
             m_damage_until = m_damage_at + damage_window;
             blocked = block::recent_damage;
+        }
+        // `near` is a legacy Windows macro, hence the longer name. A disabled gate asks for no distance at all.
+        else if (const auto near_distance = near_limit > 0.0f ? nearest_enemy_distance() : -1.0f;
+                 near_distance >= 0.0f && near_distance <= near_limit)
+        {
+            m_near_distance = near_distance;
+            blocked = block::player_near;
         }
         else if (const auto reason = combat_block(now); reason != block::none)
             blocked = reason;
@@ -473,7 +524,9 @@ void auto_health_shot_t::on_render(render::draw::draw_list& draw_list)
     const auto attack = m_debug_attack.load(std::memory_order_relaxed);
     const auto key_down = m_debug_key.load(std::memory_order_relaxed);
     const auto next_ms = m_debug_next_ms.load(std::memory_order_relaxed);
+    const auto nearest = m_debug_near.load(std::memory_order_relaxed);
     const auto threshold = std::clamp(cfg.health_shot_health, 1, 99);
+    const auto near_limit = static_cast<float>(std::clamp(cfg.health_shot_near_distance, 0, 2000));
 
     const char* phase_name = "IDLE";
     switch (current_phase)
@@ -511,6 +564,9 @@ void auto_health_shot_t::on_render(render::draw::draw_list& draw_list)
             break;
         case block::recent_damage:
             status = std::format("recent damage, wait {:.1f}s", static_cast<float>(next_ms) / 1000.0f);
+            break;
+        case block::player_near:
+            status = std::format("enemy {:.0f} u away (limit {:.0f} u)", static_cast<float>(nearest), near_limit);
             break;
         case block::aiming:
             status = "aimbot or trigger engaged";
@@ -553,7 +609,9 @@ void auto_health_shot_t::on_render(render::draw::draw_list& draw_list)
 
     const std::array<std::string, 4> lines{
         std::format("AUTO HEALTH SHOT  [{}]", phase_name),
-        std::format("HP {}  below {}  bind {}", health, threshold, std::clamp(cfg.health_shot_key, 0, 255)),
+        std::format("HP {}  below {}  bind {}  no enemy within {}", health, threshold,
+                    std::clamp(cfg.health_shot_key, 0, 255),
+                    near_limit > 0.0f ? std::format("{:.0f} u", near_limit) : std::string("off")),
         status,
         std::format("syringe {}  lmb {}  key {}  presses {}/{}", syringe ? "YES" : "NO", attack ? "DOWN" : "up",
                     key_down ? "DOWN" : "up", attempts, k_draw_attempts),

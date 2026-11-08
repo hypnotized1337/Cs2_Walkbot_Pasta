@@ -1,5 +1,4 @@
 #include <stdafx.hpp>
-#include <scripting/runtime.hpp>
 #include <game/input/bindings.hpp>
 #include <config/hotkeys.hpp>
 #include <features/visuals/visuals.hpp>

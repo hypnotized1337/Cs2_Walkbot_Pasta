@@ -35,7 +35,6 @@ private:
     void draw_visuals();
     void draw_walk_bot();
     void draw_misc();
-    void draw_configs();
     void reset_content_animation();
 
     std::atomic<bool> m_open{};
@@ -43,9 +42,9 @@ private:
     bool m_open_pending{};
     HWND m_hwnd{};
     int m_page{};
-    // Automation is a child of Walk Bot, revealed by selecting its parent rather than shown as a top-level tab on a
-    // fresh menu.
-    bool m_automation_unlocked{};
+    // Automation is a child of Walk Bot. The reveal is animated: it glides out when the Walk Bot section is selected
+    // and retracts when the user leaves it.
+    float m_automation_reveal{};
     int m_weapon_group{-1};
     int m_visual_group{};
     int m_misc_group{};

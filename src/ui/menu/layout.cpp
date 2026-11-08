@@ -1,6 +1,5 @@
 #include <stdafx.hpp>
 #include <render/presentation.hpp>
-#include <scripting/runtime.hpp>
 #include <game/input/bindings.hpp>
 #include <config/hotkeys.hpp>
 #include <features/visuals/visuals.hpp>
@@ -741,7 +740,7 @@ void draw_nav_icon(ImDrawList* draw, int icon, ImVec2 center, ImU32 color)
     }
 }
 
-bool nav_button(const char* label, bool active, int icon, const float width)
+bool nav_button(const char* label, bool active, int icon, const float width, const float alpha)
 {
     ImGui::InvisibleButton(label, {width, 48.0f});
     const auto clicked = ImGui::IsItemClicked();
@@ -755,11 +754,14 @@ bool nav_button(const char* label, bool active, int icon, const float width)
     auto* draw = ImGui::GetWindowDrawList();
     if (active_t > 0.01f)
         soft_shadow(draw, min, max, 14.0f, {0.0f, 5.0f}, 10.0f, {k_accent.x, k_accent.y, k_accent.z, 1.0f},
-                    active_t * 0.70f);
+                    active_t * 0.70f * alpha);
     const auto idle = ImVec4{k_bg_hover.x, k_bg_hover.y, k_bg_hover.z, k_bg_hover.w * hover_t};
-    const auto background = mix(idle, k_accent, active_t);
+    auto background = mix(idle, k_accent, active_t);
+    background.w *= alpha;
     draw->AddRectFilled(min, max, packed(background), 14.0f);
-    const auto color = packed(mix(k_text_muted, ImVec4{1, 1, 1, 1}, std::max(hover_t, active_t)));
+    auto ink = mix(k_text_muted, ImVec4{1, 1, 1, 1}, std::max(hover_t, active_t));
+    ink.w *= alpha;
+    const auto color = packed(ink);
     draw_nav_icon(draw, icon, {min.x + 27.0f, min.y + 24.0f}, color);
     draw->AddText({min.x + 50.0f, min.y + (48.0f - ImGui::GetTextLineHeight()) * 0.5f}, color,
                   render::localization::tr(label));

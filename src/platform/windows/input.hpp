@@ -131,7 +131,6 @@ public:
     enum class gate_owner : std::uint8_t
     {
         auto_stop,
-        nade_helper,
         walk_bot,
         count
     };

@@ -228,14 +228,6 @@ struct combat_profile
         rcs_settings aimbot_rcs{};
         fov_settings aimbot_fov_config{};
 
-        struct grenade_aim_config
-        {
-            bool enabled{false};
-            int key{0x05}; // Mouse4
-            int fov{30};
-            int smoothing{10};
-        } grenade_aim{};
-
         bool triggerbot_enabled{true};
         int triggerbot_key{0x43};
         int triggerbot_activation_mode{activation::hold};

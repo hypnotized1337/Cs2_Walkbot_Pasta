@@ -41,7 +41,6 @@ std::atomic<std::uint64_t> g_game_iter{0};
 
 [[nodiscard]] bool shared_ballistics_requested()
 {
-    const auto key_down = [](const int key) { return key > 0 && (::GetAsyncKeyState(key) & 0x8000) != 0; };
     const auto snapshot = config::get_runtime_snapshot();
     if (!snapshot)
         return false;
@@ -58,7 +57,7 @@ std::atomic<std::uint64_t> g_game_iter{0};
     const auto& visuals = snapshot->visual;
     const auto& misc = snapshot->general;
     if (misc.m_bullet_tracers.enabled || misc.m_hitmarker.enabled || misc.m_hitsound.enabled ||
-        misc.m_hitsound.show_damage || misc.m_grenades.enabled ||
+        misc.m_hitsound.show_damage ||
         (visuals.m_crosshair.enabled && visuals.m_crosshair.penetration_enabled))
     {
         return true;
@@ -80,8 +79,7 @@ std::atomic<std::uint64_t> g_game_iter{0};
     {
         return true;
     }
-    const auto& grenade = snapshot->combat.global.grenade_aim;
-    return grenade.enabled && key_down(grenade.key);
+    return false;
 }
 
 } // namespace
@@ -280,10 +278,6 @@ void game(control control)
                 game::world().run(app::context().menu.is_open());
             }
             {
-                VESTA_PERF_SCOPE(grenade_prediction_tick);
-                features::visuals::grenade_prediction().tick();
-            }
-            {
                 VESTA_PERF_SCOPE(bullet_feedback_tick);
                 features::visuals::bullet_impacts().tick();
             }
@@ -316,8 +310,7 @@ void game(control control)
 
                         g_game_step.store(5, std::memory_order_relaxed);
 
-                        features::visuals::grenade_prediction().reset();
-                        features::visuals::bullet_impacts().reset();
+                                features::visuals::bullet_impacts().reset();
                         map_loader.request(current_map);
                     }
                 }
@@ -358,7 +351,6 @@ void game(control control)
                 game::level().publish({});
                 features::misc::walk_bot().request_reset();
                 features::misc::match_flow().request_reset();
-                features::visuals::grenade_prediction().reset();
                 features::visuals::bullet_impacts().reset();
                 map_loader.request({});
             }
@@ -465,10 +457,6 @@ void combat(control control)
                 VESTA_PERF_SCOPE(auto_bonus_tick);
                 features::misc::auto_bonus().tick();
             }
-            {
-                VESTA_PERF_SCOPE(grenade_aim_tick);
-                features::aimbot::grenade_aim().tick();
-            }
         }
         else
         {
@@ -504,10 +492,6 @@ void movement(control control)
         {
             VESTA_PERF_SCOPE(movement_loop);
             {
-                VESTA_PERF_SCOPE(bhop_tick);
-                features::misc::bhop().tick();
-            }
-            {
                 VESTA_PERF_SCOPE(auto_stop_tick);
                 features::misc::auto_stop().tick();
             }
@@ -515,27 +499,9 @@ void movement(control control)
         }
         const auto snapshot = config::get_runtime_snapshot();
         const auto active =
-            snapshot && (snapshot->general.m_bunny_hop.enabled || snapshot->general.m_edge_jump.enabled ||
-                         snapshot->general.m_auto_stop.enabled || snapshot->general.m_walk_bot.enabled ||
+            snapshot && (snapshot->general.m_auto_stop.enabled || snapshot->general.m_walk_bot.enabled ||
                          features::misc::auto_stop().active());
         control.sleep_for(active ? active_interval : idle_interval);
-    }
-}
-
-void nade_helper(control control)
-{
-    constexpr auto active_interval = std::chrono::milliseconds(1);
-    constexpr auto idle_interval = std::chrono::milliseconds(8);
-    ::SetThreadPriority(::GetCurrentThread(), THREAD_PRIORITY_NORMAL);
-
-    while (!control.stopping())
-    {
-        {
-            VESTA_PERF_SCOPE(nade_helper_tick);
-            features::misc::nade_helper().tick();
-        }
-        const auto snapshot = config::get_runtime_snapshot();
-        control.sleep_for(snapshot && snapshot->general.m_nade_helper.enabled ? active_interval : idle_interval);
     }
 }
 

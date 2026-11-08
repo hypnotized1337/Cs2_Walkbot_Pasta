@@ -1009,7 +1009,7 @@ void panels::draw_event_log(const bool interactive)
 
 
 // A system message plate in the top-left corner: always the same place and look, not configurable. It reports
-// what the player needs to know right now (map geometry missing, compatibility mode, Lua unavailable, previous
+// what the player needs to know right now (map geometry missing, compatibility mode, keyboard hook, previous
 // crash). Each plate can be closed with its cross while the menu is open; the overlay ignores the mouse otherwise.
 void panels::draw_system_notices(const bool interactive)
 {
@@ -1023,7 +1023,6 @@ void panels::draw_system_notices(const bool interactive)
     ui::notices::inputs input;
     input.geometry = health.geometry.snapshot();
     input.overlay = health.overlay.snapshot();
-    input.scripting = health.scripting.snapshot();
     input.previous_session_crashed = health.previous_session_crashed.load(std::memory_order_acquire);
     input.input_hook_failed = platform::windows::bound_input().hook_failed();
     if (input.geometry.value == state::loading)
@@ -1157,15 +1156,6 @@ void panels::draw_keybind_list(const bool interactive)
     }
     const auto key_down = [](int key) { return key > 0 && (::GetAsyncKeyState(key) & 0x8000) != 0; };
     const auto& misc = config::general_settings;
-    if (cfg.show_hold && global.grenade_aim.enabled && key_down(global.grenade_aim.key))
-        rows.push_back({"Grenade Aim  [hold]", k_wm_text});
-    if (cfg.show_hold && misc.m_bunny_hop.enabled && key_down(misc.m_bunny_hop.activation_key))
-        rows.push_back({"Bunny Hop  [hold]", k_wm_text});
-    if (cfg.show_hold && misc.m_edge_jump.enabled && key_down(misc.m_edge_jump.activation_key))
-        rows.push_back({"Edge Jump  [hold]", k_wm_text});
-    if (cfg.show_hold && misc.m_nade_helper.enabled && misc.m_nade_helper.aim_assist &&
-        key_down(misc.m_nade_helper.aim_key))
-        rows.push_back({"Nade Helper  [hold]", k_wm_text});
     if (cfg.show_hold && misc.m_auto_stop.enabled && features::misc::auto_stop().active())
         rows.push_back({"Auto Stop  [active]", k_wm_text});
     if (cfg.show_always && config::visual_settings.m_no_flash.enabled)

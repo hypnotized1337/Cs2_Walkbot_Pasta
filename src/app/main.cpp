@@ -19,7 +19,6 @@
 #include <app/diagnostic_reports.hpp>
 #include <simulation/shot_trace.hpp>
 #include <app/trace_session.hpp>
-#include <scripting/runtime.hpp>
 
 namespace
 {
@@ -158,20 +157,6 @@ int run(int argc, char** argv)
         }
         // A fresh installation shows the in-game guide once; a returning user is not greeted again.
         config::first_run::evaluate(profile_existed, platform::windows::runtime_storage::paths().configs);
-        diagnostics::emit(diagnostics::event::startup_scripting_begin);
-        if (!session.initialize_scripting())
-        {
-            app::context().diagnostics.warning("Lua runtime storage could not be initialized; scripting is disabled.");
-            diagnostics::emit(diagnostics::event::startup_scripting_disabled, diagnostics::severity::warning);
-            diagnostics::health().scripting.publish(1, diagnostics::readiness::state::error,
-                                                    diagnostics::readiness::reason::scripting_storage_failed);
-        }
-
-        else
-        {
-            diagnostics::health().scripting.publish(1, diagnostics::readiness::state::ready);
-            diagnostics::emit(diagnostics::event::startup_scripting_ready);
-        }
         config::publish_runtime_snapshot();
         session.initialize_trace();
 

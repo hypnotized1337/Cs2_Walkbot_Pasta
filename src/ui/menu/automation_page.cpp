@@ -18,6 +18,7 @@ void menu_t::draw_automation()
     using walk_settings = config::general_profile::walk_bot;
     walk.health_shot_health = std::clamp(walk.health_shot_health, 1, 99);
     walk.health_shot_damage_ms = std::clamp(walk.health_shot_damage_ms, 0, 15000);
+    walk.health_shot_near_distance = std::clamp(walk.health_shot_near_distance, 0, 2000);
     walk.buy_edit = std::clamp(walk.buy_edit, 0, static_cast<int>(walk_settings::buy_mode_count) - 1);
     auto& preset = walk.buy_presets[static_cast<std::size_t>(walk.buy_edit)];
     preset.count = std::clamp(preset.count, 0, walk_settings::k_buy_items);
@@ -118,9 +119,9 @@ void menu_t::draw_automation()
         "automation_combat", "COMBAT AUTOMATION", 6, 1,
         [&]
         {
-            toggle_row("Auto Crouch (Beta)", p.auto_crouch);
+            toggle_row("Auto Crouch", p.auto_crouch);
             toggle_row("Auto Scope", walk.auto_scope);
-            toggle_popup_row("Auto Bonus Weapon (Beta)", p.m_auto_bonus.enabled, 2,
+            toggle_popup_row("Auto Bonus Weapon", p.m_auto_bonus.enabled, 2,
                              [&]
                              {
                                  keybind_row("Pickup Key", p.m_auto_bonus.key, true, false);
@@ -134,11 +135,12 @@ void menu_t::draw_automation()
                                  toggle_row("Knife Only When Target Is AFK", walk.auto_knife_afk_only);
                                  toggle_row("Show Eligibility Debug", walk.auto_knife_debug);
                              });
-            toggle_popup_row("Auto Health Shot", walk.auto_health_shot, 4,
+            toggle_popup_row("Auto Health Shot", walk.auto_health_shot, 5,
                              [&]
                              {
                                  slider_row("Health Below", walk.health_shot_health, 1, 99);
                                  slider_row("No Damage For", walk.health_shot_damage_ms, 0, 15000, " ms");
+                                 slider_row("No Enemy Within", walk.health_shot_near_distance, 0, 2000, " u");
                                  keybind_row("Use Bind", walk.health_shot_key, true);
                                  toggle_row("Show Debug", walk.health_shot_debug);
                              });

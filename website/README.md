@@ -3,10 +3,8 @@
 Static GitHub Pages landing for Vesta. It intentionally has no runtime backend,
 analytics, cookies or third-party JavaScript.
 
-The landing includes downloadable, valid Vesta profiles and the production Web
-Radar frontend running against a captured read-only snapshot. It also builds
-`docs/api_docs` into a responsive HTML documentation site. No preview calls an
-external service.
+The landing includes downloadable, valid Vesta profiles. It has no runtime
+backend and calls no external service.
 
 ## Configure links
 
@@ -18,13 +16,11 @@ Edit `site-config.js` before publishing:
 ## Build
 
 Run `npm run build` in this directory. The resulting `dist` folder contains the
-entire static site. The build always copies the canonical portable Web Radar
-script from `scripts/Vesta Web Radar.lua`, generates the three config presets
-from the current root `legit.cfg`, and renders the Lua API Markdown files.
+entire static site. The build generates the three config presets from the
+current root `legit.cfg`.
 
 Run `npm run serve` and open `http://127.0.0.1:4173/` for local preview. Do not
-open `index.html` directly: Firefox correctly blocks the radar demo's JSON
-requests from a `file://` origin.
+open `index.html` directly.
 
 The repository workflow publishes `website/dist` to GitHub Pages after changes
-to the landing page or Web Radar script reach `main`.
+to the landing page reach `main`.

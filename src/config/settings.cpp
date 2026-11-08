@@ -89,10 +89,6 @@ static void to_json(json& j, const combat_profile::global_settings& g)
              {"aimbot_prediction", g.aimbot_prediction},
              {"aimbot_rcs", g.aimbot_rcs},
              {"aimbot_fov_config", g.aimbot_fov_config},
-             {"grenade_aim_enabled", g.grenade_aim.enabled},
-             {"grenade_aim_key", g.grenade_aim.key},
-             {"grenade_aim_fov", g.grenade_aim.fov},
-             {"grenade_aim_smoothing", g.grenade_aim.smoothing},
              {"triggerbot_enabled", g.triggerbot_enabled},
              {"triggerbot_key", g.triggerbot_key},
              {"triggerbot_activation_mode", g.triggerbot_activation_mode},
@@ -173,10 +169,6 @@ static void from_json(const json& j, combat_profile::global_settings& g)
         j.at("aimbot_fov_config").get_to(g.aimbot_fov_config);
     else
         g.aimbot_fov_config.far_fov = static_cast<float>(g.aimbot_fov);
-    read_field(j, "grenade_aim_enabled", g.grenade_aim.enabled);
-    read_field(j, "grenade_aim_key", g.grenade_aim.key);
-    read_field(j, "grenade_aim_fov", g.grenade_aim.fov);
-    read_field(j, "grenade_aim_smoothing", g.grenade_aim.smoothing);
     read_field(j, "triggerbot_enabled", g.triggerbot_enabled);
     read_field(j, "triggerbot_key", g.triggerbot_key);
     read_field(j, "triggerbot_activation_mode", g.triggerbot_activation_mode);
@@ -1750,109 +1742,6 @@ static void from_json(const json& j, general_profile::bomb_info& b)
     }
 }
 
-static void to_json(json& j, const general_profile::grenades& g)
-{
-    j = json{{"enabled", g.enabled},
-             {"local_only", g.local_only},
-             {"color", g.color},
-             {"thickness", g.thickness},
-             {"bloom", g.bloom},
-             {"bloom_color", g.bloom_color},
-             {"bloom_radius", g.bloom_radius},
-             {"show_bounces", g.show_bounces},
-             {"bounce_color", g.bounce_color},
-             {"bounce_size", g.bounce_size},
-             {"show_endpoint", g.show_endpoint},
-             {"endpoint_color", g.endpoint_color},
-             {"endpoint_size", g.endpoint_size}};
-}
-
-static void from_json(const json& j, general_profile::grenades& g)
-{
-    read_field(j, "enabled", g.enabled);
-    read_field(j, "local_only", g.local_only);
-    read_field(j, "color", g.color);
-    read_field(j, "thickness", g.thickness);
-    read_field(j, "bloom", g.bloom);
-    read_field(j, "bloom_color", g.bloom_color);
-    read_field(j, "bloom_radius", g.bloom_radius);
-    read_field(j, "show_bounces", g.show_bounces);
-    read_field(j, "bounce_color", g.bounce_color);
-    read_field(j, "bounce_size", g.bounce_size);
-    read_field(j, "show_endpoint", g.show_endpoint);
-    read_field(j, "endpoint_color", g.endpoint_color);
-    read_field(j, "endpoint_size", g.endpoint_size);
-    g.thickness = std::clamp(g.thickness, 0.5f, 8.0f);
-    g.bloom_radius = std::clamp(g.bloom_radius, 0.5f, 12.0f);
-    g.bounce_size = std::clamp(g.bounce_size, 1.0f, 16.0f);
-    g.endpoint_size = std::clamp(g.endpoint_size, 2.0f, 24.0f);
-}
-
-static void to_json(json& j, const general_profile::nade_helper& n)
-{
-    j = json{{"enabled", n.enabled},
-             {"draw_distance", n.draw_distance},
-             {"stand_distance", n.stand_distance},
-             {"stand_radius", n.stand_radius},
-             {"release_radius", n.release_radius},
-             {"height_tolerance", n.height_tolerance},
-             {"show_action", n.show_action},
-             {"show_distance", n.show_distance},
-             {"plaque_background", n.plaque_background},
-             {"plaque_text", n.plaque_text},
-             {"plaque_accent", n.plaque_accent},
-             {"stand_marker", n.stand_marker},
-             {"stand_marker_active", n.stand_marker_active},
-             {"aim_marker", n.aim_marker},
-             {"aim_assist", n.aim_assist},
-             {"auto_release", n.auto_release},
-             {"aim_key", n.aim_key},
-             {"aim_smoothing", n.aim_smoothing},
-             {"aim_threshold", n.aim_threshold},
-             {"lock_time_ms", n.lock_time_ms}};
-}
-
-static void from_json(const json& j, general_profile::nade_helper& n)
-{
-    read_field(j, "enabled", n.enabled);
-    read_field(j, "draw_distance", n.draw_distance);
-    read_field(j, "stand_distance", n.stand_distance);
-    read_field(j, "stand_radius", n.stand_radius);
-    read_field(j, "release_radius", n.release_radius);
-    read_field(j, "height_tolerance", n.height_tolerance);
-    read_field(j, "show_action", n.show_action);
-    read_field(j, "show_distance", n.show_distance);
-    read_field(j, "plaque_background", n.plaque_background);
-    read_field(j, "plaque_text", n.plaque_text);
-    read_field(j, "plaque_accent", n.plaque_accent);
-    read_field(j, "stand_marker", n.stand_marker);
-    read_field(j, "stand_marker_active", n.stand_marker_active);
-    read_field(j, "aim_marker", n.aim_marker);
-    read_field(j, "aim_assist", n.aim_assist);
-    read_field(j, "auto_release", n.auto_release);
-    read_field(j, "aim_key", n.aim_key);
-    read_field(j, "aim_smoothing", n.aim_smoothing);
-    read_field(j, "aim_threshold", n.aim_threshold);
-    read_field(j, "lock_time_ms", n.lock_time_ms);
-    n.release_radius = std::clamp(n.release_radius, 1.0f, 16.0f);
-    n.height_tolerance = std::clamp(n.height_tolerance, 1.0f, 24.0f);
-    n.lock_time_ms = std::clamp(n.lock_time_ms, 0, 250);
-}
-
-static void to_json(json& j, const general_profile::bunny_hop& b)
-{
-    j = json{{"enabled", b.enabled}, {"activation_key", b.activation_key}};
-}
-
-static void from_json(const json& j, general_profile::bunny_hop& b)
-{
-    read_field(j, "enabled", b.enabled);
-    if (j.contains("activation_key"))
-        j.at("activation_key").get_to(b.activation_key);
-    else if (j.contains("key"))
-        j.at("key").get_to(b.activation_key);
-}
-
 static json buy_presets_json(const general_profile::walk_bot& w)
 {
     auto presets = json::array();
@@ -1950,6 +1839,7 @@ static void to_json(json& j, const general_profile::walk_bot& w)
              {"auto_health_shot", w.auto_health_shot},
              {"health_shot_health", w.health_shot_health},
              {"health_shot_damage_ms", w.health_shot_damage_ms},
+             {"health_shot_near_distance", w.health_shot_near_distance},
              {"health_shot_key", w.health_shot_key},
              {"health_shot_debug", w.health_shot_debug},
              {"auto_rejoin", w.auto_rejoin},
@@ -2035,6 +1925,8 @@ static void from_json(const json& j, general_profile::walk_bot& w)
     w.health_shot_health = std::clamp(w.health_shot_health, 1, 99);
     read_field(j, "health_shot_damage_ms", w.health_shot_damage_ms);
     w.health_shot_damage_ms = std::clamp(w.health_shot_damage_ms, 0, 15000);
+    read_field(j, "health_shot_near_distance", w.health_shot_near_distance);
+    w.health_shot_near_distance = std::clamp(w.health_shot_near_distance, 0, 2000);
     read_field(j, "health_shot_key", w.health_shot_key);
     w.health_shot_key = std::clamp(w.health_shot_key, 0, 255);
     read_field(j, "health_shot_debug", w.health_shot_debug);
@@ -2059,20 +1951,6 @@ static void from_json(const json& j, general_profile::walk_bot& w)
     read_field(j, "mesh_color", w.mesh_color);
     read_field(j, "mesh_distance", w.mesh_distance);
     w.mesh_distance = std::isfinite(w.mesh_distance) ? std::clamp(w.mesh_distance, 200.0f, 4000.0f) : 1400.0f;
-}
-
-static void to_json(json& j, const general_profile::edge_jump& e)
-{
-    j = json{{"enabled", e.enabled}, {"activation_key", e.activation_key}};
-}
-
-static void from_json(const json& j, general_profile::edge_jump& e)
-{
-    read_field(j, "enabled", e.enabled);
-    if (j.contains("activation_key"))
-        j.at("activation_key").get_to(e.activation_key);
-    else if (j.contains("key"))
-        j.at("key").get_to(e.activation_key);
 }
 
 static void to_json(json& j, const game_controls& b)
@@ -2137,8 +2015,7 @@ static void from_json(const json& j, general_profile::auto_bonus& a)
 
 static void to_json(json& j, const general_profile& m)
 {
-    j = json{{"m_grenades", m.m_grenades},
-             {"m_nade_helper", m.m_nade_helper},
+    j = json{
              {"m_bullet_tracers", m.m_bullet_tracers},
              {"m_hitmarker", m.m_hitmarker},
              {"m_hitsound", m.m_hitsound},
@@ -2147,8 +2024,6 @@ static void to_json(json& j, const general_profile& m)
              {"m_event_log", m.m_event_log},
              {"m_keybind_list", m.m_keybind_list},
              {"m_bomb_info", m.m_bomb_info},
-             {"m_bunny_hop", m.m_bunny_hop},
-             {"m_edge_jump", m.m_edge_jump},
              {"m_game_controls", m.m_game_controls},
              {"m_auto_stop", m.m_auto_stop},
              {"m_walk_bot", m.m_walk_bot},
@@ -2176,8 +2051,6 @@ static void to_json(json& j, const general_profile& m)
 
 static void from_json(const json& j, general_profile& m)
 {
-    read_field(j, "m_grenades", m.m_grenades);
-    read_field(j, "m_nade_helper", m.m_nade_helper);
     read_field(j, "m_bullet_tracers", m.m_bullet_tracers);
     read_field(j, "m_hitmarker", m.m_hitmarker);
     read_field(j, "m_hitsound", m.m_hitsound);
@@ -2186,8 +2059,6 @@ static void from_json(const json& j, general_profile& m)
     read_field(j, "m_event_log", m.m_event_log);
     read_field(j, "m_keybind_list", m.m_keybind_list);
     read_field(j, "m_bomb_info", m.m_bomb_info);
-    read_field(j, "m_bunny_hop", m.m_bunny_hop);
-    read_field(j, "m_edge_jump", m.m_edge_jump);
     read_field(j, "m_game_controls", m.m_game_controls);
     read_field(j, "m_auto_stop", m.m_auto_stop);
     read_field(j, "m_walk_bot", m.m_walk_bot);

@@ -10,12 +10,12 @@ namespace platform::windows::data_storage
 // work independently of MAX_PATH opt-in. Relative input stays relative/rejected
 // by migration validation. Normalize separators/dot components before prefixing.
 [[nodiscard]] std::filesystem::path extended_path(const std::filesystem::path& path);
-// The inverse, for paths shown to the user or handed to Lua scripts and other programs: many tools (Windows
+// The inverse, for paths shown to the user or handed to other programs: many tools (Windows
 // PowerShell's Join-Path among them) do not accept the \\?\ prefix.
 [[nodiscard]] std::filesystem::path plain_path(const std::filesystem::path& path);
 struct locations
 {
-    std::filesystem::path root, configs, cache, logs, lua, mesh_cache, research_logs;
+    std::filesystem::path root, configs, cache, logs, mesh_cache, research_logs;
     [[nodiscard]] static locations under(std::filesystem::path root);
 };
 struct resolved_locations

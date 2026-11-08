@@ -82,55 +82,6 @@ struct general_profile
         float damage_rise{30.0f};
     } m_hitsound{};
 
-    struct grenades
-    {
-        bool enabled{true};
-        bool local_only{false};
-        foundation::rgba color{255, 255, 255, 200};
-        float thickness{2.0f};
-        bool bloom{true};
-        foundation::rgba bloom_color{120, 170, 255, 58};
-        float bloom_radius{3.0f};
-        bool show_bounces{true};
-        foundation::rgba bounce_color{120, 170, 255, 235};
-        float bounce_size{4.0f};
-        bool show_endpoint{true};
-        foundation::rgba endpoint_color{255, 255, 255, 235};
-        float endpoint_size{8.0f};
-    } m_grenades{};
-
-    struct nade_helper
-    {
-        bool enabled{false};
-
-        float draw_distance{800.0f};
-        float stand_distance{220.0f};
-        float stand_radius{22.0f};
-        // Broad radius keeps the marker easy to acquire; automatic execution uses
-        // the tighter horizontal/vertical tolerances below.
-        float release_radius{6.0f};
-        float height_tolerance{8.0f};
-
-        bool show_action{true};
-        bool show_distance{true};
-
-        foundation::rgba plaque_background{12, 13, 18, 205};
-        foundation::rgba plaque_text{245, 245, 250, 255};
-        foundation::rgba plaque_accent{120, 170, 255, 255};
-        foundation::rgba stand_marker{120, 170, 255, 235};
-        foundation::rgba stand_marker_active{110, 235, 140, 245};
-        foundation::rgba aim_marker{245, 245, 250, 235};
-
-        bool aim_assist{true};
-        bool auto_release{true};
-        int aim_key{VK_XBUTTON2};
-        int aim_smoothing{18};
-        // Angular error (degrees) at which the aim counts as converged and the
-        // marker switches from "aim here" to "throw now".
-        float aim_threshold{0.35f};
-        int lock_time_ms{45};
-    } m_nade_helper{};
-
     struct watermark
     {
         bool enabled{true};
@@ -178,18 +129,6 @@ struct general_profile
     {
         screen_layout layout{40.0f, 200.0f};
     } m_bomb_info{};
-
-    struct bunny_hop
-    {
-        bool enabled{false};
-        int activation_key{VK_SPACE};
-    } m_bunny_hop{};
-
-    struct edge_jump
-    {
-        bool enabled{false};
-        int activation_key{VK_XBUTTON1};
-    } m_edge_jump{};
 
     // Walk bot (its own menu page): walks the player along routes over the map's navigation mesh by pressing the
     // movement keys and turning the view like a player, plus round and match automation around it.
@@ -291,10 +230,13 @@ struct general_profile
         // `health_shot_damage_ms` have passed since the last hit, while Auto Knife is idle and while the bot is not
         // aiming at or shooting anyone, the game bind that draws the health shot (use weapon_healthshot, X by default)
         // is pressed until the syringe is in hand, the primary attack is held for the injection, and a firearm is
-        // drawn again.
+        // drawn again. A use is not started while a living enemy is within `health_shot_near_distance` units.
         bool auto_health_shot{false};
         int health_shot_health{50}; // use the health shot below this health
         int health_shot_damage_ms{5000}; // wait this long after taking damage before using
+        // Hold the use while a living enemy is this close. 0 disables the gate. Drawing and injecting keep the hands
+        // and the weapon slot busy well past a second, which is the worst moment to have someone come round a corner.
+        int health_shot_near_distance{400};
         int health_shot_key{'X'};   // the game bind that draws the health shot
         bool health_shot_debug{false}; // draws the Auto Health Shot state on screen
 
@@ -336,7 +278,8 @@ struct general_profile
     } palette{};
 
     bool auto_accept{true};
-    // Beta automation: hold the game's duck bind while the aimbot is engaged with a live target.
+    // Hold the game's duck bind while the aimbot is engaged with a live target; the duck is lifted when that target
+// dies or breaks the sight line.
     bool auto_crouch{false};
     struct auto_bonus
     {
@@ -345,8 +288,6 @@ struct general_profile
         int interval_ms{1000};
     } m_auto_bonus{};
     bool obs_bypass{false};
-    // Lua runtime is local-only. The production binary exposes no network API;
-    // scripts may explicitly launch an external helper through the OS library.
     bool limit_fps{true};
     int fps_limit{240};
     bool use_gpu{true};

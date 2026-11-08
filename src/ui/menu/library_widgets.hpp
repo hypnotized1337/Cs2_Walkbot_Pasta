@@ -89,7 +89,6 @@ struct feedback
     }
 };
 
-// The config library page and the Lua page of the Misc tab.
+// The config library page of the Misc tab.
 void draw_config_library();
-void draw_script_library();
 } // namespace ui::menu::detail

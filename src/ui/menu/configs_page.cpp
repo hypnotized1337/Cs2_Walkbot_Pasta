@@ -335,19 +335,3 @@ void draw_config_library()
 }
 } // namespace ui::menu::detail
 
-namespace ui
-{
-using namespace ui::menu::detail;
-
-void menu_t::draw_configs()
-{
-    ImGui::SetCursorPos({14.0f, 24.0f});
-    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, {0.0f, 0.0f});
-    ImGui::BeginChild("##configs_cards", {682.0f, 612.0f}, false);
-    begin_cards("##configs_grid");
-    draw_config_library();
-    end_cards();
-    ImGui::EndChild();
-    ImGui::PopStyleVar();
-}
-} // namespace ui

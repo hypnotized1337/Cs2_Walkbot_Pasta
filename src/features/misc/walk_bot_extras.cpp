@@ -49,7 +49,7 @@ constexpr float k_eye = 64.0f;
 } // namespace
 
 // Reason codes (journal walkbot.idle): 1 no navigation mesh, 2 game not focused or a Vesta/chat input open, 3 local
-// pawn not readable, 4 movement owned by Auto Stop or the lineup helper, 5 no route from here, 6 a game menu or
+// pawn not readable, 4 movement owned by Auto Stop, 5 no route from here, 6 a game menu or
 // screen is open, 7 the player moves on their own, 8 recording, 9 fighting an enemy in sight.
 void walk_bot_t::note_idle(const std::uint32_t reason)
 {

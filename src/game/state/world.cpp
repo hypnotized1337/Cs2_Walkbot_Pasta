@@ -114,7 +114,6 @@ struct sampling_demand
 
 [[nodiscard]] sampling_demand current_sampling_demand(const bool menu_open)
 {
-    const auto key_down = [](const int key) { return key > 0 && (::GetAsyncKeyState(key) & 0x8000) != 0; };
     const auto snapshot = config::get_runtime_snapshot();
     if (!snapshot)
         return {};
@@ -125,23 +124,26 @@ struct sampling_demand
         (combat.aimbot.enabled &&
          config::combat_profile::activation_active(combat.aimbot.activation_mode, combat.aimbot.key)) ||
         (combat.triggerbot.enabled && !independent_seed &&
-         config::combat_profile::activation_active(combat.triggerbot.activation_mode, combat.triggerbot.key)) ||
-        (snapshot->combat.global.grenade_aim.enabled && key_down(snapshot->combat.global.grenade_aim.key));
+         config::combat_profile::activation_active(combat.triggerbot.activation_mode, combat.triggerbot.key));
     const auto& radar_cfg = snapshot->visual.m_radar;
     const auto radar_active = radar_cfg.active();
+
+    // Auto Health Shot waits while an enemy is close, so it needs the player list even when nothing else on screen
+    // does. With the gate at 0 the feature never looks at another player, so it asks for nothing.
+    const auto& automation_cfg = snapshot->general.m_walk_bot;
+    const auto health_shot_near = automation_cfg.auto_health_shot && automation_cfg.health_shot_near_distance > 0;
 
     const auto players = game::world().script_demand(game::script_data_demand::players) || menu_open ||
                          snapshot->visual.m_player.active() || snapshot->visual.m_chams.enabled || radar_active ||
                          snapshot->visual.m_sound.enabled || snapshot->general.m_bullet_tracers.enabled ||
                          snapshot->general.m_hitmarker.enabled || snapshot->general.m_hitsound.enabled ||
-                         snapshot->general.m_hitsound.show_damage || combat_players;
+                         snapshot->general.m_hitsound.show_damage || combat_players || health_shot_near;
     const auto items = game::world().script_demand(game::script_data_demand::items) || snapshot->visual.m_item.enabled;
     const auto projectiles =
         game::world().script_demand(game::script_data_demand::projectiles) || snapshot->visual.m_projectile.enabled ||
         snapshot->visual.m_no_smoke.enabled ||
         (radar_active && (snapshot->visual.m_radar.show_projectiles || snapshot->visual.m_radar.show_trajectories ||
                           snapshot->visual.m_radar.show_grenade_zones)) ||
-        snapshot->general.m_grenades.enabled ||
         (snapshot->visual.m_player.active() && snapshot->visual.m_player.m_legit_sync.enabled &&
          snapshot->visual.m_player.m_legit_sync.direct_visible) ||
         (combat.aimbot.enabled && combat.aimbot.checks.smoke) ||

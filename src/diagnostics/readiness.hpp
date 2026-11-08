@@ -25,7 +25,6 @@ enum class reason : std::uint8_t
     geometry_building,
     geometry_missing,
     geometry_failed,
-    scripting_storage_failed,
     overlay_band_unavailable,
     shutdown,
     geometry_partial
@@ -75,8 +74,6 @@ struct status
             return "geometry_missing";
         case reason::geometry_failed:
             return "geometry_failed";
-        case reason::scripting_storage_failed:
-            return "scripting_storage_failed";
         case reason::overlay_band_unavailable:
             return "overlay_band_unavailable";
         case reason::shutdown:

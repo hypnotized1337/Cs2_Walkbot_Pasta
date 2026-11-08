@@ -35,9 +35,6 @@ namespace diagnostics
     X(startup_schema_failed, "startup.schema.failed")                                                                  \
     X(startup_config_begin, "startup.config.begin")                                                                    \
     X(startup_cache_unavailable, "startup.cache.unavailable")                                                          \
-    X(startup_scripting_begin, "startup.scripting.begin")                                                              \
-    X(startup_scripting_ready, "startup.scripting.ready")                                                              \
-    X(startup_scripting_disabled, "startup.scripting.disabled")                                                        \
     X(startup_workers_begin, "startup.workers.begin")                                                                  \
     X(startup_workers_ready, "startup.workers.ready")                                                                  \
     X(runtime_worker_system_error, "runtime.worker.system_error")                                                      \
@@ -145,7 +142,6 @@ enum class subject : std::uint8_t
     game_state,
     movement,
     combat,
-    lineup,
     seed_trigger,
     watchdog,
     profile_timeout,

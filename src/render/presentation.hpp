@@ -8,7 +8,7 @@ struct ID3D11Device;
 
 namespace render
 {
-// What the user interface provides to the layers below it (features, scripting) without them depending on it:
+// What the user interface provides to the layers below it (features) without them depending on it:
 // its fonts, whether the player is using the menu, whether combat input is routed, its window and its device.
 // The UI implements it; the composition root binds the implementation once at start-up.
 class presentation

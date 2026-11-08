@@ -48,7 +48,7 @@ PowerShell:
   `*.cfg`. Loading a named config copies it into the live cache; saving writes the live settings to the named file.
 - Startup applies the embedded default profile, then overlays `current.cfg`. Missing or new keys inherit the
   embedded profile, which is why `configs/legit.cfg` matters.
-- Data root: `%TEMP%\vesta` (`configs`, `logs`, `cache`, `nav`, `lua`, `walkbot`).
+- Data root: `%TEMP%\vesta` (`configs`, `logs`, `cache`, `nav`, `walkbot`).
 - Walk-bot recordings: `%TEMP%\vesta\walkbot\<map>\<t|ct>\*.route`.
 - Logs/journal: `%TEMP%\vesta\logs`.
 - Trace, when `VESTA_SEED_TRACE_DIR` is set: `config-at-launch.json`, `schema.json`, `scene.jsonl` in its parent.
@@ -60,9 +60,9 @@ PowerShell:
 Workers are started in `src/app/runtime_session.cpp`; the loops are in `src/app/workers.cpp`:
 
 - game state: 64 Hz; owns map/match transitions and calls `walk_bot().request_reset()`.
-- movement: 1 ms active / 4 ms idle; runs bhop, auto-stop and `walk_bot().tick()`.
-- combat: 250 Hz; aim, grenade aim and ballistics.
-- nade helper; seed trigger; render thread (overlay); diagnostics; Lua worker.
+- movement: 1 ms active / 4 ms idle; runs auto-stop and `walk_bot().tick()`.
+- combat: 250 Hz; aim and ballistics.
+- seed trigger; render thread (overlay); diagnostics.
 
 Walk-bot invariants:
 

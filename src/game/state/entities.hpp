@@ -101,7 +101,7 @@ struct player_snapshot
     std::string model_path{};
     equipped_weapon_snapshot weapon{};
     // Complete owned-weapon list is sampled with the immutable player snapshot.
-    // Local Lua dashboards consume it; the ESP hot path still uses weapon above.
+    // The ESP hot path still uses weapon above.
     std::vector<std::string> loadout{};
     std::uint64_t steamid{};
     std::int32_t comp_rank{};

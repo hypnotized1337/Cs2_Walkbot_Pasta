@@ -1,13 +1,6 @@
 cmake_minimum_required(VERSION 3.20)
 project(vesta VERSION 1.2.3 LANGUAGES C CXX)
 
-# Lua (compiled as C) reports errors with longjmp through Vesta's C++ API functions. With /EHsc MSVC assumes that
-# extern "C" functions never throw and skips the destructors of those frames, leaving locks held and memory leaked;
-# /EHs keeps the unwind information so the longjmp destroys them like an exception would.
-if(MSVC)
-    string(REPLACE "/EHsc" "/EHs" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
-endif()
-
 # Dear ImGui, unmodified upstream v1.92.3, fetched at configure time into the dependency cache (build/_deps), not
 # kept in the source tree. The tag is only a convenient name: the commit it resolves to is verified below.
 include(FetchContent)
@@ -110,7 +103,6 @@ set(vesta_sources
     src/features/aimbot/aimbot_trigger.cpp
     src/features/aimbot/aimbot_internal.cpp
     src/features/aimbot/command_ring.cpp
-    src/features/aimbot/grenade_aim.cpp
     src/features/trigger/seed_trigger.cpp
     src/features/aimbot/seed_plan.cpp
     src/features/aimbot/seed_state.cpp
@@ -118,7 +110,6 @@ set(vesta_sources
     src/features/visuals/bullet_impacts.cpp
     src/features/visuals/crosshair.cpp
 	 src/features/visuals/event_log.cpp
-    src/features/visuals/grenade_prediction.cpp
 	src/features/visuals/hitsound.cpp
     src/features/visuals/item.cpp
     src/features/visuals/player.cpp
@@ -130,8 +121,6 @@ set(vesta_sources
     src/features/misc/auto_crouch.cpp
     src/features/misc/auto_health_shot.cpp
 	 src/features/misc/auto_stop.cpp
-    src/features/misc/bhop.cpp
-    src/features/misc/nade_helper.cpp
     src/features/misc/walk_bot.cpp
     src/features/misc/walk_bot_path.cpp
     src/features/misc/walk_bot_drive.cpp
@@ -165,7 +154,6 @@ set(vesta_sources
     src/ui/menu/misc_page.cpp
     src/ui/menu/walk_bot_page.cpp
     src/ui/menu/configs_page.cpp
-    src/ui/menu/scripts_page.cpp
     src/ui/menu/library_widgets.cpp
     src/ui/menu/guide_page.cpp
     src/platform/windows/open_folder.cpp
@@ -182,12 +170,6 @@ set(vesta_sources
     # system
     src/diagnostics/log.cpp
     src/diagnostics/performance.cpp
-
-    # local Lua scripting (no network API is linked into the product)
-    src/scripting/runtime.cpp
-    src/scripting/sandbox.cpp
-    src/scripting/native_files.cpp
-    src/scripting/radar_asset.cpp
 
     # build support and vendored UI
     src/stdafx.cpp
@@ -226,19 +208,6 @@ string(REGEX REPLACE "([0-9a-f][0-9a-f])" "0x\\1," VESTA_DEFAULT_PROFILE_BYTES
 configure_file(
     "${CMAKE_CURRENT_SOURCE_DIR}/src/config/default_profile.hpp.in"
     "${CMAKE_CURRENT_BINARY_DIR}/generated/config/default_profile.hpp"
-    @ONLY
-)
-
-# The web radar is the only Lua script allowed outside the sandbox: its digest (text with CRLF folded to LF) is
-# compiled in, so an edited or different file runs restricted. Changing the script needs a new build.
-set(VESTA_RADAR_SCRIPT "${CMAKE_CURRENT_SOURCE_DIR}/lua/scripts/Vesta Web Radar.lua")
-set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS "${VESTA_RADAR_SCRIPT}")
-file(READ "${VESTA_RADAR_SCRIPT}" VESTA_RADAR_TEXT)
-string(REPLACE "\r" "" VESTA_RADAR_TEXT "${VESTA_RADAR_TEXT}")
-string(SHA256 VESTA_RADAR_SHA256 "${VESTA_RADAR_TEXT}")
-configure_file(
-    "${CMAKE_CURRENT_SOURCE_DIR}/src/scripting/trusted_scripts.hpp.in"
-    "${CMAKE_CURRENT_BINARY_DIR}/generated/scripting/trusted_scripts.hpp"
     @ONLY
 )
 
@@ -371,18 +340,6 @@ endforeach()
 
 include(FetchContent)
 
-FetchContent_Declare(
-    lua
-    URL https://www.lua.org/ftp/lua-5.4.8.tar.gz
-    URL_HASH SHA256=4f18ddae154e793e46eeab727c59ef1c0c0c2b744e7b94219710d76f530629ae
-    DOWNLOAD_EXTRACT_TIMESTAMP TRUE
-)
-FetchContent_MakeAvailable(lua)
-file(GLOB lua_sources CONFIGURE_DEPENDS "${lua_SOURCE_DIR}/src/*.c")
-list(FILTER lua_sources EXCLUDE REGEX "/(lua|luac|onelua)\\.c$")
-add_library(vesta_lua STATIC ${lua_sources})
-target_include_directories(vesta_lua PUBLIC ${lua_SOURCE_DIR}/src)
-target_link_libraries(${PROJECT_NAME} PRIVATE vesta_lua)
 
 FetchContent_Declare(
     freetype

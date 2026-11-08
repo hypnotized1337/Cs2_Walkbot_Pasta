@@ -18,7 +18,6 @@ export async function generateConfigPresets(projectRoot, destination) {
   const fullLegit = configure(source, {
     aimbot_enabled: false,
     aimbot_visible_only: true,
-    grenade_aim_enabled: false,
     penetration_crosshair: false,
     triggerbot_enabled: false,
     triggerbot_autostop: false
@@ -33,15 +32,10 @@ export async function generateConfigPresets(projectRoot, destination) {
   fullLegit.esp.m_sound.enabled = false;
   fullLegit.esp.m_no_flash.enabled = false;
   fullLegit.misc.m_auto_stop.enabled = false;
-  fullLegit.misc.m_bunny_hop.enabled = false;
-  fullLegit.misc.m_edge_jump.enabled = false;
-  fullLegit.misc.m_grenades.enabled = false;
-  fullLegit.misc.m_nade_helper.enabled = false;
   fullLegit.misc.m_bullet_tracers.enabled = false;
 
   const legit = configure(source, {
     aimbot_enabled: false,
-    grenade_aim_enabled: false,
     penetration_crosshair: false,
     triggerbot_enabled: true,
     triggerbot_seed_type: 0,
@@ -59,10 +53,6 @@ export async function generateConfigPresets(projectRoot, destination) {
   legit.esp.m_chams.enabled = true;
   legit.esp.m_chams.invisible.enabled = true;
   legit.misc.m_auto_stop.enabled = false;
-  legit.misc.m_bunny_hop.enabled = false;
-  legit.misc.m_edge_jump.enabled = false;
-  legit.misc.m_grenades.enabled = false;
-  legit.misc.m_nade_helper.enabled = false;
 
   const semiRage = configure(source, {
     aimbot_enabled: true,

@@ -32,7 +32,6 @@ struct inputs
 {
     diagnostics::readiness::status geometry{};
     diagnostics::readiness::status overlay{};
-    diagnostics::readiness::status scripting{};
     bool previous_session_crashed{};
     bool input_hook_failed{};
     // How long the geometry has been loading; a short load is normal and shows nothing.
@@ -78,15 +77,10 @@ inline constexpr double loading_notice_delay_seconds = 3.0;
             {"overlay", level::warning,
              "Overlay is in compatibility mode and may be hidden in true fullscreen. Set CS2 to Fullscreen Windowed.",
              1});
-    if (current.scripting.value == state::error)
-        result.push_back(
-            {"scripting", level::warning,
-             "Lua is unavailable: its data folder could not be prepared. Check free disk space, then restart PASTA.",
-             1});
     if (current.input_hook_failed)
         result.push_back(
             {"input", level::warning,
-             "Keyboard blocking could not start. Auto Stop and the grenade helper may not hold movement keys.", 1});
+             "Keyboard blocking could not start. Auto Stop may not hold movement keys.", 1});
     if (current.previous_session_crashed)
         result.push_back({"crash", level::information,
                           "The previous session ended unexpectedly. Save a report in Misc > General > Diagnostic Report.",

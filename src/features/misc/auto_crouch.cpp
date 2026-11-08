@@ -8,7 +8,6 @@
 #include <game/state/constants.hpp>
 #include <game/state/services.hpp>
 #include <platform/windows/input.hpp>
-#include <simulation/aim_parts.hpp>
 #include <simulation/collision.hpp>
 
 #include <chrono>
@@ -24,41 +23,31 @@ constexpr auto k_view_target_grace = std::chrono::milliseconds(250);
 // Once a target has been crouched for, bridge short gaps in combat target publication. A longer gap means the target
 // was lost and the duck is released.
 constexpr auto k_target_loss_grace = std::chrono::milliseconds(250);
-// A duck lowers the eye by roughly this much in CS2. The exposure check runs from the lower eye so a target that is
-// only peeking over cover is not crouched away from.
-constexpr float k_crouch_eye_drop = 18.0f;
-// "Decently exposed": more than one hitbox in sight and at least one below the head. A head above a wall does not
-// count: the same wall hides it as soon as the view drops.
-constexpr int k_exposure_min_visible = 2;
-constexpr int k_exposure_min_below_head = 1;
-// The gate has to stay open before the duck goes down, and has to stay closed for a moment before it is lifted, so a
-// single sampled frame cannot start the crouch/release cycle.
-constexpr auto k_exposure_confirm = std::chrono::milliseconds(100);
-constexpr auto k_exposure_release_grace = std::chrono::milliseconds(150);
-// After a target was hidden by the duck, wait this long before trying again. Standing back up usually restores the
-// sight line, so without the pause the bot would immediately duck again.
-constexpr auto k_exposure_retry = std::chrono::milliseconds(600);
+// The sight gate only asks whether the enemy is still reachable at all, not how much of them the duck leaves
+// exposed. Holding through a tighter angle is deliberate: the old two-hitbox rule stood the bot up mid-fight to
+// regain the sight line, which read as the crouch being dropped after a shot.
+// The gate has to stay open for a moment before the duck goes down, and has to stay closed for a moment before it
+// is lifted, so a single sampled frame cannot start the crouch/release cycle.
+constexpr auto k_sight_confirm = std::chrono::milliseconds(100);
+constexpr auto k_sight_release_grace = std::chrono::milliseconds(150);
 
-// How much of the enemy a ray from `eye` can reach. `sampled` is false when the collision world is unavailable: the
-// gate then fails open and keeps the old behaviour instead of disabling Auto Crouch on maps without collision data.
-struct exposure
+// Whether any part of the enemy can still be reached from `eye`. `sampled` is false when the collision world is
+// unavailable: the gate then fails open and holds the duck instead of disabling Auto Crouch on maps without
+// collision data.
+struct sight
 {
     int visible{};
-    int below_head{};
     bool sampled{};
 
-    [[nodiscard]] bool decent() const noexcept
-    {
-        return !sampled || (visible >= k_exposure_min_visible && below_head >= k_exposure_min_below_head);
-    }
+    [[nodiscard]] bool seen() const noexcept { return !sampled || visible > 0; }
 };
 
-[[nodiscard]] exposure sample_exposure(const game::player_snapshot& player, const foundation::vec3& eye,
-                                       const simulation::collision_world& world)
+[[nodiscard]] sight sample_sight(const game::player_snapshot& player, const foundation::vec3& eye,
+                                 const simulation::collision_world& world)
 {
-    exposure result{};
-    // Nothing to judge by: fail open instead of silently disabling Auto Crouch on maps or frames the reader cannot
-    // resolve.
+    sight result{};
+    // Nothing to judge by: fail open instead of silently disabling Auto Crouch on maps or frames the reader
+    // cannot resolve.
     if (!world.valid() || !player.bones.is_valid() || player.hitboxes.count <= 0)
         return result;
     result.sampled = true;
@@ -67,12 +56,8 @@ struct exposure
         if (hitbox.index < 0 || !player.bones.covers(hitbox.bone))
             continue;
         const auto box = game::place_hitbox(player.bones.bones[static_cast<std::size_t>(hitbox.bone)], hitbox);
-        if (world.trace_ray(eye, box.center()).hit)
-            continue;
-        ++result.visible;
-        if (simulation::aim_part_of(hitbox, game::hitbox_data().hitgroup_from_hitbox(hitbox.index)) !=
-            config::combat_profile::aim_part::head)
-            ++result.below_head;
+        if (!world.trace_ray(eye, box.center()).hit)
+            ++result.visible;
     }
     return result;
 }
@@ -99,9 +84,8 @@ void auto_crouch_t::reset()
         m_duck = {};
     m_engaged_target = 0;
     m_target_seen_at = {};
-    // The retry pause is kept: it is what stops a crouch that hid the enemy from being re-pressed on the next tick.
-    m_exposure_ok_at = {};
-    m_exposure_bad_at = {};
+    m_sight_ok_at = {};
+    m_sight_bad_at = {};
     m_waiting_since = {};
     m_waiting_for_duck = false;
     m_duck_wait_timed_out = false;
@@ -220,45 +204,35 @@ void auto_crouch_t::tick()
         m_target_seen_at = now;
     }
 
-    // Exposure gate. A duck drops the eye by roughly 18 units, and against an enemy who is only peeking over cover that
-    // sight line is the whole fight: the crouch hid him, releasing brought him back, and the bot cycled between the two
-    // without ever firing. Duck only while the enemy stays decently exposed from the eye the crouch will leave us with.
-    if (now < m_exposure_retry_at)
-    {
-        reset();
-        return;
-    }
+    // Sight gate. The duck is held while any part of the enemy is still reachable; it is lifted only when the
+    // enemy is dead or fully behind cover. The old gate judged how many hitboxes the crouched eye left exposed
+    // and stood the bot up mid-fight whenever the duck tightened the angle, which read as the crouch being
+    // dropped after a shot.
     if (const auto* engaged = find_player(target))
     {
-        auto eye = game::camera().origin();
-        if (!game::local_player().ducked())
-            eye.z -= k_crouch_eye_drop;
-        if (sample_exposure(*engaged, eye, simulation::collision()).decent())
+        if (sample_sight(*engaged, game::camera().origin(), simulation::collision()).seen())
         {
-            // The gate has to stay open for a moment before the duck goes down, so one lucky sample cannot start it.
-            if (m_exposure_ok_at == std::chrono::steady_clock::time_point{})
-                m_exposure_ok_at = now;
-            m_exposure_bad_at = {};
-            if (!m_duck.pressed && now - m_exposure_ok_at < k_exposure_confirm)
+            // Stay open for a moment before the duck goes down, so one lucky sample cannot start it.
+            if (m_sight_ok_at == std::chrono::steady_clock::time_point{})
+                m_sight_ok_at = now;
+            m_sight_bad_at = {};
+            if (!m_duck.pressed && now - m_sight_ok_at < k_sight_confirm)
                 return;
         }
         else
         {
-            // ...and stay closed for a moment before a held duck is lifted, so a single sampled frame cannot end it.
-            m_exposure_ok_at = {};
-            if (m_exposure_bad_at == std::chrono::steady_clock::time_point{})
-                m_exposure_bad_at = now;
-            const auto grace = m_duck.pressed ? k_exposure_release_grace : std::chrono::milliseconds(0);
-            if (now - m_exposure_bad_at >= grace)
+            // ...and stay closed for a moment before a held duck is lifted, so one sampled frame cannot end it.
+            m_sight_ok_at = {};
+            if (m_sight_bad_at == std::chrono::steady_clock::time_point{})
+                m_sight_bad_at = now;
+            const auto grace = m_duck.pressed ? k_sight_release_grace : std::chrono::milliseconds(0);
+            if (now - m_sight_bad_at >= grace)
             {
-                if (m_duck.pressed)
-                    m_exposure_retry_at = now + k_exposure_retry;
                 reset();
                 return;
             }
         }
     }
-
     // Keep sending the held state every tick. transition() only emits a key event when the state changes, so this does
     // not repeat key-down events while the target stays alive.
     if (!set_duck(true))

@@ -64,7 +64,7 @@ private:
     void* m_output{};
 };
 
-// The process-wide sink for code that has no injected one (configuration, assets, scripting).
+// The process-wide sink for code that has no injected one (configuration, assets).
 [[nodiscard]] const logger& process_log() noexcept;
 
 // What the exception currently being handled says about itself; call only inside a catch block.

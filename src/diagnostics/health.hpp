@@ -7,11 +7,10 @@
 namespace diagnostics
 {
 // The state of the subsystems the player can see in the menu and the notice plates. Each channel has one
-// publisher (map loader, scripting start-up, overlay); the UI only reads.
+// publisher (map loader, overlay); the UI only reads.
 struct subsystem_health
 {
     readiness::channel geometry{};
-    readiness::channel scripting{};
     // ready = band window; waiting_dependency = compatibility window.
     readiness::channel overlay{};
     // Set during bootstrap when the crash recorder found an unfinished previous session.

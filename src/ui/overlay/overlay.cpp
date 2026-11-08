@@ -16,7 +16,6 @@
 #include <ui/overlay/hud.hpp>
 #include <ui/overlay/graphics_device.hpp>
 #include <ui/overlay/render_policy.hpp>
-#include <scripting/runtime.hpp>
 #include <config/hotkeys.hpp>
 #include <config/library.hpp>
 #include <features/aimbot/aimbot.hpp>
@@ -104,8 +103,7 @@ constexpr bool k_use_composition_backend = true;
     return visuals.m_player.enabled || visuals.m_item.enabled || visuals.m_projectile.enabled ||
            visuals.m_bomb.enabled || visuals.m_no_flash.enabled || visuals.m_no_smoke.enabled ||
            visuals.m_crosshair.enabled || (visuals.m_player.enabled && visuals.m_chams.enabled) ||
-           visuals.m_radar.enabled || visuals.m_sound.enabled || misc.m_grenades.enabled ||
-           misc.m_nade_helper.enabled || misc.m_watermark.enabled || misc.m_spectator_list.enabled ||
+           visuals.m_radar.enabled || visuals.m_sound.enabled || misc.m_watermark.enabled || misc.m_spectator_list.enabled ||
            misc.m_event_log.enabled || misc.m_keybind_list.enabled || misc.m_bullet_tracers.enabled ||
            misc.m_hitmarker.enabled || misc.m_hitsound.enabled || misc.m_hitsound.show_damage ||
            (combat.aimbot_enabled && combat.aimbot_draw_fov) || combat.penetration_crosshair;
@@ -449,7 +447,7 @@ void overlay_t::update_frame_state()
     apply_resource_priority();
 }
 
-// Carries out a file chosen in the config/Lua dialog (which runs on its own thread). Failures are logged by the
+// Carries out a file chosen in the config dialog (which runs on its own thread). Failures are logged by the
 // storage and the script runtime.
 void overlay_t::apply_pending_file_request()
 {
@@ -467,9 +465,6 @@ void overlay_t::apply_pending_file_request()
     const auto chosen = std::filesystem::u8path(path);
     switch (request)
     {
-        case file_request::import_lua:
-            static_cast<void>(scripting::runtime().import_script(chosen));
-            break;
         case file_request::import_config:
             config::library().note(config::library().import_file(chosen), "Imported");
             break;
@@ -570,8 +565,6 @@ void overlay_t::draw_world(render::draw::draw_list& draw_list)
         features::visuals::bomb().on_render(draw_list);
         features::visuals::radar().on_render(draw_list);
         features::visuals::crosshair().on_render(draw_list);
-        features::visuals::grenade_prediction().on_render(draw_list);
-        features::misc::nade_helper().on_render(draw_list);
         features::misc::walk_bot().on_render(draw_list);
         features::misc::auto_health_shot().on_render(draw_list);
         features::visuals::bullet_impacts().on_render(draw_list);
@@ -600,7 +593,6 @@ void overlay_t::build_frame()
     if (game::local_player().valid() && !spectator_suppressed)
         draw_world(draw_list);
 
-    scripting::runtime().render(draw_list, m_render_width, m_render_height);
     // Outlined ESP text queued by the features above goes out as one block.
     render::esp_text::bind(m_context);
     render::esp_text::flush(draw_list.m_im_draw_list);
@@ -837,7 +829,7 @@ void overlay_t::shutdown() noexcept
         return;
 
     write_overlay_lifecycle_event(diagnostics::event::shutdown_begin);
-    // Render work has stopped and the launch scope quiesced game/Lua workers.
+    // Render work has stopped and the launch scope quiesced the game workers.
     // Futures retaining process/archive data must finish before those owners die.
     features::visuals::bomb().shutdown_background();
     features::chams::g_renderer.drain_background();
@@ -1470,16 +1462,8 @@ void overlay_t::request_file(const file_request kind)
                 ofn.lpfnHook = &overlay_t::config_dialog_hook;
                 ofn.Flags = OFN_FILEMUSTEXIST | OFN_PATHMUSTEXIST | OFN_NOCHANGEDIR | OFN_EXPLORER | OFN_ENABLEHOOK |
                             OFN_DONTADDTORECENT;
-                if (kind == file_request::import_lua)
-                {
-                    ofn.lpstrFilter = L"Lua scripts (*.lua)\0*.lua\0";
-                    ofn.lpstrTitle = L"Import Lua script into PASTA";
-                }
-                else
-                {
-                    ofn.lpstrFilter = L"PASTA config (*.cfg)\0*.cfg\0";
-                    ofn.lpstrTitle = L"Import a PASTA config";
-                }
+                ofn.lpstrFilter = L"PASTA config (*.cfg)\0*.cfg\0";
+                ofn.lpstrTitle = L"Import a PASTA config";
                 if (::GetOpenFileNameW(&ofn))
                     chosen = std::wstring{path.c_str()};
             }

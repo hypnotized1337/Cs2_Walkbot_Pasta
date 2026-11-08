@@ -8,7 +8,6 @@ Third-party components remain under the licenses named below.
 | Dear ImGui | MIT | https://github.com/ocornut/imgui |
 | nlohmann/json | MIT | https://github.com/nlohmann/json |
 | xorstr | Apache-2.0 | https://github.com/JustasMasiulis/xorstr |
-| Lua | MIT | https://www.lua.org |
 | FreeType | FreeType License or GPL-2.0 | https://freetype.org |
 | meshoptimizer | MIT | https://github.com/zeux/meshoptimizer |
 | LZ4 | BSD-2-Clause | https://github.com/lz4/lz4 |

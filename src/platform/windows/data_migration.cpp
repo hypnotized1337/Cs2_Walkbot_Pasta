@@ -10,7 +10,7 @@ namespace platform::windows::data_storage
 namespace
 {
 constexpr std::string_view marker_text = "vesta-data-migration=1\n";
-// Lua projects and caches are shallow; the bound keeps recursion and stack use
+// User files are shallow; the bound keeps recursion and stack use
 // independent of hostile or corrupted trees. Deeper trees fail before publish.
 constexpr unsigned maximum_tree_depth = 32;
 class migration final
@@ -64,9 +64,8 @@ public:
         m_pending = m_target.root / L".migration-v1.pending";
         if (!copy_file(m_source / L"hotkeys.cfg", m_target.configs / L"hotkeys.cfg"))
             return m_result;
-        if (!tree(m_source / L"config_cache", m_target.configs, false, 0) ||
-            !tree(m_source / L"chams_cache", m_target.mesh_cache, false, 0) ||
-            !tree(m_source / L"lua", m_target.lua, true, 0))
+        if (!tree(m_source / L"config_cache", m_target.configs, 0) ||
+            !tree(m_source / L"chams_cache", m_target.mesh_cache, 0))
             return m_result;
         if (cancelled())
             return m_result;
@@ -158,7 +157,7 @@ private:
         }
         const auto expected = locations::under(m_target.root);
         if (m_target.configs != expected.configs || m_target.cache != expected.cache ||
-            m_target.logs != expected.logs || m_target.lua != expected.lua ||
+            m_target.logs != expected.logs ||
             m_target.mesh_cache != expected.mesh_cache || m_target.research_logs != expected.research_logs)
         {
             fail(migration_stage::validate_paths, ERROR_INVALID_PARAMETER);
@@ -198,8 +197,9 @@ private:
     }
     bool ensure_areas()
     {
-        for (const auto& folder : {m_target.root, m_target.configs, m_target.cache, m_target.logs, m_target.lua,
-                                   m_target.mesh_cache, m_target.research_logs})
+        for (const auto& folder :
+             {m_target.root, m_target.configs, m_target.cache, m_target.logs, m_target.mesh_cache,
+              m_target.research_logs})
             if (!directory(folder))
                 return false;
         return true;
@@ -287,7 +287,7 @@ private:
         }
         return no_reparse(path);
     }
-    bool tree(const std::filesystem::path& from, const std::filesystem::path& to, bool lua, unsigned depth)
+    bool tree(const std::filesystem::path& from, const std::filesystem::path& to, unsigned depth)
     {
         if (cancelled() || !no_reparse(from))
             return false;
@@ -329,14 +329,10 @@ private:
             if (cancelled())
                 return false;
             const auto filename = it->path().filename();
-            // Only concrete pending names written by the existing product are
-            // temporary. Arbitrary Lua/user files ending in .tmp remain data.
+            // Only the concrete pending name written by the existing product is temporary; other user files
+            // remain data.
             const bool config_pending = from == m_source / L"config_cache" && filename == L"current.cfg.tmp";
-            const bool lua_pending = lua && ((from == m_source / L"lua" && filename == L"runtime.json.tmp") ||
-                                             (inside(from, m_source / L"lua/data") && filename == L"store.json.tmp"));
-            const bool lua_log = lua && from == m_source / L"lua" &&
-                                 ::CompareStringOrdinal(filename.c_str(), -1, L"logs", -1, TRUE) == CSTR_EQUAL;
-            if (config_pending || lua_pending || lua_log)
+            if (config_pending)
                 continue;
             const auto child_attributes = ::GetFileAttributesW(it->path().c_str());
             if (child_attributes == INVALID_FILE_ATTRIBUTES)
@@ -351,7 +347,7 @@ private:
             }
             if (child_attributes & FILE_ATTRIBUTE_DIRECTORY)
             {
-                if (!directory(to / filename) || !tree(it->path(), to / filename, lua, depth + 1))
+                if (!directory(to / filename) || !tree(it->path(), to / filename, depth + 1))
                     return false;
             }
             else if (!copy_file(it->path(), to / filename))

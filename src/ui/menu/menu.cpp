@@ -2,7 +2,6 @@
 #include <render/presentation.hpp>
 #include <ui/presentation.hpp>
 #include <platform/windows/input.hpp>
-#include <scripting/runtime.hpp>
 #include <config/first_run.hpp>
 #include <game/input/bindings.hpp>
 #include <config/hotkeys.hpp>
@@ -263,30 +262,50 @@ void menu_t::draw_sidebar()
         }
     }
 
-    static constexpr const char* labels[]{"Aimbot", "Triggerbot", "Visuals", "Walk Bot", "Automation", "Misc",
-                                          "Configs"};
-    static constexpr int icons[]{0, 1, 2, 3, 6, 4, 5};
+    static constexpr const char* labels[]{"Aimbot", "Triggerbot", "Visuals", "Walk Bot", "Automation", "Misc"};
+    static constexpr int icons[]{0, 1, 2, 3, 6, 4};
     ImGui::SetCursorPos({20.0f, logo_texture ? text_top + brand_size + 14.0f : 112.0f});
-    // Automation is a child of Walk Bot: it stays hidden until its parent has been clicked. Once revealed it keeps a
-    // narrower, indented row and a branch line in the gutter so the hierarchy stays readable.
+    // Automation is a child of Walk Bot. It glides out while the Walk Bot section is selected and retracts into it
+    // when the user moves to another page; the reveal is advanced every frame so both directions animate.
+    const auto automation_selected = m_page == k_walk_page || m_page == k_automation_page;
+    m_automation_reveal = approach(m_automation_reveal, automation_selected ? 1.0f : 0.0f, 0.18f);
+    if (!automation_selected && m_automation_reveal < 0.002f)
+        m_automation_reveal = 0.0f;
+
     ImVec2 walk_min{}, walk_max{};
     for (int i = 0; i < static_cast<int>(std::size(labels)); ++i)
     {
-        if (i == k_automation_page && !m_automation_unlocked)
-            continue;
         const auto automation = i == k_automation_page;
-        ImGui::SetCursorPosX(automation ? 36.0f : 20.0f);
+        const auto reveal = std::clamp(m_automation_reveal, 0.0f, 1.0f);
+        if (automation && reveal <= 0.0f)
+            continue;
+        // The row and the gap after it share one animated slot, so the rows below slide instead of jumping when the
+        // child appears or retracts.
+        const auto slot = automation ? 54.0f * reveal : 0.0f;
+        if (automation)
+            ImGui::Dummy({0.0f, slot});
+        const auto slot_top = automation ? ImGui::GetCursorScreenPos().y - slot : 0.0f;
+        if (automation)
+        {
+            ImGui::SetCursorPosY(ImGui::GetCursorPosY() - slot);
+            ImGui::PushClipRect({min.x, slot_top}, {max.x, slot_top + slot}, true);
+            ImGui::BeginDisabled(reveal < 0.98f);
+        }
+        ImGui::SetCursorPosX(automation ? 36.0f + (1.0f - reveal) * 10.0f : 20.0f);
         ImGui::PushID(i);
         const auto active = m_page == i;
-        if (nav_button(labels[i], active, icons[i], automation ? 184.0f : 200.0f))
+        const auto clicked = nav_button(labels[i], active, icons[i], automation ? 184.0f : 200.0f, automation ? reveal : 1.0f);
+        if (automation)
         {
-            if (i == k_walk_page)
-                m_automation_unlocked = true;
-            if (!active)
-            {
-                m_page = i;
-                reset_content_animation();
-            }
+            ImGui::EndDisabled();
+            ImGui::PopClipRect();
+            // nav_button always advances a full row; hand the shorter animated slot to the next row instead.
+            ImGui::SetCursorPosY(ImGui::GetCursorPosY() + slot - 48.0f);
+        }
+        if (clicked && !active)
+        {
+            m_page = i;
+            reset_content_animation();
         }
         const auto row_min = ImGui::GetItemRectMin();
         const auto row_max = ImGui::GetItemRectMax();
@@ -297,15 +316,20 @@ void menu_t::draw_sidebar()
         }
         else if (automation)
         {
-            const auto child_mid = row_min.y + 24.0f;
-            const auto connector = packed(k_border_light);
-            const auto endpoint = packed(k_accent);
+            // Keep the branch endpoint inside the animated slot while the row retracts.
+            const auto child_mid = row_min.y + std::min(24.0f, slot * 0.5f);
+            auto connector_color = k_border_light;
+            auto endpoint_color = k_accent;
+            connector_color.w *= reveal;
+            endpoint_color.w *= reveal;
+            const auto connector = packed(connector_color);
+            const auto endpoint = packed(endpoint_color);
             draw->AddLine({walk_min.x, walk_max.y + 1.0f}, {walk_min.x, child_mid}, connector, 1.5f);
             draw->AddLine({walk_min.x, child_mid}, {row_min.x, child_mid}, endpoint, 1.5f);
             draw->AddCircleFilled({row_min.x, child_mid}, 1.7f, endpoint, 12);
         }
         ImGui::PopID();
-        if (i != static_cast<int>(std::size(labels)) - 1)
+        if (!automation && i != static_cast<int>(std::size(labels)) - 1)
             ImGui::Dummy({0.0f, 6.0f});
     }
 
@@ -314,9 +338,6 @@ void menu_t::draw_sidebar()
 
 void menu_t::draw_content()
 {
-    // Never leave the hidden child reachable through stale page state.
-    if (m_page == k_automation_page && !m_automation_unlocked)
-        m_page = k_walk_page;
     ImGui::SetCursorPos({240.0f, 0.0f});
     ImGui::BeginChild("##content", {710.0f, 650.0f}, false, ImGuiWindowFlags_NoScrollbar);
     m_content_animation = std::min(1.0f, m_content_animation + ImGui::GetIO().DeltaTime / 0.14f);
@@ -333,10 +354,8 @@ void menu_t::draw_content()
         draw_walk_bot();
     else if (m_page == k_automation_page)
         draw_automation();
-    else if (m_page == 5)
-        draw_misc();
     else
-        draw_configs();
+        draw_misc();
 
     ImGui::EndChild();
 }
