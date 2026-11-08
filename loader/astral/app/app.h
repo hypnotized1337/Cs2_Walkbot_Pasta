@@ -55,6 +55,7 @@ private:
     float m_velH = 0.f;
     bool m_sizeInit = false;
     float m_statusBlend = 0.f;
+    float m_successT = 0.f;
     bool m_closing = false;
     float m_closeT = 0.f;
     float m_fade = 1.f;

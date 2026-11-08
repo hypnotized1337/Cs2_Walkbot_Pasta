@@ -22,6 +22,7 @@
 namespace {
 
 constexpr wchar_t kWindowClass[] = L"PastaLoaderWindow";
+constexpr wchar_t kInstanceMutex[] = L"Local\\PastaLoader.SingleInstance";
 constexpr int kMaxPanelWidth = 372;
 constexpr int kMaxPanelHeight = 236;
 constexpr int kMargin = 26;
@@ -64,6 +65,13 @@ struct WindowState {
     std::wstring shotPath;
     float shotAfter = 1.f;
     float elapsed = 0.f;
+};
+
+struct InstanceMutex {
+    HANDLE handle = nullptr;
+    ~InstanceMutex() {
+        if (handle) CloseHandle(handle);
+    }
 };
 
 WindowState* g_state = nullptr;
@@ -114,12 +122,16 @@ void worker_main() {
     } else {
         g_phase = load_phase::success;
         g_status = L"PASTA is running";
-        g_detail = L"Press Insert in game to open the menu.";
+        g_detail = L"Launch complete. Closing automatically.";
         g_progress = 100;
     }
 }
 
 void start_loading() {
+    {
+        const std::scoped_lock lock(g_state_mutex);
+        if (g_phase == load_phase::running) return;
+    }
     if (g_worker.joinable()) g_worker.join();
 
     g_cancel.store(false, std::memory_order_relaxed);
@@ -260,9 +272,29 @@ bool parse_command_line(std::wstring& shotPath, bool& headless, float& shotAfter
     return ok;
 }
 
+void focus_existing_loader() {
+    for (int attempt = 0; attempt < 20; ++attempt) {
+        if (const HWND existing = FindWindowW(kWindowClass, nullptr)) {
+            ShowWindow(existing, SW_RESTORE);
+            SetWindowPos(existing, HWND_TOP, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_SHOWWINDOW);
+            SetForegroundWindow(existing);
+            return;
+        }
+        Sleep(50);
+    }
+}
+
 } // namespace
 
 int WINAPI wWinMain(const HINSTANCE instance, HINSTANCE, PWSTR, const int showCommand) {
+    InstanceMutex instanceMutex;
+    SetLastError(ERROR_SUCCESS);
+    instanceMutex.handle = CreateMutexW(nullptr, FALSE, kInstanceMutex);
+    if (instanceMutex.handle && GetLastError() == ERROR_ALREADY_EXISTS) {
+        focus_existing_loader();
+        return 0;
+    }
+
     SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
 
     const HRESULT com = CoInitializeEx(nullptr, COINIT_APARTMENTTHREADED);

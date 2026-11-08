@@ -61,6 +61,39 @@ static void drawProgress(const Rect& r, int progress, float alpha) {
     dl().gradientHMasked(fill, t.barGlow.alpha(alpha), t.focus.alpha(alpha), fill, radius);
 }
 
+static Vec2 between(const Vec2& a, const Vec2& b, float t) {
+    return Vec2(a.x + (b.x - a.x) * t, a.y + (b.y - a.y) * t);
+}
+
+static void drawCheckMark(const Vec2& center, float radius, float progress, float alpha) {
+    Theme& t = theme();
+    const float p = core::clamp01(progress);
+    const float ring = core::easeOutCubic(core::clamp01(p / 0.55f));
+    const float check = core::clamp01((p - 0.18f) / 0.57f);
+    Rect badge(center.x - radius, center.y - radius, radius * 2.f, radius * 2.f);
+
+    dl().shadow(badge.shrink(2.f), t.focus.alpha(0.22f * alpha), 22.f, radius, Vec2(0.f, 4.f));
+    dl().circle(center, radius, Col::hex(0x1D1316, 0.94f * alpha));
+    dl().border(badge.shrink(0.5f), Col::hex(0xFFFFFF, 0.07f * alpha), 1.f, radius - 0.5f);
+    dl().arc(center, radius, 2.f, -core::kPi * 0.5f, -core::kPi * 0.5f + ring * core::kPi * 2.f,
+             t.focus.alpha(alpha));
+
+    const Vec2 a(center.x - radius * 0.38f, center.y + radius * 0.02f);
+    const Vec2 b(center.x - radius * 0.10f, center.y + radius * 0.30f);
+    const Vec2 c(center.x + radius * 0.40f, center.y - radius * 0.28f);
+    const float first = core::clamp01(check / 0.42f);
+    const float second = core::clamp01((check - 0.42f) / 0.58f);
+    const Vec2 e1 = between(a, b, first);
+    const Vec2 e2 = between(b, c, second);
+    const Col shadow = Col::hex(0x000000, 0.32f * alpha);
+    const Col stroke = Col::hex(0xFFF3D7, alpha);
+
+    if (first > 0.f) dl().line(Vec2(a.x + 0.5f, a.y + 0.9f), Vec2(e1.x + 0.5f, e1.y + 0.9f), 4.1f, shadow);
+    if (second > 0.f) dl().line(Vec2(b.x + 0.5f, b.y + 0.9f), Vec2(e2.x + 0.5f, e2.y + 0.9f), 4.1f, shadow);
+    if (first > 0.f) dl().line(a, e1, 3.8f, stroke);
+    if (second > 0.f) dl().line(b, e2, 3.8f, stroke);
+}
+
 static bool font_resource(const int id, const void*& data, size_t& size) {
     const HRSRC resource = FindResourceW(nullptr, MAKEINTRESOURCEW(id), RT_RCDATA);
     if (!resource) return false;
@@ -146,7 +179,9 @@ void App::screenStatus(const Rect& panel, float alpha, const ViewState& state, A
     ui::text(fonts().caption, Rect(textX, content.y + 27.f, textW, 22.f), detail.c_str(),
              t.text.alpha(0.56f * alpha), AlignH::Left, AlignV::Top);
 
-    if (m_assets.logo.valid()) {
+    if (state.phase == Phase::success) {
+        drawCheckMark(Vec2(content.center().x, content.y + 102.f), 36.f, m_successT / 0.75f, alpha);
+    } else if (m_assets.logo.valid()) {
         const float beat = 0.5f - 0.5f * std::cos(g().time * 2.2f);
         const float aspect = m_assets.logo.aspect();
         const float logoW = 140.f * (1.f + beat * 0.012f);
@@ -163,8 +198,6 @@ void App::screenStatus(const Rect& panel, float alpha, const ViewState& state, A
             !state.cancelling) {
             actions.cancel = true;
         }
-    } else if (state.phase == Phase::success) {
-        if (gameRow("pasta.close", action, nullptr, "Close")) requestClose();
     } else if (state.phase == Phase::failure) {
         if (gameRow("pasta.retry", action, nullptr, "Try again")) actions.load = true;
     }
@@ -178,6 +211,13 @@ Actions App::frame(float dt, const ViewState& state) {
     if (m_closing) {
         m_closeT = core::clamp01(m_closeT + dt / 0.19f);
         m_fade = 1.f - m_closeT * m_closeT;
+    }
+
+    if (state.phase == Phase::success) {
+        m_successT += dt;
+        if (m_successT >= 1.35f && !m_closing) requestClose();
+    } else {
+        m_successT = 0.f;
     }
 
     const bool active = state.phase != Phase::idle;

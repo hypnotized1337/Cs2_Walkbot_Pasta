@@ -22,6 +22,38 @@ static const Sparkle kDust[] = {
     { 0.90f, 0.18f, 0.9f, 0.34f, 2.8f },
 };
 
+static Vec2 rotate_offset(const Vec2& center, float x, float y, float angle) {
+    const float c = std::cos(angle);
+    const float s = std::sin(angle);
+    return Vec2(center.x + x * c - y * s, center.y + x * s + y * c);
+}
+
+// A tiny, softly lit elbow of pasta. The wavy polyline keeps the same twinkle slot as a sparkle while reading as a
+// noodle instead of a four-point star, even at title-bar scale.
+static void noodleShape(const Vec2& center, float size, float angle, const Col& color) {
+    if (color.a <= 0.001f || size <= 0.1f) return;
+
+    const float length = size * 1.15f;
+    const float thickness = (std::max)(0.9f, size * 0.32f);
+    const Vec2 points[5] = {
+        rotate_offset(center, -length, 0.18f * size, angle),
+        rotate_offset(center, -length * 0.55f, -0.45f * size, angle),
+        rotate_offset(center, 0.f, 0.38f * size, angle),
+        rotate_offset(center, length * 0.55f, -0.32f * size, angle),
+        rotate_offset(center, length, 0.20f * size, angle),
+    };
+
+    const auto stroke = [&](const Vec2& offset, float width, const Col& c) {
+        for (int i = 0; i < 4; ++i) {
+            dl().line(Vec2(points[i].x + offset.x, points[i].y + offset.y),
+                      Vec2(points[i + 1].x + offset.x, points[i + 1].y + offset.y), width, c);
+        }
+    };
+
+    stroke(Vec2(0.55f, 0.75f), thickness * 1.45f, Col::hex(0x1A0507, 0.42f * color.a));
+    stroke(Vec2(), thickness, color);
+}
+
 void titleBar(const Rect& panel, float barHeight, const char* title, float time) {
     Theme& t = theme();
     Rect bar(panel.x, panel.y, panel.w, barHeight);
@@ -54,9 +86,9 @@ void titleBar(const Rect& panel, float barHeight, const char* title, float time)
         const float twinkle = 0.74f + 0.26f * std::sin(time * 1.6f + s.phase);
         const Vec2 c(bandX(s.x), bar.y + bar.h * s.y);
         const float r = s.size * twinkle;
-        dl().shadow(Rect(c.x - r * 0.5f, c.y - r * 0.5f, r, r), Col::hex(0xFF8C7E, 0.30f * twinkle), r * 1.9f,
-                    r * 0.5f, Vec2());
-        dl().star(c, r, 0.85f, Col::hex(0xFFFFFF, s.alpha * twinkle));
+        dl().shadow(Rect(c.x - r * 0.6f, c.y - r * 0.6f, r * 1.2f, r * 1.2f),
+                    Col::hex(0xFF8C7E, 0.16f * twinkle), r * 1.9f, r * 0.6f, Vec2());
+        noodleShape(c, r, s.phase * 1.35f, Col::hex(0xFFF3D7, s.alpha * twinkle));
     }
 
     dl().popClip();
@@ -98,9 +130,9 @@ void skyBackground(const Rect& area, const Rect& shape, float radius, float time
         const float twinkle = 0.72f + 0.28f * std::sin(time * 1.5f + s.phase);
         const Vec2 c(area.x + area.w * s.x, area.y + area.h * s.y);
         const float r = s.size * twinkle * starScale;
-        dl().shadow(Rect(c.x - r * 0.5f, c.y - r * 0.5f, r, r), Col::hex(0xFF8C7E, 0.28f * twinkle * alpha),
-                    r * 1.9f, r * 0.5f, Vec2());
-        dl().star(c, r, 0.85f, Col::hex(0xFFFFFF, s.alpha * twinkle * alpha));
+        dl().shadow(Rect(c.x - r * 0.6f, c.y - r * 0.6f, r * 1.2f, r * 1.2f),
+                    Col::hex(0xFF8C7E, 0.16f * twinkle * alpha), r * 1.9f, r * 0.6f, Vec2());
+        noodleShape(c, r, s.phase * 1.55f, Col::hex(0xFFF3D7, s.alpha * twinkle * alpha));
     }
     dl().popClip();
 }
@@ -226,7 +258,8 @@ void spinnerRing(const Vec2& center, float radius, float thickness, const Col& f
         const float twinkle = 0.35f + 0.65f * (0.5f + 0.5f * std::sin(t * 2.4f + s[0] * 2.f));
         const float drift = s[0] + t * 0.35f;
         const Vec2 p(center.x + std::cos(drift) * radius * s[1], center.y + std::sin(drift) * radius * s[1]);
-        dl().star(p, s[2] * (0.7f + 0.3f * twinkle), 0.85f, Col::hex(0xFFFFFF, 0.60f * twinkle * alpha));
+        noodleShape(p, s[2] * (0.7f + 0.3f * twinkle), s[0] * 1.35f,
+                    Col::hex(0xFFF3D7, 0.60f * twinkle * alpha));
     }
 
     dl().arc(center, radius, thickness, 0.f, core::kPi * 2.f, Col::hex(0xFFFFFF, 0.10f * alpha));
