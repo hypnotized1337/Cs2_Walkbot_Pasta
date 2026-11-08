@@ -13,7 +13,7 @@ of that; only the differences are below. Compared with Vesta `main`, November
 
 | Area | Vesta | PASTA |
 | --- | --- | --- |
-| Sidebar | Aimbot, Triggerbot, Visuals, Misc | Adds Walk Bot and Automation |
+| Sidebar | Aimbot, Triggerbot, Visuals, Misc | Adds Walk Bot Automation and enchancments|
 | Automation | Auto Accept, rejoin/disconnect and buy/reload inside Misc | Dedicated page plus new combat automation |
 | Walk Bot | Misc tab | Own page with new combat controls |
 | Scripting | Lua 5.4 and Web Radar | Removed |
