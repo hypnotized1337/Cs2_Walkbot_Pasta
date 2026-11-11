@@ -3,7 +3,9 @@
 ## Current checkpoint
 
 Test branch: `ui-remake-test`. Base revision: `83b616b`.
-The isolation stage is ready for the owner to compile; no skin/widgets/pages have been ported.
+The owner reported a successful Windows compile on 2026-11-11, with `vesta_uitest` created
+and the original `vesta` untouched. This is owner-reported verification; no local Windows build ran.
+Stage 0 is accepted. Stage 1 inventory is in progress; no skin/widgets/pages have been ported.
 Commit message for this checkpoint: `isolate test config path`.
 See [ISOLATION.md](ISOLATION.md) for all changed source files/lines, exact paths and manual checks.
 
@@ -20,12 +22,13 @@ See [ISOLATION.md](ISOLATION.md) for all changed source files/lines, exact paths
 
 ## Owner action now
 
-Compile target `vesta` from the test checkout and report errors/success before the next stage.
+Compilation checkpoint passed per owner report. Next action: review the completed Stage 1
+inventory, decision list and proposed layout, then approve the Astral vertical slice.
 Copy your old config to `%TEMP%\vesta_uitest\configs\current.cfg` with the app closed,
 or place a named copy in `%TEMP%\vesta_uitest\configs\named`.
 Do not run the separate production loader. Do not replace your working executable.
 
-## Next (after compile feedback)
+## Next
 
 1. Finish Stage 1 as files, one page/settings group at a time with commits:
    `controls.csv`, `config_keys.csv`, `other_surfaces.md`, reference compatibility/mapping,
@@ -45,7 +48,8 @@ not the required final inventory.
 ## Decisions already made
 
 - Continue without local Windows build; do not install/emulate MSVC.
-- Work only locally in the test worktree; no pushes authorized.
+- Work only in the test worktree. The owner authorized pushing the isolation commit to
+  `origin/ui-remake-test`; it is published. Never push or merge into the production branch.
 - Keep existing config keys and gameplay behavior; port visual layer only after Stage 1 approval.
 - Add controls in the NEW menu for saved user-facing values missing old UI; label inventory rows
   `new control (no old UI)`. Confirmed requested examples: item ammo, shotgun/heavy filters,
@@ -65,5 +69,6 @@ record the actual behavior and proposed control in Stage 1 before page work.
 ## Verification limits
 
 The reference uses different ImGui internals/version; keep Vesta's pinned version unless approved.
-No baseline build succeeded in this Linux sandbox. No visual/gameplay/round-trip check has run.
+No baseline build ran in this Linux sandbox. The owner confirmed the Windows build and root
+isolation. No new-menu visual/gameplay/round-trip check has run.
 The owner explicitly replaced that build gate with per-stage Windows compilation on their PC.
