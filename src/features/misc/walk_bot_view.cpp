@@ -6,11 +6,13 @@
 #include <features/aimbot/flick_profile.hpp>
 #include <features/trigger/seed_trigger.hpp>
 #include <foundation/identity.hpp>
+#include <foundation/scope_exit.hpp>
 #include <game/memory/bound_services.hpp>
 #include <game/state/services.hpp>
 #include <platform/windows/input.hpp>
 #include <simulation/collision.hpp>
 #include <simulation/nav_mesh.hpp>
+#include <simulation/punch_snapshot.hpp>
 
 #include <algorithm>
 #include <optional>
@@ -27,11 +29,49 @@ using namespace walk_detail;
 void walk_bot_t::look(const player_state& player, const gaze& target, const bool blocked, const clock::time_point now)
 {
     const auto snapshot = config::get_runtime_snapshot();
+    // Publish the fight hand's error on every call, including the early returns below. The spray gate and its log read
+    // these; a sample that stopped updating must be visible as stale, not mistaken for an old on-target reading.
+    const bool fight_gaze = target.how == gaze::mode::fight;
+    // The game builds the shot from the base view plus the bullet-scale punch, not from the rendered camera alone.
+    // Aiming at the camera leaves the predicted impact above the target by the punch (the Follow Recoil gap). Read the
+    // same two values the game uses so the fight hand closes its loop on where the bullets actually go.
+    foundation::vec3 aim_punch{};
+    if (fight_gaze && player.pawn)
+        if (const auto punch = simulation::read_cached_punch(
+                game::bound_memory().process, player.pawn,
+                SCHEMA("C_CSPlayerPawn", "m_pAimPunchServices"_id)))
+            aim_punch = *punch;
+    auto impact_view = player.base_view + aim_punch;
+    impact_view.x = std::clamp(impact_view.x, -89.0f, 89.0f);
+    impact_view.y = foundation::wrap_yaw(impact_view.y);
+    float aim_sample_error = 999.0f;
+    float aim_sample_delta = 0.0f;
+    int aim_sample_px_x = 0;
+    int aim_sample_px_y = 0;
+    bool aim_sample_valid = false;
+    const foundation::scope_exit publish_aim_sample(
+        [&]() noexcept
+        {
+            features::aimbot::publish_walk_autofire_aim(fight_gaze && aim_sample_valid, aim_sample_error,
+                                                        aim_sample_delta, aim_sample_px_x, aim_sample_px_y);
+        });
+    if (fight_gaze)
+    {
+        const auto to = target.point - player.eye;
+        const auto target_yaw = degrees(std::atan2(to.y, to.x));
+        const auto target_pitch = -degrees(std::atan2(to.z, std::hypot(to.x, to.y)));
+        aim_sample_error =
+            std::hypot(foundation::wrap_yaw(target_yaw - impact_view.y), target_pitch - impact_view.x);
+        aim_sample_valid = std::isfinite(aim_sample_error);
+    }
     // Rear defense is an emergency turn and the knife chase has to face its target: both still take the view when
     // Turn Camera is off, unlike the walking camera.
     const bool knife = target.how == gaze::mode::fight && m_knife_target != 0;
     if (!snapshot->general.m_walk_bot.look && target.how != gaze::mode::rear && !knife)
+    {
+        aim_sample_valid = false; // no turn camera: the fight hand is not steering, whatever the angle says
         return;
+    }
     if (now - m_view_last_step < std::chrono::milliseconds(4))
         return; // ~250 updates a second is plenty for a hand
     const auto dt = m_view_last_step == clock::time_point{}
@@ -100,6 +140,7 @@ void walk_bot_t::look(const player_state& player, const gaze& target, const bool
         m_view_velocity = {};
         m_view_pending = {};
         m_mouse_remainder = {};
+        aim_sample_valid = false; // the hand is not steering while another hand owns the view
         return;
     }
     if (target_dead && m_view_holding)
@@ -112,7 +153,10 @@ void walk_bot_t::look(const player_state& player, const gaze& target, const bool
         m_view_target = 0;
     m_view_holding = false;
     if (!rear && now < m_view_resume_at)
+    {
+        aim_sample_valid = false; // waiting out the other hand: no new aim command is going out
         return;
+    }
 
     const auto to = target.point - player.eye;
     if (flat(to).length() < 8.0f && target.how == gaze::mode::route)
@@ -148,9 +192,12 @@ void walk_bot_t::look(const player_state& player, const gaze& target, const bool
                                     std::sin(m_noise_phase * 79.0f + 2.3f) * 0.4f);
         }
     }
-    const foundation::vec2 control_view{player.view.x, player.view.y};
+    const foundation::vec2 control_view = fight ? foundation::vec2{impact_view.x, impact_view.y}
+                                                : foundation::vec2{player.view.x, player.view.y};
     const foundation::vec2 error{target_pitch - control_view.x, foundation::wrap_yaw(target_yaw - control_view.y)};
     const auto error_size = std::hypot(error.x, error.y);
+    aim_sample_error = error_size;
+    aim_sample_valid = std::isfinite(aim_sample_error);
 
     // The hand. A clear change of where to look is a turn: minimum-jerk over a Fitts-law duration (quick and smooth,
     // no jump and no shake), each step covering its share of what is still left so a moving point is followed, bent
@@ -211,6 +258,7 @@ void walk_bot_t::look(const player_state& player, const gaze& target, const bool
     const auto ramp_t = std::clamp(std::chrono::duration<float>(now - m_view_ramp_from).count() / 0.25f, 0.0f, 1.0f);
     const auto ramp = rear ? 1.0f : ramp_t * ramp_t * (3.0f - 2.0f * ramp_t);
     step = {step.x * ramp, step.y * ramp};
+    aim_sample_delta = std::hypot(step.x, step.y);
     m_view_velocity = {step.x / dt, step.y / dt};
 
     constexpr float k_m_yaw = 0.022f;
@@ -219,7 +267,10 @@ void walk_bot_t::look(const player_state& player, const gaze& target, const bool
         player.pawn + SCHEMA("C_BasePlayerPawn", "m_flFOVSensitivityAdjust"_id));
     const auto per_count = sensitivity * k_m_yaw * (fov_adjust > 0.0f && std::isfinite(fov_adjust) ? fov_adjust : 1.0f);
     if (!(per_count > 0.0f) || !std::isfinite(per_count))
+    {
+        aim_sample_valid = false;
         return;
+    }
     m_mouse_remainder.x += -m_view_velocity.y * dt / per_count;
     m_mouse_remainder.y += m_view_velocity.x * dt / per_count;
     const auto dx = static_cast<int>(m_mouse_remainder.x);
@@ -228,6 +279,8 @@ void walk_bot_t::look(const player_state& player, const gaze& target, const bool
     m_mouse_remainder.y -= static_cast<float>(dy);
     if ((dx || dy) && platform::windows::bound_input().walker_pointer(dx, dy))
     {
+        aim_sample_px_x = dx;
+        aim_sample_px_y = dy;
         m_view_pending = {m_view_pending.x + static_cast<float>(dy) * per_count,
                           m_view_pending.y - static_cast<float>(dx) * per_count};
     }

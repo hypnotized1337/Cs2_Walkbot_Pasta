@@ -64,11 +64,29 @@ struct combat_profile
 
     struct multipoint_settings
     {
+        // The preset caps how many candidates geometry offers. High Performance is the default because every extra
+        // point is another potential collision/ballistics check on the aim worker.
+        struct preset
+        {
+            enum : int
+            {
+                high_performance = 0,
+                medium = 1,
+                low = 2,
+            };
+        };
+        int performance{preset::high_performance};
         bool caps{true};
         bool sides{true};
+        bool display{false};
         float head_scale{0.50f};
         float body_scale{0.50f};
         float limb_scale{0.50f};
+
+        [[nodiscard]] constexpr int max_points() const noexcept
+        {
+            return performance == preset::low ? 7 : performance == preset::medium ? 5 : 3;
+        }
     };
 
     struct prediction_settings
@@ -85,9 +103,6 @@ struct combat_profile
         float pitch{100.0f};
         float yaw{100.0f};
         float response_ms{35.0f};
-        float smoothness{75.0f};
-        float randomness{30.0f};
-        float drift{30.0f};
     };
 
     struct fov_settings

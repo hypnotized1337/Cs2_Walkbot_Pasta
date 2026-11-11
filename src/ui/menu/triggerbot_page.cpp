@@ -16,7 +16,7 @@ void menu_t::draw_triggerbot()
         static constexpr const char* seed_types[]{"None", "Restricted", "Unrestricted"};
         const auto global_seeded = global.triggerbot_seed_type != config::combat_profile::seed_mode::none;
         const auto trigger_uses_key = global.triggerbot_activation_mode != config::combat_profile::activation::always;
-        const auto trigger_rows = global.triggerbot_enabled ? (trigger_uses_key ? 1 : 0) + (global_seeded ? 7 : 9) : 1;
+        const auto trigger_rows = global.triggerbot_enabled ? (trigger_uses_key ? 1 : 0) + (global_seeded ? 8 : 10) : 1;
         card_in_column("trigger_core", "TRIGGERBOT CORE", trigger_rows, 0,
                        [&]
                        {
@@ -50,6 +50,7 @@ void menu_t::draw_triggerbot()
                                }
                                toggle_row("Predictive", global.triggerbot_predictive);
                                toggle_row("Lethal Only", global.triggerbot_lethal_only);
+                               toggle_row("Show Decision Debug", config::general_settings.trigger_debug_overlay);
                            }
                        });
         if (global.triggerbot_enabled)

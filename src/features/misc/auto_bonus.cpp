@@ -42,7 +42,7 @@ void auto_bonus_t::reset()
 void auto_bonus_t::tick()
 {
     const auto snapshot = config::get_runtime_snapshot();
-    if (!snapshot || !snapshot->general.m_auto_bonus.enabled)
+    if (!snapshot || !snapshot->general.m_walk_bot.enabled || !snapshot->general.m_auto_bonus.enabled)
     {
         reset();
         return;

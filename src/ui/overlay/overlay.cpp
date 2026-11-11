@@ -106,6 +106,7 @@ constexpr bool k_use_composition_backend = true;
            visuals.m_radar.enabled || visuals.m_sound.enabled || misc.m_watermark.enabled || misc.m_spectator_list.enabled ||
            misc.m_event_log.enabled || misc.m_keybind_list.enabled || misc.m_bullet_tracers.enabled ||
            misc.m_hitmarker.enabled || misc.m_hitsound.enabled || misc.m_hitsound.show_damage ||
+           misc.trigger_debug_overlay ||
            (combat.aimbot_enabled && combat.aimbot_draw_fov) || combat.penetration_crosshair;
 }
 
@@ -608,6 +609,7 @@ void overlay_t::build_frame()
             m_hud_panels.draw_event_log(interactive);
             m_hud_panels.draw_keybind_list(interactive);
             m_hud_panels.draw_bomb_info(interactive);
+            m_hud_panels.draw_trigger_debug(interactive);
         }
     }
 
@@ -1948,15 +1950,24 @@ bool overlay_t::initialize_graphics()
         const auto menu_dpi_scale = m_ui_dpi_scale;
         m_fonts.menu_regular_12 =
             render::draw::add_font_from_file("C:/Windows/Fonts/segoeui.ttf", 16.0f * menu_dpi_scale);
+        // The source menu is DejaVuSans 13 at 524x412. This shell is 1.5x that size, so 18px keeps the source's
+        // text-to-card proportion; unlike the HUD font this one stays at the authored size and menu_scale transforms it.
+        m_fonts.menu_source_18 = render::draw::add_font_from_file("C:/Windows/Fonts/segoeui.ttf", 18.0f);
+        // The readability overlays draw larger text than the menu, so rasterize their TTF at the high end of the
+        // supported HUD scale instead of magnifying the small menu atlas.
+        m_fonts.hud_text_40 = render::draw::add_font_from_file(
+            "C:/Windows/Fonts/segoeui.ttf", ui::hud::k_hud_font_raster_size * menu_dpi_scale,
+            atlas->GetGlyphRangesCyrillic());
         m_fonts.menu_semibold_13 =
             render::draw::add_font_from_file("C:/Windows/Fonts/seguisb.ttf", 16.0f * menu_dpi_scale);
-        m_fonts.menu_brand_30 =
-            render::draw::add_font_from_file("C:/Windows/Fonts/segoeuib.ttf", 38.0f * menu_dpi_scale);
+        m_fonts.menu_brand_30 = render::draw::add_font_from_file(
+            "C:/Windows/Fonts/segoeuib.ttf", ui::hud::k_hud_brand_size * 2.0f * menu_dpi_scale);
         const auto font_ready = [](const render::draw::font* font) { return font && font->im_font; };
         if (!font_ready(m_fonts.notosans_medium_12) || !font_ready(m_fonts.esp_text_11) ||
             !font_ready(m_fonts.weapons_15) || !font_ready(m_fonts.weapons_esp_15) ||
-            !font_ready(m_fonts.menu_regular_12) || !font_ready(m_fonts.menu_semibold_13) ||
-            !font_ready(m_fonts.menu_brand_30))
+            !font_ready(m_fonts.menu_regular_12) || !font_ready(m_fonts.menu_source_18) ||
+            !font_ready(m_fonts.hud_text_40) ||
+            !font_ready(m_fonts.menu_semibold_13) || !font_ready(m_fonts.menu_brand_30))
         {
             game::bound_memory().log.warning("one or more required ImGui fonts failed to load.");
             return false;

@@ -6,6 +6,7 @@
 #include <render/presentation.hpp>
 #include <render/text/localization.hpp>
 #include <ui/menu/library_widgets.hpp>
+#include <ui/menu/menu.hpp>
 #include <ui/overlay/overlay.hpp>
 #include <ui/presentation.hpp>
 #include <imgui.h>
@@ -20,8 +21,8 @@ namespace
 using config::config_library;
 using outcome = config_library::outcome;
 
-constexpr float k_tile_height = 56.0f;
-constexpr float k_tile_gap = 8.0f;
+constexpr float k_tile_height = 60.0f;
+constexpr float k_tile_gap = 6.0f;
 
 // What the Configs page keeps between frames: the name being typed, the tile being renamed and the last result.
 struct page_state
@@ -172,8 +173,8 @@ bool config_tile(const config::library_entry& entry, const float width)
     bool changed = false;
 
     // Actions from the right edge: the menu of everything else, then the main action.
-    constexpr float button = 30.0f;
-    float x = max.x - 12.0f - button;
+    constexpr float button = 24.0f;
+    float x = max.x - 10.0f - button;
     ImGui::SetCursorScreenPos({x, min.y + (k_tile_height - button) * 0.5f});
     static constexpr std::array<menu_action, 4> k_actions{
         {{"Overwrite with current"}, {"Rename"}, {"Duplicate"}, {"Delete", tone::danger, true}}};
@@ -207,9 +208,9 @@ bool config_tile(const config::library_entry& entry, const float width)
     }
     if (!broken && !changed)
     {
-        x -= 8.0f + 96.0f;
+        x -= 6.0f + 74.0f;
         ImGui::SetCursorScreenPos({x, min.y + (k_tile_height - button) * 0.5f});
-        if (pill_button("##load", "Load", 96.0f, tone::accent))
+        if (pill_button("##load", "Load", 74.0f, tone::accent))
         {
             report(key, library.load(entry), "Loaded");
             changed = true;
@@ -217,11 +218,11 @@ bool config_tile(const config::library_entry& entry, const float width)
     }
 
     // Name and subtitle, or the rename field.
-    const auto text_x = min.x + 18.0f;
-    const auto text_right = x - 10.0f;
+    const auto text_x = min.x + 14.0f;
+    const auto text_right = x - 8.0f;
     if (renaming && !changed)
     {
-        ImGui::SetCursorScreenPos({text_x - 4.0f, min.y + (k_tile_height - 32.0f) * 0.5f});
+        ImGui::SetCursorScreenPos({text_x - 4.0f, min.y + (k_tile_height - 24.0f) * 0.5f});
         if (g_page.focus_rename)
         {
             ImGui::SetKeyboardFocusHere();
@@ -241,11 +242,10 @@ bool config_tile(const config::library_entry& entry, const float width)
     }
     else
     {
-        const auto* title_font = render::fonts().menu_semibold_13;
-        ImFont* font = title_font && title_font->im_font ? title_font->im_font : ImGui::GetFont();
-        const auto size = title_font && title_font->im_font ? title_font->font_size : ImGui::GetFontSize();
+        ImFont* font = ImGui::GetFont();
+        const auto size = ImGui::GetFontSize();
         draw->PushClipRect({text_x, min.y}, {text_right, max.y}, true);
-        draw->AddText(font, size, {text_x, min.y + 10.0f}, packed(broken ? k_text_muted : k_text_main),
+        draw->AddText(font, size, {text_x, min.y + 8.0f}, packed(broken ? k_text_muted : k_text_main),
                       entry.name.c_str());
 
         std::string subtitle{};
@@ -267,7 +267,7 @@ bool config_tile(const config::library_entry& entry, const float width)
             subtitle +=
                 entry.legacy ? std::string(render::localization::tr("Old format")) : format_date(entry.saved_at);
         }
-        draw->AddText({text_x, min.y + 31.0f}, packed(color), subtitle.c_str());
+        draw->AddText({text_x, min.y + 33.0f}, packed(color), subtitle.c_str());
         draw->PopClipRect();
     }
 
@@ -316,14 +316,14 @@ void draw_config_library()
         [&]
         {
             const auto width = ImGui::GetContentRegionAvail().x;
-            constexpr float save_width = 110.0f;
+            constexpr float save_width = 82.0f;
             const auto has_folder = config::library().folder().has_value();
             if (hint_input("##new_config", "New config", g_page.new_name, sizeof(g_page.new_name),
                            width - save_width - 8.0f))
                 save_new();
             ImGui::SameLine(0.0f, 8.0f);
             ImGui::BeginDisabled(!has_folder || g_page.new_name[0] == '\0');
-            if (pill_button("##save_new", "Save", save_width, tone::accent, 32.0f))
+            if (pill_button("##save_new", "Save", save_width, tone::accent, 24.0f))
                 save_new();
             ImGui::EndDisabled();
             ImGui::Dummy({0.0f, 2.0f});
@@ -334,4 +334,21 @@ void draw_config_library()
         header_width(), [] { header_actions(); });
 }
 } // namespace ui::menu::detail
+
+namespace ui
+{
+void menu_t::draw_configs()
+{
+    using namespace ui::menu::detail;
+
+    ImGui::SetCursorPos({14.0f, 12.0f});
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, {0.0f, 0.0f});
+    ImGui::BeginChild("##configs_cards", {772.0f, 578.0f}, false);
+    begin_cards("##configs_grid");
+    draw_config_library();
+    end_cards();
+    ImGui::EndChild();
+    ImGui::PopStyleVar();
+}
+} // namespace ui
 

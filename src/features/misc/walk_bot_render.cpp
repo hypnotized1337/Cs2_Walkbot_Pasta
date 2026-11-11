@@ -1,5 +1,6 @@
 #include <stdafx.hpp>
 #include <features/misc/walk_bot_detail.hpp>
+#include <features/multipoint_overlay.hpp>
 #include <config/misc.hpp>
 #include <config/settings.hpp>
 #include <game/state/services.hpp>
@@ -21,6 +22,14 @@ void walk_bot_t::on_render(render::draw::draw_list& draw_list)
     const auto& cfg = snapshot->general.m_walk_bot;
     if (!cfg.enabled)
         return;
+
+    if (cfg.aim_multipoint && cfg.aim_multipoint_config.display)
+    {
+        const auto players = game::world().players();
+        if (players)
+            features::multipoint_overlay::draw(draw_list, *players, cfg.aim_hitboxes, true,
+                                               cfg.aim_multipoint_config);
+    }
 
     // Recording: a red dot and REC in the top-left corner.
     bool recording{};

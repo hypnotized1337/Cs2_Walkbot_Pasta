@@ -89,7 +89,8 @@ private:
         std::uintptr_t controller{};
         foundation::vec3 origin{};
         foundation::vec3 velocity{};
-        foundation::vec3 view{}; // pitch, yaw
+        foundation::vec3 view{};      // pitch, yaw: the rendered CViewRender camera
+        foundation::vec3 base_view{}; // pitch, yaw: v_angle, the base the game adds bullet punch to
         foundation::vec3 eye{};
         int team{};
         bool on_ground{};
@@ -357,6 +358,11 @@ private:
     std::int32_t m_last_health{};
     clock::time_point m_hit_at{};
     std::uintptr_t m_fight_target{};
+    // The previous fight point, kept as hitbox and candidate indices so the hand does not hop between neighbouring
+    // multipoints. Movement worker only; reset with the target.
+    std::uintptr_t m_fight_aim_pawn{};
+    int m_fight_aim_hitbox{-1};
+    int m_fight_aim_candidate{-1};
     clock::time_point m_fight_seen_at{};
     std::uintptr_t m_fight_react_target{}; // the enemy being registered before the fight starts
     clock::time_point m_fight_react_until{};

@@ -154,6 +154,9 @@ struct general_profile
         bool aim{true};
         float aim_speed{1.0f}; // the hand's speed: 1 is a quick player, 2 a very fast one
         int aim_hitboxes{combat_profile::aim_part::head}; // aim-part bitmask of the hitboxes it may aim at
+        // Optional multipoint aim: the centre plus capsule ends and lateral points. Off keeps one centre per part.
+        bool aim_multipoint{false};
+        combat_profile::multipoint_settings aim_multipoint_config{};
         bool aim_body_lethal{true}; // takes a chest shot instead of the head when the chest shot would kill
         int aim_smoothing{20};      // extra ease on the fight hand: 0 mechanical, 100 calm
         float aim_jitter{0.08f};    // micro movement of the hand while it tracks, in degrees
@@ -163,12 +166,8 @@ struct general_profile
         // is drawn again for the next target.
         bool auto_scope{true};
         bool autofire{true};
-        bool autofire_spray{false}; // beta: holds the trigger on SMGs and rifles instead of one press per shot
-        // Beta spray fires in bursts: `spray_burst_count` bullets, then the trigger is released for
-        // `spray_burst_cooldown_ms` so the weapon can recover before the next burst. Off holds the trigger instead.
-        bool spray_burst{true};
-        int spray_burst_count{10};
-        int spray_burst_cooldown_ms{450};
+        bool autofire_spray{false}; // beta: holds the trigger on SMGs, rifles and machine guns instead of one press per shot
+        bool spray_log{false};      // opt-in: writes one CSV row per spray tick to %TEMP%\vesta\logs
         // Close-quarters knife: an enemy inside this range is finished with slot 3 and a secondary attack instead of
         // the gun. The AFK check keeps the bot from chasing an active player.
         bool auto_knife{false};
@@ -259,6 +258,8 @@ struct general_profile
         float stop_speed{8.0f};
         float required_shoot_speed{34.0f};
     } m_auto_stop{};
+    // Draws the triggerbot decision trace. Off by default so the trace costs nothing unless it is being diagnosed.
+    bool trigger_debug_overlay{false};
 
     // Interface language: 0 English, 1 Russian (render::localization::id).
     static constexpr int k_language_count = 2;
@@ -266,15 +267,16 @@ struct general_profile
     float menu_scale{1.0f};
     struct interface_palette
     {
-        foundation::rgba background{13, 13, 18, 217};
-        foundation::rgba panel{20, 20, 26, 179};
-        foundation::rgba card{28, 28, 36, 153};
-        foundation::rgba popup{13, 13, 18, 199};
-        foundation::rgba accent{124, 58, 237, 255};
-        foundation::rgba text{248, 248, 242, 255};
-        foundation::rgba muted_text{161, 161, 170, 255};
-        foundation::rgba border{255, 255, 255, 15};
-        foundation::rgba hover{255, 255, 255, 20};
+        // Insomnia-style defaults: near-black surfaces, hairline warm-grey borders and a periwinkle accent.
+        foundation::rgba background{13, 13, 13, 255};
+        foundation::rgba panel{18, 18, 18, 255};
+        foundation::rgba card{13, 13, 13, 255};
+        foundation::rgba popup{10, 11, 9, 255};
+        foundation::rgba accent{180, 180, 208, 255};
+        foundation::rgba text{199, 199, 199, 255};
+        foundation::rgba muted_text{128, 128, 130, 255};
+        foundation::rgba border{36, 34, 33, 255};
+        foundation::rgba hover{30, 32, 34, 255};
     } palette{};
 
     bool auto_accept{true};

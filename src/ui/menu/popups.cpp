@@ -97,18 +97,12 @@ void popup_blur_callback(const ImDrawList*, const ImDrawCmd* command)
 
 void draw_popup_surface(ImDrawList* draw, ImVec2 min, ImVec2 max, float rounding)
 {
-    popup_blur_request blur{max.x - min.x, max.y - min.y, rounding, 2.25f};
-    draw->PushClipRect(min, max, true);
-    draw->AddCallback(popup_blur_callback, &blur, sizeof(blur));
-    draw->AddCallback(ImDrawCallback_ResetRenderState, nullptr);
-    draw->PopClipRect();
-    draw->AddRectFilled(min, max, packed(k_bg_popup), rounding);
-    draw->AddRectFilled(min + ImVec2{1.0f, 1.0f}, max - ImVec2{1.0f, 1.0f}, IM_COL32(224, 226, 236, 10),
-                        std::max(0.0f, rounding - 1.0f));
-    add_vertical_gradient_rounded(draw, min + ImVec2{1.0f, 1.0f}, max - ImVec2{1.0f, 1.0f}, IM_COL32(255, 255, 255, 8),
-                                  IM_COL32(255, 255, 255, 0), std::max(0.0f, rounding - 1.0f),
-                                  ImDrawFlags_RoundCornersAll);
-    draw->AddRect(min, max, IM_COL32(255, 255, 255, 24), rounding, 0, 1.0f);
+    // Source popups are flat panels with one hairline, not frosted glass. The rounding argument is kept for the
+    // callers that still pass one, but the source surface itself is square.
+    static_cast<void>(rounding);
+    draw->AddRectFilled(min, max, packed(k_outline_dark));
+    draw->AddRectFilled(min + ImVec2{1.0f, 1.0f}, max - ImVec2{1.0f, 1.0f}, packed(k_border));
+    draw->AddRectFilled(min + ImVec2{2.0f, 2.0f}, max - ImVec2{2.0f, 2.0f}, packed(k_bg_popup));
 }
 
 void color_picker_popup(render::draw::rgba& color, ImVec2 item_min, ImVec2 item_max, ImGuiID picker_id)
@@ -127,7 +121,7 @@ void color_picker_popup(render::draw::rgba& color, ImVec2 item_min, ImVec2 item_
     ImGui::SetNextWindowSize(picker_size, ImGuiCond_Always);
     ImGui::PushStyleColor(ImGuiCol_PopupBg, ImVec4{0, 0, 0, 0});
     ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, {0, 0});
-    ImGui::PushStyleVar(ImGuiStyleVar_PopupRounding, 14.0f);
+    ImGui::PushStyleVar(ImGuiStyleVar_PopupRounding, 0.0f);
     ImGui::PushStyleVar(ImGuiStyleVar_PopupBorderSize, 0.0f);
     if (ImGui::BeginPopup("##picker", ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse |
                                           ImGuiWindowFlags_NoBackground))
@@ -137,8 +131,7 @@ void color_picker_popup(render::draw::rgba& color, ImVec2 item_min, ImVec2 item_
         auto* popup_draw = ImGui::GetWindowDrawList();
 
         popup_draw->PushClipRect(settings_bounds_min(), settings_bounds_max(), false);
-        soft_shadow(popup_draw, popup_min, popup_max, 14.0f, {0.0f, 6.0f}, 14.0f, {0, 0, 0, 1}, 0.55f);
-        draw_popup_surface(popup_draw, popup_min, popup_max, 14.0f);
+        draw_popup_surface(popup_draw, popup_min, popup_max, 0.0f);
         popup_draw->PopClipRect();
 
         float hue{}, saturation{}, brightness{};
@@ -294,7 +287,7 @@ void settings_popup(ImVec2 anchor_min, ImVec2 anchor_max, int rows, callback_ref
     const auto parent_min = ImGui::GetWindowPos();
     const auto parent_size = ImGui::GetWindowSize();
     const auto parent_max = parent_min + parent_size;
-    const auto popup_size = ImVec2{std::clamp(parent_size.x - 24.0f, 288.0f, 320.0f), 24.0f + rows * k_row_height};
+    const auto popup_size = ImVec2{std::clamp(parent_size.x - 24.0f, 272.0f, 300.0f), 20.0f + rows * k_row_height};
     const auto bounds_min = settings_bounds_min();
     const auto bounds_max = settings_bounds_max();
     const auto nested = parent && (parent->Flags & ImGuiWindowFlags_Popup) != 0;
@@ -319,8 +312,8 @@ void settings_popup(ImVec2 anchor_min, ImVec2 anchor_max, int rows, callback_ref
     ImGui::SetNextWindowPos(popup_position, ImGuiCond_Always);
     ImGui::SetNextWindowSize(popup_size, ImGuiCond_Always);
     ImGui::PushStyleColor(ImGuiCol_PopupBg, ImVec4{0, 0, 0, 0});
-    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, {16.0f, 0.0f});
-    ImGui::PushStyleVar(ImGuiStyleVar_PopupRounding, 12.0f);
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, {12.0f, 0.0f});
+    ImGui::PushStyleVar(ImGuiStyleVar_PopupRounding, 0.0f);
     ImGui::PushStyleVar(ImGuiStyleVar_PopupBorderSize, 0.0f);
     if (ImGui::BeginPopup("##settings", ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse |
                                             ImGuiWindowFlags_NoBackground))
@@ -329,11 +322,10 @@ void settings_popup(ImVec2 anchor_min, ImVec2 anchor_max, int rows, callback_ref
         const auto popup_max = popup_min + popup_size;
         auto* popup_draw = ImGui::GetWindowDrawList();
         popup_draw->PushClipRect(bounds_min, bounds_max, false);
-        soft_shadow(popup_draw, popup_min, popup_max, 12.0f, {0.0f, 7.0f}, 15.0f, {0, 0, 0, 1}, 0.78f);
-        draw_popup_surface(popup_draw, popup_min, popup_max, 12.0f);
+        draw_popup_surface(popup_draw, popup_min, popup_max, 0.0f);
         popup_draw->PopClipRect();
 
-        ImGui::SetCursorPos({16.0f, 12.0f});
+        ImGui::SetCursorPos({12.0f, 10.0f});
         callback();
         ImGui::EndPopup();
     }
@@ -343,7 +335,7 @@ void settings_popup(ImVec2 anchor_min, ImVec2 anchor_max, int rows, callback_ref
 
 void settings_popup_row(const char* label, int rows, callback_ref callback)
 {
-    constexpr auto options_width = 28.0f;
+    constexpr auto options_width = 20.0f;
     begin_row(label, options_width);
     ImGui::InvisibleButton("##settings_options", {options_width, 24.0f});
     const auto options_min = ImGui::GetItemRectMin();
@@ -355,7 +347,7 @@ void settings_popup_row(const char* label, int rows, callback_ref callback)
     auto* draw = ImGui::GetWindowDrawList();
     const auto dot_y = (options_min.y + options_max.y) * 0.5f;
     for (int dot = 0; dot < 3; ++dot)
-        draw->AddCircleFilled({options_min.x + 5.0f + dot * 9.0f, dot_y}, 1.08f, IM_COL32_WHITE, 12);
+        draw->AddCircleFilled({options_min.x + 4.0f + dot * 6.0f, dot_y}, 1.0f, packed(ImVec4{1, 1, 1, 1}), 10);
 
     settings_popup(options_min, options_max, rows, callback);
     end_row();
@@ -363,9 +355,9 @@ void settings_popup_row(const char* label, int rows, callback_ref callback)
 
 void toggle_popup_row(const char* label, bool& value, int rows, callback_ref callback)
 {
-    constexpr auto options_width = 28.0f;
-    constexpr auto spacing = 8.0f;
-    constexpr auto switch_width = 46.0f;
+    constexpr auto options_width = 20.0f;
+    constexpr auto spacing = 6.0f;
+    constexpr auto switch_width = 20.0f;
     begin_row(label, options_width + spacing + switch_width);
 
     ImGui::InvisibleButton("##settings_options", {options_width, 24.0f});
@@ -378,9 +370,7 @@ void toggle_popup_row(const char* label, bool& value, int rows, callback_ref cal
     auto* draw = ImGui::GetWindowDrawList();
     const auto dot_y = (options_min.y + options_max.y) * 0.5f;
     for (int dot = 0; dot < 3; ++dot)
-    {
-        draw->AddCircleFilled({options_min.x + 5.0f + dot * 9.0f, dot_y}, 1.08f, IM_COL32_WHITE, 12);
-    }
+        draw->AddCircleFilled({options_min.x + 4.0f + dot * 6.0f, dot_y}, 1.0f, packed(ImVec4{1, 1, 1, 1}), 10);
 
     ImGui::SetCursorScreenPos({options_max.x + spacing, options_min.y});
     toggle_control(value);
@@ -396,7 +386,7 @@ void visual_editor_settings_popup(int rows, callback_ref callback)
     if (ImGui::IsItemHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Right))
         ImGui::OpenPopup("##element_settings");
 
-    const auto popup_size = ImVec2{320.0f, 24.0f + rows * k_row_height};
+    const auto popup_size = ImVec2{300.0f, 20.0f + rows * k_row_height};
     const auto display = ImGui::GetIO().DisplaySize;
     const settings_bounds_scope popup_bounds{{0.0f, 0.0f}, display};
     const auto cursor = ImGui::GetMousePos();
@@ -408,8 +398,8 @@ void visual_editor_settings_popup(int rows, callback_ref callback)
     ImGui::SetNextWindowPos(popup_position, ImGuiCond_Appearing);
     ImGui::SetNextWindowSize(popup_size, ImGuiCond_Always);
     ImGui::PushStyleColor(ImGuiCol_PopupBg, ImVec4{0, 0, 0, 0});
-    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, {16.0f, 0.0f});
-    ImGui::PushStyleVar(ImGuiStyleVar_PopupRounding, 12.0f);
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, {12.0f, 0.0f});
+    ImGui::PushStyleVar(ImGuiStyleVar_PopupRounding, 0.0f);
     ImGui::PushStyleVar(ImGuiStyleVar_PopupBorderSize, 0.0f);
     if (ImGui::BeginPopup("##element_settings", ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse |
                                                     ImGuiWindowFlags_NoBackground))
@@ -418,10 +408,9 @@ void visual_editor_settings_popup(int rows, callback_ref callback)
         const auto popup_max = popup_min + popup_size;
         auto* popup_draw = ImGui::GetWindowDrawList();
         popup_draw->PushClipRect(settings_bounds_min(), settings_bounds_max(), false);
-        soft_shadow(popup_draw, popup_min, popup_max, 12.0f, {0.0f, 7.0f}, 15.0f, {0, 0, 0, 1}, 0.78f);
-        draw_popup_surface(popup_draw, popup_min, popup_max, 12.0f);
+        draw_popup_surface(popup_draw, popup_min, popup_max, 0.0f);
         popup_draw->PopClipRect();
-        ImGui::SetCursorPos({16.0f, 12.0f});
+        ImGui::SetCursorPos({12.0f, 10.0f});
         callback();
         ImGui::EndPopup();
     }

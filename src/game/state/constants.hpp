@@ -79,6 +79,13 @@ constexpr inline bool is_firearm(std::uint32_t equipment_type)
     return equipment_type >= 1 && equipment_type <= 6;
 }
 
+// The weapons whose trigger can be held for a spray: SMGs, rifles and machine guns. Shotguns and sniper rifles keep
+// their per-shot trigger path, and pistols are not full-auto.
+constexpr inline bool is_spray_weapon(std::uint32_t equipment_type)
+{
+    return equipment_type == smg || equipment_type == rifle || equipment_type == lmg;
+}
+
 enum input_button : std::uintptr_t
 {
     in_attack = 1 << 0,

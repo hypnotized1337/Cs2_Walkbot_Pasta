@@ -12,6 +12,8 @@ struct font_set
     draw::font* notosans_medium_12{};
     draw::font* esp_text_11{};
     draw::font* menu_regular_12{};
+    draw::font* menu_source_18{};
+    draw::font* hud_text_40{};
     draw::font* menu_semibold_13{};
     draw::font* menu_brand_30{};
 };

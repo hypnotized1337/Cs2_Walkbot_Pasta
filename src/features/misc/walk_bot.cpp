@@ -50,6 +50,13 @@ bool walk_bot_t::read_player(player_state& out) const
         return false;
     if (!game::camera().sample(out.eye, out.view))
         return false;
+    // The shot direction is built from the client's base view (v_angle) plus AimPunchServices' bullet scale. The
+    // rendered CViewRender may carry only a fraction of the punch, so it cannot be used as the shot origin direction.
+    out.base_view = out.view;
+    foundation::vec3 base_view{};
+    if (process.copy(pawn + SCHEMA("C_BasePlayerPawn", "v_angle"_id), &base_view, sizeof(base_view)) &&
+        std::isfinite(base_view.x) && std::isfinite(base_view.y) && std::isfinite(base_view.z))
+        out.base_view = base_view;
     out.pawn = pawn;
     out.controller = game::local_player().controller();
     out.team = game::local_player().team();
@@ -446,7 +453,7 @@ void walk_bot_t::handle_knife(const player_state& player, const combat_plan& pla
     m_scope_target = 0;
     m_scope_next = {};
     features::aimbot::g_walk_autofire.store(false, std::memory_order_release);
-    features::aimbot::g_walk_autofire_parts.store(0, std::memory_order_release);
+    features::aimbot::publish_walk_autofire_parts(0);
     features::aimbot::g_walk_autofire_spray.store(false, std::memory_order_release);
 
     if (m_knife_attack.pressed && now >= m_knife_release)
@@ -600,7 +607,7 @@ void walk_bot_t::handle_rear(const player_state& player, const combat_plan& plan
     const auto weapon = simulation::ballistics().ctx();
     const auto scope_wait = cfg.auto_scope && weapon.valid && weapon.weapon_type == game::rules::precision &&
                             !weapon.is_scoped && m_scope_state != scope_state::scoped;
-    features::aimbot::g_walk_autofire_parts.store(plan.view.part, std::memory_order_release);
+    features::aimbot::publish_walk_autofire_parts(plan.view.part);
     features::aimbot::g_walk_autofire.store(!scope_wait, std::memory_order_release);
     look(player, plan.view, false, now);
 }
@@ -635,6 +642,11 @@ void walk_bot_t::tick()
     release_tapped_key(!cfg.enabled);
     if (!cfg.enabled)
     {
+        // A buy sequence belongs to the walk bot session. Drop it on disable so re-enabling cannot type stale keys.
+        m_buy_queue.clear();
+        m_buy_waiting_menu = false;
+        m_buy_first_key = {};
+        m_next_buy_key = {};
         auto_bonus().set_auto_knife_active(false);
         m_knife_locked = false;
         restore_knife_weapon(now);
@@ -648,7 +660,7 @@ void walk_bot_t::tick()
         m_scope_wanted = false;
         (void)set_secondary_control(m_knife_attack, false);
         features::aimbot::g_walk_autofire.store(false, std::memory_order_release);
-        features::aimbot::g_walk_autofire_parts.store(0, std::memory_order_release);
+        features::aimbot::publish_walk_autofire_parts(0);
         features::aimbot::g_walk_autofire_spray.store(false, std::memory_order_release);
         servo_scope(now);
         if (m_walking || !m_gated_keys.empty() || m_recording_active)
@@ -706,7 +718,7 @@ void walk_bot_t::tick()
         m_rear_target = 0;
         (void)set_secondary_control(m_knife_attack, false);
         features::aimbot::g_walk_autofire.store(false, std::memory_order_release);
-        features::aimbot::g_walk_autofire_parts.store(0, std::memory_order_release);
+        features::aimbot::publish_walk_autofire_parts(0);
         note_idle(3);
         release_keys();
         return;
@@ -779,7 +791,7 @@ void walk_bot_t::tick()
         m_knife_locked = false;
         m_rear_target = 0;
         features::aimbot::g_walk_autofire.store(false, std::memory_order_release);
-        features::aimbot::g_walk_autofire_parts.store(0, std::memory_order_release);
+        features::aimbot::publish_walk_autofire_parts(0);
         note_idle(8);
         release_keys();
         look(player, {}, true, now);
@@ -821,10 +833,10 @@ void walk_bot_t::tick()
     // on a sniper rifle, it waits for the scope: an unscoped sniper shot is a wasted shot.
     const auto weapon = simulation::ballistics().ctx();
     const auto sniper = weapon.valid && weapon.weapon_type == game::rules::precision;
-    // Spray is an SMG/rifle hold only. Publishing it for a sniper would let the trigger's hold path and its seed
-    // stand-down reason about a mode that does not apply to this weapon.
-    const auto spray_weapon = weapon.valid && (weapon.weapon_type == game::rules::smg ||
-                                               weapon.weapon_type == game::rules::rifle);
+    // Spray is a hold for the game's automatic weapon classes: SMGs, rifles and machine guns. Publishing it for a
+    // sniper or shotgun would let the trigger's hold path and its seed stand-down reason about a mode that does not
+    // apply to that weapon.
+    const auto spray_weapon = weapon.valid && game::rules::is_spray_weapon(weapon.weapon_type);
     features::aimbot::g_walk_autofire_spray.store(cfg.autofire && cfg.autofire_spray && spray_weapon,
                                                   std::memory_order_release);
     // The scope servo already confirmed the scope for this fight; do not keep autofire off if the ballistics snapshot
@@ -843,7 +855,7 @@ void walk_bot_t::tick()
         if (!auto_stop_brake)
         {
             features::aimbot::g_walk_autofire.store(false, std::memory_order_release);
-            features::aimbot::g_walk_autofire_parts.store(0, std::memory_order_release);
+            features::aimbot::publish_walk_autofire_parts(0);
         }
         release_keys();
         look(player, {}, true, now);
@@ -853,7 +865,7 @@ void walk_bot_t::tick()
     {
         auto_bonus().set_auto_knife_active(false);
         features::aimbot::g_walk_autofire.store(false, std::memory_order_release);
-        features::aimbot::g_walk_autofire_parts.store(0, std::memory_order_release);
+        features::aimbot::publish_walk_autofire_parts(0);
         note_idle(1);
         release_keys();
         return;
@@ -867,6 +879,11 @@ void walk_bot_t::tick()
         (fight.what == combat_plan::kind::knife && fight.enemy != 0) ||
         (fight.what == combat_plan::kind::rear && fight.weapon == 1 && fight.enemy != 0);
     auto_bonus().set_auto_knife_active(knife_engagement);
+    // Publish the chosen part before the permission: the trigger runs on another worker, and must not see autofire
+    // enabled with the previous fight's part for a pass. This is the part that owns the selected point, including a
+    // multipoint cap or side.
+    const auto engaging = fight.what == combat_plan::kind::engage;
+    features::aimbot::publish_walk_autofire_parts(engaging ? fight.view.part : 0);
     // Publish the permission only once the plan is known. The trigger worker runs at 250 Hz and could otherwise see
     // a true published for the current tick before handle_knife() suspends the gun autofire for a knife engagement.
     features::aimbot::g_walk_autofire.store(cfg.autofire && !scope_wait && !knife_engagement,
@@ -882,8 +899,6 @@ void walk_bot_t::tick()
         m_knife_locked = false;
         (void)set_secondary_control(m_knife_attack, false);
     }
-    const auto engaging = fight.what == combat_plan::kind::engage;
-    features::aimbot::g_walk_autofire_parts.store(engaging ? fight.view.part : 0, std::memory_order_release);
     m_scope_wanted = engaging;
     servo_scope(now);
     if (fight.what == combat_plan::kind::knife)

@@ -42,57 +42,6 @@ int read_seed_tick()
     return host_session ? read_seed_tick(controller, pawn, *host_session) : -1;
 }
 
-point_buffer build_aim_points(const game::skeleton_reader::data::bone& bone, const game::hitbox_catalog::entry& hb,
-                              bool multipoint, int part, const config::combat_profile::multipoint_settings& settings)
-{
-    point_buffer out{};
-
-    const auto capsule = game::place_hitbox(bone, hb);
-    const auto start = capsule.start;
-    const auto end = capsule.end;
-    const auto center = capsule.center();
-
-    out.points[out.count++] = center;
-    if (!multipoint)
-    {
-        return out;
-    }
-
-    if (settings.caps)
-    {
-        out.points[out.count++] = start;
-        out.points[out.count++] = end;
-    }
-
-    // Lateral spread perpendicular to the capsule axis, so points cover the sides
-    // of the hull (a shoulder/temple edge), not just its length.
-    auto axis = end - start;
-    if (settings.sides && axis.length_sqr() > 0.0001f)
-    {
-        axis.normalize();
-        auto right = axis.cross(foundation::vec3{0.0f, 0.0f, 1.0f});
-        if (right.length_sqr() < 0.0001f)
-        {
-            right = axis.cross(foundation::vec3{1.0f, 0.0f, 0.0f});
-        }
-        right.normalize();
-        const auto up = right.cross(axis).normalized();
-
-        const auto scale =
-            part == config::combat_profile::aim_part::head
-                ? settings.head_scale
-                : (part == config::combat_profile::aim_part::body ? settings.body_scale : settings.limb_scale);
-        const auto reach = capsule.radius * std::clamp(scale, 0.05f, 0.95f);
-
-        out.points[out.count++] = center + right * reach;
-        out.points[out.count++] = center - right * reach;
-        out.points[out.count++] = center + up * reach;
-        out.points[out.count++] = center - up * reach;
-    }
-
-    return out;
-}
-
 bool line_through_smoke(const foundation::vec3& start, const foundation::vec3& end)
 {
     const auto projectiles = game::world().projectiles();

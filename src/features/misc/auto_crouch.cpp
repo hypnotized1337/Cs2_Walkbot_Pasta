@@ -23,23 +23,33 @@ constexpr auto k_view_target_grace = std::chrono::milliseconds(250);
 // Once a target has been crouched for, bridge short gaps in combat target publication. A longer gap means the target
 // was lost and the duck is released.
 constexpr auto k_target_loss_grace = std::chrono::milliseconds(250);
-// The sight gate only asks whether the enemy is still reachable at all, not how much of them the duck leaves
-// exposed. Holding through a tighter angle is deliberate: the old two-hitbox rule stood the bot up mid-fight to
-// regain the sight line, which read as the crouch being dropped after a shot.
-// The gate has to stay open for a moment before the duck goes down, and has to stay closed for a moment before it
-// is lifted, so a single sampled frame cannot start the crouch/release cycle.
+// Lowering the camera can put a wall between the eye and an enemy who was only just visible while standing. The
+// crouch decision is therefore made from the eye the duck would produce, not the current standing eye. Once the duck
+// is committed, hold through a narrower angle; only losing every hitbox makes it stand back up. This keeps the old
+// benefit of not standing up after every shot while avoiding a crouch that hides a barely exposed target.
 constexpr auto k_sight_confirm = std::chrono::milliseconds(100);
 constexpr auto k_sight_release_grace = std::chrono::milliseconds(150);
+// CS2's standing eye is 64 units and its crouched eye is 46; this is the drop the crouched sight sample uses.
+constexpr auto k_crouch_eye_drop = 18.0f;
+constexpr auto k_min_crouch_hitboxes = 2;
 
-// Whether any part of the enemy can still be reached from `eye`. `sampled` is false when the collision world is
-// unavailable: the gate then fails open and holds the duck instead of disabling Auto Crouch on maps without
-// collision data.
+// What `eye` can reach. `sampled` is false when the collision world is unavailable: the gate then fails open and
+// holds the duck instead of disabling Auto Crouch on maps without collision data.
 struct sight
 {
     int visible{};
+    int total{};
     bool sampled{};
 
     [[nodiscard]] bool seen() const noexcept { return !sampled || visible > 0; }
+
+    // The initial crouch is only allowed when the lower eye keeps enough of the enemy exposed. A map without
+    // collision data still fails open. A single-hitbox target (rare) is accepted rather than making Auto Crouch
+    // permanently unusable for it.
+    [[nodiscard]] bool exposed_for_crouch() const noexcept
+    {
+        return !sampled || visible >= std::min(total, k_min_crouch_hitboxes);
+    }
 };
 
 [[nodiscard]] sight sample_sight(const game::player_snapshot& player, const foundation::vec3& eye,
@@ -55,6 +65,7 @@ struct sight
     {
         if (hitbox.index < 0 || !player.bones.covers(hitbox.bone))
             continue;
+        ++result.total;
         const auto box = game::place_hitbox(player.bones.bones[static_cast<std::size_t>(hitbox.bone)], hitbox);
         if (!world.trace_ray(eye, box.center()).hit)
             ++result.visible;
@@ -94,7 +105,8 @@ void auto_crouch_t::reset()
 void auto_crouch_t::tick()
 {
     const auto snapshot = config::get_runtime_snapshot();
-    if (!snapshot || !snapshot->general.auto_crouch || game::input_bindings().text_entry_active())
+    if (!snapshot || !snapshot->general.m_walk_bot.enabled || !snapshot->general.auto_crouch ||
+        game::input_bindings().text_entry_active())
     {
         reset();
         return;
@@ -204,13 +216,18 @@ void auto_crouch_t::tick()
         m_target_seen_at = now;
     }
 
-    // Sight gate. The duck is held while any part of the enemy is still reachable; it is lifted only when the
-    // enemy is dead or fully behind cover. The old gate judged how many hitboxes the crouched eye left exposed
-    // and stood the bot up mid-fight whenever the duck tightened the angle, which read as the crouch being
-    // dropped after a shot.
+    // Sight gate. A crouch lowers the eye, so the initial decision samples the eye the duck would produce. If a
+    // barely exposed enemy would disappear behind the lower viewpoint, stay standing and wait for a better angle.
+    // Once committed, hold through a narrow angle; only a complete loss of the target releases the duck.
     if (const auto* engaged = find_player(target))
     {
-        if (sample_sight(*engaged, game::camera().origin(), simulation::collision()).seen())
+        const auto eye = game::camera().origin();
+        const auto gate_eye = game::local_player().ducked()
+                                  ? eye
+                                  : foundation::vec3{eye.x, eye.y, eye.z - k_crouch_eye_drop};
+        const auto gate = sample_sight(*engaged, gate_eye, simulation::collision());
+        const auto enough = m_duck.pressed ? gate.seen() : gate.exposed_for_crouch();
+        if (enough)
         {
             // Stay open for a moment before the duck goes down, so one lucky sample cannot start it.
             if (m_sight_ok_at == std::chrono::steady_clock::time_point{})
@@ -221,12 +238,17 @@ void auto_crouch_t::tick()
         }
         else
         {
-            // ...and stay closed for a moment before a held duck is lifted, so one sampled frame cannot end it.
             m_sight_ok_at = {};
+            if (!m_duck.pressed)
+            {
+                // The crouched eye would lose too much of the target: do not duck into the wall.
+                m_sight_bad_at = {};
+                return;
+            }
+            // Stay closed for a moment before a held duck is lifted, so one sampled frame cannot end it.
             if (m_sight_bad_at == std::chrono::steady_clock::time_point{})
                 m_sight_bad_at = now;
-            const auto grace = m_duck.pressed ? k_sight_release_grace : std::chrono::milliseconds(0);
-            if (now - m_sight_bad_at >= grace)
+            if (now - m_sight_bad_at >= k_sight_release_grace)
             {
                 reset();
                 return;

@@ -5,12 +5,14 @@
 #include <simulation/seed_timing.hpp>
 #include <config/settings.hpp>
 #include <features/aimbot/command_ring.hpp>
+#include <features/aimbot/trigger_debug.hpp>
 #include <diagnostics/rate_gate.hpp>
 #include <array>
 #include <atomic>
 #include <chrono>
 #include <cstddef>
 #include <cstdint>
+#include <deque>
 #include <limits>
 #include <memory>
 #include <mutex>
@@ -39,9 +41,46 @@ inline std::atomic<bool> g_walk_autofire{false};
 // autofire fires on that part instead of the triggerbot's own selection so its shots follow the walk bot's aim. 0
 // keeps the triggerbot's own selection.
 inline std::atomic<int> g_walk_autofire_parts{0};
-// Beta spray: while set, the walk bot's autofire holds the trigger on an SMG or rifle and fires in bursts. Recoil
-// control still owns the punch compensation for each burst; the walk bot's hand only places the view.
+// Beta spray: while set, the walk bot's autofire holds the trigger on an SMG, rifle or machine gun. The walk bot's
+// own aim owns the target and the impact point; the spray only mirrors that lock (g_walk_autofire_parts) and never
+// traces for targets itself.
 inline std::atomic<bool> g_walk_autofire_spray{false};
+// When the walk bot last published the part mask and its aim error. The spray must not trust a lock or an error that
+// stopped updating: a stopped movement worker would otherwise leave the attack held on a frozen frame.
+inline std::atomic<std::int64_t> g_walk_autofire_parts_at{0};
+inline std::atomic<std::int64_t> g_walk_autofire_aim_at{0};
+// The walk bot's own angular error to the hitbox it is aiming at, in degrees, and how far it moved the view this tick.
+// valid is false when the fight hand is not steering (turn camera off, view blocked/foreign, aim pause).
+inline std::atomic<float> g_walk_autofire_aim_error{999.0f};
+inline std::atomic<float> g_walk_autofire_aim_delta{0.0f};
+inline std::atomic<int> g_walk_autofire_aim_px_x{0};
+inline std::atomic<int> g_walk_autofire_aim_px_y{0};
+inline std::atomic<bool> g_walk_autofire_aim_valid{false};
+
+[[nodiscard]] inline std::int64_t steady_ticks() noexcept
+{
+    return std::chrono::steady_clock::now().time_since_epoch().count();
+}
+
+inline void publish_walk_autofire_parts(const int parts) noexcept
+{
+    g_walk_autofire_parts.store(parts, std::memory_order_release);
+    g_walk_autofire_parts_at.store(steady_ticks(), std::memory_order_release);
+}
+
+inline void publish_walk_autofire_aim(const bool valid, const float error_degrees, const float delta_degrees,
+                                      const int pixels_x, const int pixels_y) noexcept
+{
+    g_walk_autofire_aim_error.store(error_degrees, std::memory_order_relaxed);
+    g_walk_autofire_aim_delta.store(delta_degrees, std::memory_order_relaxed);
+    g_walk_autofire_aim_px_x.store(pixels_x, std::memory_order_relaxed);
+    g_walk_autofire_aim_px_y.store(pixels_y, std::memory_order_relaxed);
+    g_walk_autofire_aim_valid.store(valid, std::memory_order_release);
+    g_walk_autofire_aim_at.store(steady_ticks(), std::memory_order_release);
+}
+
+// One RCS input flush moves at most this many pixels; a larger correction stays pending for the next tick.
+inline constexpr int k_rcs_max_pixels_per_tick{24};
 
 using simulation::ballistics_t;
 
@@ -112,6 +151,8 @@ public:
     {
         return m_current_engaged_target.load(std::memory_order_acquire);
     }
+    // The combat worker fills the trigger decision trace; the render thread only reads this snapshot.
+    [[nodiscard]] trigger_debug::snapshot trigger_debug_snapshot() const;
     void sync_seed_phase(int tick, std::chrono::steady_clock::time_point observed_at) noexcept
     {
         if (simulation::seed_timing::observe_phase(tick, observed_at, m_seed_phase_tick, m_seed_phase_tick_at,
@@ -149,6 +190,10 @@ private:
                                                  const config::combat_profile::resolved_config& cfg, bool enforce_fov,
                                                  float& out_damage, int& out_hitbox, int& out_bone,
                                                  bool& out_penetrated, foundation::vec3& out_offset) const;
+    // Whether this candidate is the bone-local point the last aim pass used. Keeping the point in bone space makes it
+    // stable while the target moves and rotates.
+    [[nodiscard]] bool sticky_aim_point(std::uintptr_t pawn, int bone,
+                                        const foundation::vec3& offset) const noexcept;
 
     [[nodiscard]] float get_fov(const foundation::vec3& view_angles, const foundation::vec3& eye_pos,
                                 const foundation::vec3& target_pos) const;
@@ -168,6 +213,16 @@ private:
     // Steps of tick(), in the order it runs them.
     void update_revolver_pre_cock(const ballistics_t::context& ctx, const config::combat_profile::triggerbot& cfg);
     void release_finished_press(const ballistics_t::context& ctx, std::chrono::steady_clock::time_point now);
+    // Autospray: holds attack while the walk bot's aim reports a target and the weapon can fire, releases on the
+    // first tick either is gone. Returns true while the spray owns the attack button.
+    [[nodiscard]] bool update_autospray(const ballistics_t::context& ctx);
+    void end_autospray() noexcept;
+    // The walk bot's own aim moves the camera during autofire and now closes its loop on the game's predicted impact
+    // point (base view + bullet-scale punch). RCS must stand down so only one hand corrects recoil.
+    [[nodiscard]] static bool walk_aim_owns_recoil() noexcept
+    {
+        return g_walk_autofire.load(std::memory_order_acquire);
+    }
     void observe_shots_fired(std::uintptr_t pawn);
     [[nodiscard]] bool select_and_aim(const combat_frame& frame, const config::combat_profile::resolved_config& cfg,
                                       bool visual_scan_requested, bool visual_scan_due);
@@ -192,7 +247,8 @@ private:
     [[nodiscard]] trigger_result trace_direction(const foundation::vec3& eye_pos, const foundation::vec3& direction,
                                                  const std::vector<game::player_snapshot>& players,
                                                  const config::combat_profile::triggerbot& cfg, int hitbox_parts,
-                                                 std::uintptr_t focus_pawn = 0) const;
+                                                 std::uintptr_t focus_pawn = 0,
+                                                 trigger_debug::frame* trace = nullptr) const;
     void triggerbot(const foundation::vec3& eye_pos, const foundation::vec3& view_angles,
                     const std::vector<game::player_snapshot>& players, const config::combat_profile::triggerbot& cfg);
 
@@ -319,6 +375,7 @@ private:
     std::uintptr_t m_aim_selection_weapon{};
     std::chrono::steady_clock::time_point m_aim_selection_at{};
     int m_aim_last_bone{-1};
+    foundation::vec3 m_aim_last_offset{};
     std::chrono::steady_clock::time_point m_aim_last_call{};
     std::chrono::steady_clock::time_point m_aim_last_seen{};
     std::chrono::steady_clock::time_point m_aim_reaction_until{};
@@ -335,14 +392,8 @@ private:
     float m_aim_wander_phase{};
     float m_aim_wander_freq{};
     float m_aim_tracking_lag{};
-    // Recoil-sync state: compensation lags behind recoil and never matches it exactly.
-    foundation::vec3 m_rcs_raw{};
-    foundation::vec3 m_rcs_target{};
-    foundation::vec3 m_rcs_velocity{}; // continuous compensation velocity
-    float m_rcs_gain{1.0f};            // under/over-compensation for the current burst
-    float m_rcs_response_scale{1.0f};
-    float m_rcs_phase{};
-    float m_rcs_freq{2.5f};
+    // Recoil compensation: m_rcs_applied is the correction already injected for this burst, so each tick sends only
+    // the difference to the freshly read punch. One layer, no stacked smoothing.
     foundation::vec3 m_rcs_applied{};
     foundation::vec2 m_rcs_mouse_error{};
     foundation::vec2 m_rcs_pending_mouse{};
@@ -350,11 +401,9 @@ private:
     std::chrono::steady_clock::time_point m_rcs_last_input_time{};
     int m_rcs_last_input_sequence{-1};
     std::uintptr_t m_rcs_weapon{};
-    int m_rcs_last_clip{-1};
-    float m_rcs_last_shot_time{-1.0f};
-    int m_rcs_burst_shots{};
-    int m_rcs_input_step{24};
-    bool m_rcs_active{false}; // a burst is in progress (recoil accumulated)
+    int m_rcs_shots{};       // shots fired in this attack, from m_iShotsFired; reset with the spray
+    int m_rcs_last_fired{-1};
+    bool m_rcs_active{false}; // compensation is being applied this burst
     std::uint64_t m_combat_sequence{};
 
     foundation::vec3 m_aim_previous_relative_velocity{};
@@ -365,15 +414,63 @@ private:
     int m_aim_velocity_samples{};
 
     bool m_trigger_held{false};
-    bool m_spray_held{false};        // a spray fight is active, including the pause between bursts
-    bool m_spray_button_down{false}; // the trigger is physically held for the current burst
-    bool m_spray_cooling{false};     // the burst is complete and the weapon is recovering
-    int m_spray_burst_shots{};       // bullets fired in the current burst, counted from the magazine
-    int m_spray_last_clip{-1};
+    enum class spray_state : std::uint8_t
+    {
+        idle,
+        spraying,
+    };
+    spray_state m_spray_state{spray_state::idle};
     std::uintptr_t m_spray_weapon{};
-    std::chrono::steady_clock::time_point m_spray_check_at{};
-    std::chrono::steady_clock::time_point m_spray_off_target_since{};
-    std::chrono::steady_clock::time_point m_spray_cooldown_until{};
+    // Opt-in spray diagnostics. A row is captured at the start of the next combat tick, so it describes the tick
+    // that just ran; the file is written when the spray releases.
+    struct spray_log_row
+    {
+        float t_ms{};
+        float dt_ms{};
+        int spraying{};
+        int attack_held{};
+        float lock_age_ms{};
+        float view_pitch{};
+        float view_yaw{};
+        float base_pitch{};
+        float base_yaw{};
+        int punch_valid{};
+        float punch_x{}; // raw aim punch, before the game's bullet scale
+        float punch_y{};
+        float punch_scale{};
+        float impact_pitch{};
+        float impact_yaw{};
+        float impact_error{};
+        float aim_error{};
+        float aim_age_ms{};
+        int aim_valid{};
+        int shots_fired{};
+        float rcs_pitch{};
+        float rcs_yaw{};
+        float pending_x{};
+        float pending_y{};
+        int rcs_px_x{};
+        int rcs_px_y{};
+        int aim_px_x{};
+        int aim_px_y{};
+        float aim_delta{};
+        int rcs_order{}; // 1: RCS was folded in before the aim error was measured
+        int rcs_owner{}; // 1: the walk bot's aim owns recoil; 0: RCS does
+        int rcs_enabled{};
+        int rcs_start_bullet{};
+        float rcs_strength_pitch{};
+        float rcs_strength_yaw{};
+        float rcs_response_ms{};
+    };
+    std::vector<spray_log_row> m_spray_log{};
+    std::chrono::steady_clock::time_point m_spray_log_start{};
+    std::chrono::steady_clock::time_point m_spray_log_last{};
+    bool m_spray_log_active{};
+    foundation::vec3 m_spray_log_rcs_delta{};
+    foundation::vec2 m_spray_log_rcs_pixels{};
+    void begin_spray_log();
+    void capture_spray_log(bool release_row = false);
+    void write_spray_log() noexcept;
     std::atomic<std::int64_t> m_view_engaged_ticks{};
     std::atomic<std::int64_t> m_view_target_ticks{};
     std::atomic<std::uintptr_t> m_view_engaged_target{};
@@ -394,6 +491,39 @@ private:
     std::chrono::steady_clock::time_point m_trigger_fire_time{};
     std::chrono::steady_clock::time_point m_trigger_cooldown_until{};
     diagnostics::rate_gate m_trigger_note{std::chrono::milliseconds(250)};
+    struct trigger_debug_runtime
+    {
+        bool seen{};
+        trigger_debug::decision state{trigger_debug::decision::idle};
+        trigger_debug::reason why{trigger_debug::reason::unspecified};
+        std::uintptr_t pawn{};
+        int hitbox{-1};
+        int hitgroup{-1};
+        int required_parts{};
+        float damage{};
+        float delay_ms{};
+        float cooldown_ms{};
+        float target_age_ms{};
+        float hitchance{};
+        float required_hitchance{};
+        float min_damage{};
+        int target_health{};
+        float state_ms{};
+        float on_target_ms{};
+        bool on_target{};
+        bool stuck{};
+        std::chrono::steady_clock::time_point state_since{};
+        std::chrono::steady_clock::time_point on_target_since{};
+        std::chrono::steady_clock::time_point last_shot{};
+        std::chrono::steady_clock::time_point last_update{};
+        std::chrono::steady_clock::time_point last_dump{};
+        std::array<trigger_debug::target, 24> targets{};
+        std::size_t target_count{};
+        std::deque<trigger_debug::decision_entry> history{};
+    };
+    mutable std::mutex m_trigger_debug_mutex{};
+    trigger_debug_runtime m_trigger_debug{};
+    void publish_trigger_debug(const trigger_debug::frame& frame) noexcept;
     // Each worker that reads user commands keeps its own ring search state.
     command_ring_reader m_recoil_commands{};
     command_ring_reader m_seed_commands{};

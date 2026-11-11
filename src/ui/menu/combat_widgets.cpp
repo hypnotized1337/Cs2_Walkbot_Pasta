@@ -103,7 +103,7 @@ void fov_row(int& fixed_fov, config::combat_profile::fov_settings& fov, bool& dr
 
 void humanizer_row(int& amount, int& smoothing, config::combat_profile::humanizer_settings& humanizer)
 {
-    settings_popup_row("Humanizer Profile", 6,
+    settings_popup_row("Humanizer Profile", 8,
                        [&]
                        {
                            humanizer_preview(amount, smoothing, humanizer);
@@ -134,11 +134,18 @@ void humanizer_row(int& amount, int& smoothing, config::combat_profile::humanize
 
 void multipoint_row(bool& enabled, config::combat_profile::multipoint_settings& settings)
 {
-    toggle_popup_row("Multi-Point", enabled, 5,
+    toggle_popup_row("Multi-Point", enabled, 7,
                      [&]
                      {
+                         static constexpr const char* presets[]{"High Performance", "Medium", "Low"};
+                         select_row("Performance", settings.performance, presets);
+                         settings.performance = std::clamp(
+                             settings.performance,
+                             static_cast<int>(config::combat_profile::multipoint_settings::preset::high_performance),
+                             static_cast<int>(config::combat_profile::multipoint_settings::preset::low));
                          toggle_row("Cap Points", settings.caps);
                          toggle_row("Side Points", settings.sides);
+                         toggle_row("Display Multipoints", settings.display);
                          slider_row("Head Scale", settings.head_scale, 0.05f, 0.95f, "", 0.05f);
                          slider_row("Body Scale", settings.body_scale, 0.05f, 0.95f, "", 0.05f);
                          slider_row("Limbs Scale", settings.limb_scale, 0.05f, 0.95f, "", 0.05f);
@@ -147,16 +154,13 @@ void multipoint_row(bool& enabled, config::combat_profile::multipoint_settings& 
 
 void rcs_row(config::combat_profile::rcs_settings& rcs)
 {
-    toggle_popup_row("RCS", rcs.enabled, 7,
+    toggle_popup_row("RCS", rcs.enabled, 4,
                      [&]
                      {
                          slider_row("Start Bullet", rcs.start_bullet, 1, 10);
                          slider_row("Pitch Strength", rcs.pitch, 0.0f, 200.0f, "%", 1.0f);
                          slider_row("Yaw Strength", rcs.yaw, 0.0f, 200.0f, "%", 1.0f);
                          slider_row("Correction Time", rcs.response_ms, 1.0f, 150.0f, " ms", 1.0f);
-                         slider_row("Smoothness", rcs.smoothness, 0.0f, 100.0f, "%", 1.0f);
-                         slider_row("Strength Variation", rcs.randomness, 0.0f, 30.0f, "%", 1.0f);
-                         slider_row("Path Drift", rcs.drift, 0.0f, 30.0f, "%", 1.0f);
                      });
 }
 

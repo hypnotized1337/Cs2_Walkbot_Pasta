@@ -11,9 +11,11 @@ namespace features::aimbot::detail
 
 // A new command can still describe an older camera state; only bounded
 // feedback may correct the faster worker's predicted camera position.
-[[nodiscard]] inline float selection_cost(const float fov, const bool held) noexcept
+[[nodiscard]] inline float selection_cost(const float fov, const bool held, const bool sticky) noexcept
 {
-    return fov - (held ? 0.12f : 0.0f);
+    // A held target and its previous multipoint keep a small preference. Without this, points a fraction of a degree
+    // apart trade places as the view moves, which reads as aim jitter even though every point is valid.
+    return fov - (held ? 0.12f : 0.0f) - (sticky ? 0.20f : 0.0f);
 }
 
 [[nodiscard]] constexpr bool should_trace_candidate(const float fov, const float limit, const bool enforce_fov) noexcept

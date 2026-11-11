@@ -27,59 +27,50 @@ void from_imvec(const ImVec4& value, render::draw::rgba& color)
 
 void toggle_control(bool& value)
 {
-    constexpr auto switch_size = ImVec2{46.0f, 24.0f};
-    const auto id = ImGui::GetID("##toggle");
-    if (ImGui::InvisibleButton("##toggle", switch_size))
-    {
+    // Source checkbox: a square with a one-pixel black ring, no travel or thumb. The hit target stays 24px high
+    // so it lines up with the neighbouring fields.
+    constexpr auto hit_size = ImVec2{20.0f, 24.0f};
+    constexpr auto box_size = 20.0f;
+    if (ImGui::InvisibleButton("##toggle", hit_size))
         value = !value;
-    }
 
-    auto& animation = g_toggle_animations[id];
-    spring_to(animation.position, animation.velocity, value ? 1.0f : 0.0f);
-    animation.reveal = approach(animation.reveal, 1.0f, 0.22f);
-
-    const auto reveal = 1.0f - std::pow(1.0f - std::clamp(animation.reveal, 0.0f, 1.0f), 3.0f);
     const auto raw_min = ImGui::GetItemRectMin();
-    const auto raw_max = ImGui::GetItemRectMax();
-    const auto center = (raw_min + raw_max) * 0.5f;
-    const auto half_size = ImVec2{switch_size.x * 0.5f * reveal, switch_size.y * 0.5f * (0.82f + reveal * 0.18f)};
-    const auto min = center - half_size;
-    const auto max = center + half_size;
+    const auto box_min = ImVec2{raw_min.x, raw_min.y + 2.0f};
+    const auto box_max = box_min + ImVec2{box_size, box_size};
     const auto hovered = ImGui::IsItemHovered();
     pointer_cursor_if_hovered();
-    const auto hover = animate_state(g_hover_animations, id, hovered, 0.16f);
-    const auto position = std::clamp(animation.position, 0.0f, 1.0f);
     auto* draw = ImGui::GetWindowDrawList();
-    const auto off_track = mix(ImVec4{38.0f / 255.0f, 38.0f / 255.0f, 48.0f / 255.0f, 0.88f},
-                               ImVec4{50.0f / 255.0f, 50.0f / 255.0f, 62.0f / 255.0f, 0.96f}, hover);
-    auto track = mix(off_track, k_accent, position);
-    track.w *= reveal;
 
-    draw->AddRectFilled(min, max, packed(track), 12.0f);
-
-    const auto knob_target_x = raw_min.x + 12.0f + 22.0f * position;
-    const auto knob_center = ImVec2{center.x + (knob_target_x - center.x) * reveal, center.y};
-    const auto motion = std::min(std::abs(animation.velocity) * 0.018f, 0.16f);
-    const auto knob_radius = (9.0f + hover * 0.35f) * reveal;
-    draw->AddCircleFilled(knob_center + ImVec2{0.0f, 1.5f}, knob_radius + 1.0f,
-                          IM_COL32(0, 0, 0, static_cast<int>(55.0f * reveal)), 28);
-    draw->AddEllipseFilled(knob_center, {knob_radius * (1.0f + motion), knob_radius * (1.0f - motion * 0.45f)},
-                           IM_COL32(250, 250, 252, static_cast<int>(255.0f * reveal)), 0.0f, 28);
-    draw->AddCircle(knob_center, knob_radius, IM_COL32(255, 255, 255, static_cast<int>(110.0f * reveal)), 28, 1.0f);
+    draw->AddRectFilled(box_min, box_max, packed(k_outline_dark));
+    const auto inner_min = box_min + ImVec2{1.0f, 1.0f};
+    const auto inner_max = box_max - ImVec2{1.0f, 1.0f};
+    if (value)
+    {
+        // The checked state is an interaction accent, not a fixed pale colour. Custom red (or any other) accents
+        // must reach every toggle, including the ones in popups and the ESP editor.
+        draw->AddRectFilled(inner_min, inner_max, packed(k_accent));
+    }
+    else
+    {
+        draw->AddRectFilled(inner_min, inner_max, packed(k_bg_panel));
+        draw->AddLine({inner_min.x, inner_max.y}, {inner_max.x, inner_min.y}, packed(ImVec4{1, 1, 1, 0.035f}),
+                      1.0f);
+    }
+    draw->AddRect(box_min, box_max, hovered ? packed(k_border_light) : packed(k_outline_dark), 0.0f, 0, 1.0f);
 }
 
 void toggle_row(const char* label, bool& value)
 {
-    begin_row(label, 46.0f);
+    begin_row(label, 20.0f);
     toggle_control(value);
     end_row();
 }
 
 void toggle_color_row(const char* label, bool& value, render::draw::rgba& color)
 {
-    constexpr auto options_width = 28.0f;
-    constexpr auto spacing = 8.0f;
-    constexpr auto switch_width = 46.0f;
+    constexpr auto options_width = 20.0f;
+    constexpr auto spacing = 6.0f;
+    constexpr auto switch_width = 20.0f;
     begin_row(label, options_width + spacing + switch_width);
 
     const auto picker_id = ImGui::GetID("##picker");
@@ -93,9 +84,7 @@ void toggle_color_row(const char* label, bool& value, render::draw::rgba& color)
     auto* draw = ImGui::GetWindowDrawList();
     const auto dot_y = (options_min.y + options_max.y) * 0.5f;
     for (int dot = 0; dot < 3; ++dot)
-    {
-        draw->AddCircleFilled({options_min.x + 5.0f + dot * 9.0f, dot_y}, 1.08f, IM_COL32_WHITE, 12);
-    }
+        draw->AddCircleFilled({options_min.x + 4.0f + dot * 6.0f, dot_y}, 1.0f, IM_COL32_WHITE, 10);
 
     ImGui::SetCursorScreenPos({options_max.x + spacing, options_min.y});
     toggle_control(value);
@@ -155,9 +144,9 @@ void select_row(const char* label, int& value, std::span<const char* const> opti
     if (options.empty())
         return;
 
-    constexpr auto control_width = 140.0f;
-    constexpr auto control_height = 30.0f;
-    constexpr auto option_height = 34.0f;
+    constexpr auto control_width = 150.0f;
+    constexpr auto control_height = 24.0f;
+    constexpr auto option_height = 24.0f;
 
     auto popup_width = control_width;
     for (const auto* option : options)
@@ -167,7 +156,6 @@ void select_row(const char* label, int& value, std::span<const char* const> opti
 
     begin_row(label, control_width);
     const auto index = std::clamp(value, 0, static_cast<int>(options.size()) - 1);
-    const auto button_id = ImGui::GetID("##select_button");
     ImGui::InvisibleButton("##select_button", {control_width, control_height});
     if (ImGui::IsItemClicked())
     {
@@ -176,36 +164,31 @@ void select_row(const char* label, int& value, std::span<const char* const> opti
     pointer_cursor_if_hovered();
     const auto button_hovered = ImGui::IsItemHovered();
     const auto popup_open = ImGui::IsPopupOpen("##options");
-    const auto hover_t = animate_state(g_hover_animations, button_id, button_hovered, 0.14f);
-    const auto open_t = animate_state(g_active_animations, button_id, popup_open, 0.16f);
     const auto button_min = ImGui::GetItemRectMin();
     const auto button_max = ImGui::GetItemRectMax();
 
     auto* button_draw = ImGui::GetWindowDrawList();
-    const auto control_bg =
-        mix(ImVec4{27.0f / 255.0f, 27.0f / 255.0f, 35.0f / 255.0f, 0.94f},
-            ImVec4{38.0f / 255.0f, 36.0f / 255.0f, 48.0f / 255.0f, 0.98f}, std::max(hover_t, open_t));
-    button_draw->AddRectFilled(button_min, button_max, packed(control_bg), 9.0f);
-    auto control_border = mix(k_border, k_border_light, hover_t);
-    control_border = mix(control_border, k_accent, open_t * 0.65f);
-    control_border.w = 0.08f + hover_t * 0.08f + open_t * 0.20f;
-    button_draw->AddRect(button_min, button_max, packed(control_border), 9.0f, 0, 1.0f);
+    button_draw->AddRectFilled(button_min, button_max, packed(k_outline_dark), 2.0f);
+    button_draw->AddRectFilled(button_min + ImVec2{1.0f, 1.0f}, button_max - ImVec2{1.0f, 1.0f},
+                               packed(button_hovered ? k_bg_hover : k_bg_panel), 1.0f);
+    button_draw->AddRect(button_min, button_max,
+                         packed(button_hovered || popup_open ? k_border_light : k_border), 2.0f, 0, 1.0f);
     const auto* selected_text = render::localization::tr(options[index]);
     const auto label_size = ImGui::CalcTextSize(selected_text);
     // Clipped short of the arrow so an over-long value cannot spill past the
     // button's own background and collide with the chevron.
-    button_draw->PushClipRect(button_min, {button_max.x - 28.0f, button_max.y}, true);
-    button_draw->AddText({button_min.x + 12.0f, button_min.y + (control_height - label_size.y) * 0.5f},
+    button_draw->PushClipRect(button_min, {button_max.x - 20.0f, button_max.y}, true);
+    button_draw->AddText({button_min.x + 7.0f, button_min.y + (control_height - label_size.y) * 0.5f},
                          packed(k_text_main), selected_text);
     button_draw->PopClipRect();
 
-    draw_dropdown_chevron(button_draw, {button_max.x - 15.0f, button_min.y + control_height * 0.5f},
-                          packed(mix(k_text_muted, k_text_main, std::max(hover_t, open_t))), open_t);
+    draw_dropdown_chevron(button_draw, {button_max.x - 9.0f, button_min.y + control_height * 0.5f},
+                          packed(k_text_muted), popup_open ? 1.0f : 0.0f);
 
-    const auto popup_height = 8.0f + options.size() * option_height;
-    auto popup_position = ImVec2{button_min.x, button_max.y + 4.0f};
+    const auto popup_height = 4.0f + options.size() * option_height;
+    auto popup_position = ImVec2{button_min.x, button_max.y + 3.0f};
     if (popup_position.y + popup_height > settings_bounds_max().y - 8.0f)
-        popup_position.y = button_min.y - popup_height - 4.0f;
+        popup_position.y = button_min.y - popup_height - 3.0f;
     // Right-aligned with the button, so a popup wider than the control grows
     // back into the card instead of off its right edge.
     popup_position.x = std::max(button_max.x - popup_width, settings_bounds_min().x + 8.0f);
@@ -213,7 +196,7 @@ void select_row(const char* label, int& value, std::span<const char* const> opti
     ImGui::SetNextWindowSize({popup_width, popup_height}, ImGuiCond_Always);
     ImGui::PushStyleColor(ImGuiCol_PopupBg, ImVec4{0, 0, 0, 0});
     ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, {0.0f, 0.0f});
-    ImGui::PushStyleVar(ImGuiStyleVar_PopupRounding, 8.0f);
+    ImGui::PushStyleVar(ImGuiStyleVar_PopupRounding, 0.0f);
     ImGui::PushStyleVar(ImGuiStyleVar_PopupBorderSize, 0.0f);
     ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, {0.0f, 0.0f});
     if (ImGui::BeginPopup("##options", ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse |
@@ -224,39 +207,31 @@ void select_row(const char* label, int& value, std::span<const char* const> opti
         auto* popup_draw = ImGui::GetWindowDrawList();
 
         popup_draw->PushClipRect(settings_bounds_min(), settings_bounds_max(), false);
-        soft_shadow(popup_draw, popup_min, popup_max, 10.0f, {0.0f, 6.0f}, 12.0f, {0.0f, 0.0f, 0.0f, 1.0f}, 0.72f);
-        draw_popup_surface(popup_draw, popup_min, popup_max, 10.0f);
+        draw_popup_surface(popup_draw, popup_min, popup_max, 0.0f);
         popup_draw->PopClipRect();
         for (int i = 0; i < static_cast<int>(options.size()); ++i)
         {
             ImGui::PushID(i);
-            ImGui::SetCursorScreenPos(popup_min + ImVec2{4.0f, 4.0f + option_height * i});
-            const auto option_id = ImGui::GetID("##option");
-            ImGui::InvisibleButton("##option", {popup_width - 8.0f, option_height});
+            ImGui::SetCursorScreenPos(popup_min + ImVec2{2.0f, 2.0f + option_height * i});
+            ImGui::InvisibleButton("##option", {popup_width - 4.0f, option_height});
             const auto option_hovered = ImGui::IsItemHovered();
             pointer_cursor_if_hovered();
             const auto option_min = ImGui::GetItemRectMin();
             const auto option_max = ImGui::GetItemRectMax();
             const auto selected = value == i;
-            const auto option_hover_t = animate_state(g_hover_animations, option_id, option_hovered, 0.11f);
-            const auto selected_t = animate_state(g_active_animations, option_id, selected, 0.14f);
-            auto option_bg = mix(ImVec4{1, 1, 1, 0}, k_bg_hover, option_hover_t);
-            option_bg = mix(option_bg, ImVec4{k_accent.x, k_accent.y, k_accent.z, 0.13f}, selected_t);
-            const auto option_visual_min = option_min + ImVec2{0.0f, 2.0f};
-            const auto option_visual_max = option_max - ImVec2{0.0f, 2.0f};
-            popup_draw->AddRectFilled(option_visual_min, option_visual_max, packed(option_bg), 7.0f);
-            if (selected_t > 0.01f)
+            if (selected)
             {
-                popup_draw->AddRectFilled({option_min.x + 3.0f, option_visual_min.y + 6.0f},
-                                          {option_min.x + 5.0f, option_visual_max.y - 6.0f},
-                                          packed(ImVec4{k_accent.x, k_accent.y, k_accent.z, selected_t}), 1.0f);
+                const auto top = IM_COL32(184, 184, 210, 255);
+                const auto bottom = IM_COL32(122, 124, 150, 255);
+                popup_draw->AddRectFilledMultiColor(option_min, option_max, top, top, bottom, bottom);
             }
-            popup_draw->AddText({option_min.x + 12.0f + option_hover_t * 2.0f,
-                                 option_min.y + (option_height - ImGui::GetTextLineHeight()) * 0.5f},
-                                packed(mix(k_text_muted, k_text_main, std::max(option_hover_t, selected_t))),
+            else if (option_hovered)
+            {
+                popup_draw->AddRectFilled(option_min, option_max, packed(k_bg_hover));
+            }
+            popup_draw->AddText({option_min.x + 7.0f, option_min.y + (option_height - ImGui::GetTextLineHeight()) * 0.5f},
+                                selected ? IM_COL32(12, 12, 14, 255) : packed(k_text_main),
                                 render::localization::tr(options[i]));
-            draw_checkmark(popup_draw, {option_max.x - 16.0f, option_min.y + option_height * 0.5f},
-                           packed(ImVec4{k_accent.x, k_accent.y, k_accent.z, selected_t}), selected_t);
             if (ImGui::IsItemClicked())
             {
                 value = i;
@@ -276,9 +251,9 @@ void multiselect_row(const char* label, int& mask, std::span<const std::pair<con
     if (options.empty())
         return;
 
-    constexpr auto control_width = 140.0f;
-    constexpr auto control_height = 30.0f;
-    constexpr auto option_height = 34.0f;
+    constexpr auto control_width = 150.0f;
+    constexpr auto control_height = 24.0f;
+    constexpr auto option_height = 24.0f;
     begin_row(label, control_width);
 
     std::string summary{};
@@ -293,51 +268,45 @@ void multiselect_row(const char* label, int& mask, std::span<const std::pair<con
             summary = render::localization::tr("None");
     }
 
-    const auto button_id = ImGui::GetID("##multiselect_button");
     ImGui::InvisibleButton("##multiselect_button", {control_width, control_height});
     if (ImGui::IsItemClicked())
         ImGui::OpenPopup("##multi_options");
     pointer_cursor_if_hovered();
     const auto button_hovered = ImGui::IsItemHovered();
     const auto popup_open = ImGui::IsPopupOpen("##multi_options");
-    const auto hover_t = animate_state(g_hover_animations, button_id, button_hovered, 0.14f);
-    const auto open_t = animate_state(g_active_animations, button_id, popup_open, 0.16f);
     const auto button_min = ImGui::GetItemRectMin();
     const auto button_max = ImGui::GetItemRectMax();
 
     auto* button_draw = ImGui::GetWindowDrawList();
-    const auto control_bg =
-        mix(ImVec4{27.0f / 255.0f, 27.0f / 255.0f, 35.0f / 255.0f, 0.94f},
-            ImVec4{38.0f / 255.0f, 36.0f / 255.0f, 48.0f / 255.0f, 0.98f}, std::max(hover_t, open_t));
-    button_draw->AddRectFilled(button_min, button_max, packed(control_bg), 9.0f);
-    auto control_border = mix(k_border, k_border_light, hover_t);
-    control_border = mix(control_border, k_accent, open_t * 0.65f);
-    control_border.w = 0.08f + hover_t * 0.08f + open_t * 0.20f;
-    button_draw->AddRect(button_min, button_max, packed(control_border), 9.0f);
+    button_draw->AddRectFilled(button_min, button_max, packed(k_outline_dark), 2.0f);
+    button_draw->AddRectFilled(button_min + ImVec2{1.0f, 1.0f}, button_max - ImVec2{1.0f, 1.0f},
+                               packed(button_hovered ? k_bg_hover : k_bg_panel), 1.0f);
+    button_draw->AddRect(button_min, button_max,
+                         packed(button_hovered || popup_open ? k_border_light : k_border), 2.0f, 0, 1.0f);
     const auto label_size = ImGui::CalcTextSize(summary.c_str());
-    button_draw->PushClipRect(button_min, {button_max.x - 28.0f, button_max.y}, true);
-    button_draw->AddText({button_min.x + 12.0f, button_min.y + (control_height - label_size.y) * 0.5f},
+    button_draw->PushClipRect(button_min, {button_max.x - 20.0f, button_max.y}, true);
+    button_draw->AddText({button_min.x + 7.0f, button_min.y + (control_height - label_size.y) * 0.5f},
                          packed(k_text_main), summary.c_str());
     button_draw->PopClipRect();
 
-    draw_dropdown_chevron(button_draw, {button_max.x - 15.0f, button_min.y + control_height * 0.5f},
-                          packed(mix(k_text_muted, k_text_main, std::max(hover_t, open_t))), open_t);
+    draw_dropdown_chevron(button_draw, {button_max.x - 9.0f, button_min.y + control_height * 0.5f},
+                          packed(k_text_muted), popup_open ? 1.0f : 0.0f);
 
     auto popup_width = control_width;
     for ([[maybe_unused]] const auto& [name, bit] : options)
     {
         popup_width = std::max(popup_width, ImGui::CalcTextSize(render::localization::tr(name)).x + 58.0f);
     }
-    const auto popup_height = 8.0f + options.size() * option_height;
-    auto popup_position = ImVec2{button_min.x, button_max.y + 4.0f};
+    const auto popup_height = 4.0f + options.size() * option_height;
+    auto popup_position = ImVec2{button_min.x, button_max.y + 3.0f};
     if (popup_position.y + popup_height > settings_bounds_max().y - 8.0f)
-        popup_position.y = button_min.y - popup_height - 4.0f;
+        popup_position.y = button_min.y - popup_height - 3.0f;
     popup_position.x = std::max(button_max.x - popup_width, settings_bounds_min().x + 8.0f);
     ImGui::SetNextWindowPos(popup_position, ImGuiCond_Always);
     ImGui::SetNextWindowSize({popup_width, popup_height}, ImGuiCond_Always);
     ImGui::PushStyleColor(ImGuiCol_PopupBg, ImVec4{0, 0, 0, 0});
     ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, {0.0f, 0.0f});
-    ImGui::PushStyleVar(ImGuiStyleVar_PopupRounding, 8.0f);
+    ImGui::PushStyleVar(ImGuiStyleVar_PopupRounding, 0.0f);
     ImGui::PushStyleVar(ImGuiStyleVar_PopupBorderSize, 0.0f);
     ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, {0.0f, 0.0f});
     if (ImGui::BeginPopup("##multi_options", ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse |
@@ -347,41 +316,34 @@ void multiselect_row(const char* label, int& mask, std::span<const std::pair<con
         const auto popup_max = ImVec2{popup_min.x + ImGui::GetWindowSize().x, popup_min.y + ImGui::GetWindowSize().y};
         auto* popup_draw = ImGui::GetWindowDrawList();
         popup_draw->PushClipRect(settings_bounds_min(), settings_bounds_max(), false);
-        soft_shadow(popup_draw, popup_min, popup_max, 10.0f, {0.0f, 6.0f}, 12.0f, {0.0f, 0.0f, 0.0f, 1.0f}, 0.72f);
-        draw_popup_surface(popup_draw, popup_min, popup_max, 10.0f);
+        draw_popup_surface(popup_draw, popup_min, popup_max, 0.0f);
         popup_draw->PopClipRect();
         for (int i = 0; i < static_cast<int>(options.size()); ++i)
         {
             ImGui::PushID(i);
-            ImGui::SetCursorScreenPos(popup_min + ImVec2{4.0f, 4.0f + option_height * i});
-            const auto option_id = ImGui::GetID("##multi_option");
-            ImGui::InvisibleButton("##multi_option", {popup_width - 8.0f, option_height});
+            ImGui::SetCursorScreenPos(popup_min + ImVec2{2.0f, 2.0f + option_height * i});
+            ImGui::InvisibleButton("##multi_option", {popup_width - 4.0f, option_height});
             const auto option_hovered = ImGui::IsItemHovered();
             pointer_cursor_if_hovered();
             const auto option_min = ImGui::GetItemRectMin();
             const auto option_max = ImGui::GetItemRectMax();
             const auto bit = options[i].second;
             const auto selected = (mask & bit) != 0;
-            const auto option_hover_t = animate_state(g_hover_animations, option_id, option_hovered, 0.11f);
-            const auto selected_t = animate_state(g_active_animations, option_id, selected, 0.14f);
-            auto option_bg = mix(ImVec4{1, 1, 1, 0}, k_bg_hover, option_hover_t);
-            option_bg = mix(option_bg, ImVec4{k_accent.x, k_accent.y, k_accent.z, 0.11f}, selected_t);
-            const auto option_visual_min = option_min + ImVec2{0.0f, 2.0f};
-            const auto option_visual_max = option_max - ImVec2{0.0f, 2.0f};
-            popup_draw->AddRectFilled(option_visual_min, option_visual_max, packed(option_bg), 7.0f);
+            if (option_hovered)
+                popup_draw->AddRectFilled(option_min, option_max, packed(k_bg_hover));
 
-            const auto check_min = ImVec2{option_min.x + 10.0f, option_min.y + 9.0f};
-            const auto check_max = check_min + ImVec2{16.0f, 16.0f};
-            const auto check_bg =
-                mix(ImVec4{1.0f, 1.0f, 1.0f, 0.035f}, ImVec4{k_accent.x, k_accent.y, k_accent.z, 1.0f}, selected_t);
-            popup_draw->AddRectFilled(check_min, check_max, packed(check_bg), 5.0f);
-            popup_draw->AddRect(check_min, check_max, packed(mix(k_border_light, k_accent, selected_t)), 5.0f);
-            draw_checkmark(popup_draw, (check_min + check_max) * 0.5f,
-                           IM_COL32(255, 255, 255, static_cast<int>(selected_t * 255.0f)), selected_t, 1.8f);
-
-            popup_draw->AddText({option_min.x + 36.0f + option_hover_t * 2.0f,
+            const auto check_min = ImVec2{option_min.x + 6.0f, option_min.y + 5.0f};
+            const auto check_max = check_min + ImVec2{14.0f, 14.0f};
+            popup_draw->AddRectFilled(check_min, check_max, packed(k_outline_dark));
+            popup_draw->AddRectFilled(check_min + ImVec2{1.0f, 1.0f}, check_max - ImVec2{1.0f, 1.0f},
+                                      selected ? packed(k_accent) : packed(k_bg_panel));
+            if (selected)
+            {
+                draw_checkmark(popup_draw, (check_min + check_max) * 0.5f, IM_COL32(20, 20, 22, 255), 1.0f, 1.5f);
+            }
+            popup_draw->AddText({option_min.x + 27.0f,
                                  option_min.y + (option_height - ImGui::GetTextLineHeight()) * 0.5f},
-                                packed(mix(k_text_muted, k_text_main, std::max(option_hover_t, selected_t))),
+                                packed(selected ? k_text_main : k_text_muted),
                                 render::localization::tr(options[i].first));
             if (ImGui::IsItemClicked())
                 mask ^= bit; // toggle, keep popup open
@@ -435,50 +397,39 @@ void draw_action_icon(ImDrawList* draw, row_action_icon icon, ImVec2 center, ImU
 
 bool button_row(const char* label, const char* text, row_action_icon icon)
 {
-    constexpr auto control_width = 140.0f;
-    constexpr auto control_height = 30.0f;
+    constexpr auto control_width = 120.0f;
+    constexpr auto control_height = 24.0f;
     begin_row(label, control_width);
 
-    const auto id = ImGui::GetID("##button_row");
     ImGui::InvisibleButton("##button_row", {control_width, control_height});
     const auto clicked = ImGui::IsItemClicked();
     pointer_cursor_if_hovered();
     const auto hovered = ImGui::IsItemHovered();
     const auto held = ImGui::IsItemActive();
-    const auto hover_t = animate_state(g_hover_animations, id, hovered, 0.13f);
-    const auto held_t = animate_state(g_active_animations, id, held, 0.08f);
     const auto bmin = ImGui::GetItemRectMin();
     const auto bmax = ImGui::GetItemRectMax();
 
     auto* dl = ImGui::GetWindowDrawList();
-    constexpr auto rounding = 9.0f;
-    if (hover_t > 0.01f)
-    {
-        soft_shadow(dl, bmin, bmax, rounding, {0.0f, 3.0f}, 7.0f, {k_accent.x, k_accent.y, k_accent.z, 1.0f},
-                    hover_t * 0.24f);
-    }
-    auto bg = mix(ImVec4{27.0f / 255.0f, 27.0f / 255.0f, 35.0f / 255.0f, 0.88f},
-                  ImVec4{k_accent.x, k_accent.y, k_accent.z, 0.78f}, hover_t * 0.72f);
-    bg = mix(bg, ImVec4{k_accent.x * 0.72f, k_accent.y * 0.72f, k_accent.z * 0.72f, 0.92f}, held_t);
-    dl->AddRectFilled(bmin, bmax, packed(bg), rounding);
-    auto border = mix(k_border, ImVec4{k_accent.x, k_accent.y, k_accent.z, 0.55f}, hover_t);
-    border.w += held_t * 0.18f;
-    dl->AddRect(bmin, bmax, packed(border), rounding, 0, 1.0f);
+    dl->AddRectFilled(bmin, bmax, packed(k_outline_dark), 2.0f);
+    dl->AddRectFilled(bmin + ImVec2{1.0f, 1.0f}, bmax - ImVec2{1.0f, 1.0f},
+                      packed(held ? k_accent : hovered ? k_bg_hover : k_bg_panel), 1.0f);
+    dl->AddRect(bmin, bmax, packed(hovered ? k_border_light : k_border), 2.0f, 0, 1.0f);
 
     const auto* button_text = render::localization::tr(text);
     const auto ts = ImGui::CalcTextSize(button_text);
     const auto has_icon = icon != row_action_icon::none;
-    const auto content_width = ts.x + (has_icon ? 21.0f : 0.0f);
+    const auto content_width = ts.x + (has_icon ? 18.0f : 0.0f);
     const auto content_x = bmin.x + (control_width - content_width) * 0.5f;
-    const auto press_offset = ImVec2{0.0f, held_t * 1.0f};
-    const auto content_color = packed(mix(k_text_muted, k_text_main, std::max(hover_t, held_t)));
+    const auto press_offset = ImVec2{0.0f, held ? 1.0f : 0.0f};
+    const auto content_color = packed(held ? ImVec4{20.0f / 255.0f, 20.0f / 255.0f, 22.0f / 255.0f, 1.0f}
+                                           : k_text_main);
     if (has_icon)
     {
-        const auto icon_center = ImVec2{content_x + 7.0f, bmin.y + control_height * 0.5f} + press_offset;
+        const auto icon_center = ImVec2{content_x + 6.0f, bmin.y + control_height * 0.5f} + press_offset;
         draw_action_icon(dl, icon, icon_center, content_color);
     }
-    const auto text_position =
-        ImVec2{content_x + (has_icon ? 21.0f : 0.0f), bmin.y + (control_height - ts.y) * 0.5f} + press_offset;
+    const auto text_position = ImVec2{content_x + (has_icon ? 18.0f : 0.0f),
+                                      bmin.y + (control_height - ts.y) * 0.5f} + press_offset;
     dl->AddText(text_position, content_color, button_text);
 
     end_row();
@@ -496,16 +447,16 @@ int filter_filename_char(ImGuiInputTextCallbackData* data)
 
 void text_input_row(const char* label, char* buffer, std::size_t size)
 {
-    constexpr auto control_width = 190.0f;
+    constexpr auto control_width = 170.0f;
     begin_row(label, control_width);
     ImGui::PushStyleColor(ImGuiCol_FrameBg, k_bg_panel);
     ImGui::PushStyleColor(ImGuiCol_FrameBgHovered, k_bg_hover);
     ImGui::PushStyleColor(ImGuiCol_FrameBgActive, k_bg_hover);
-    ImGui::PushStyleColor(ImGuiCol_Border, k_border_light);
+    ImGui::PushStyleColor(ImGuiCol_Border, k_border);
     ImGui::PushStyleColor(ImGuiCol_Text, k_text_main);
-    ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 8.0f);
+    ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 2.0f);
     ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 1.0f);
-    ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, {10.0f, 6.0f});
+    ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, {6.0f, 3.0f});
     ImGui::SetNextItemWidth(control_width);
     ImGui::InputText("##text_input", buffer, size, ImGuiInputTextFlags_CallbackCharFilter, filter_filename_char);
     ImGui::PopStyleVar(3);
@@ -515,23 +466,27 @@ void text_input_row(const char* label, char* buffer, std::size_t size)
 
 void keybind_row(const char* label, int& value, bool keyboard_only, bool game_control)
 {
-    begin_row(label, 130.0f);
+    constexpr auto control_width = 130.0f;
+    begin_row(label, control_width);
     const auto listening = g_listening_key == &value;
     const auto pulse = listening ? 0.8f + std::sin(static_cast<float>(ImGui::GetTime()) * 6.28318f) * 0.2f : 1.0f;
     ImGui::PushStyleColor(ImGuiCol_Button, listening ? ImVec4{k_accent.x, k_accent.y, k_accent.z, pulse} : k_bg_panel);
     ImGui::PushStyleColor(ImGuiCol_ButtonHovered, listening ? k_accent : k_bg_hover);
-    ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 8.0f);
+    ImGui::PushStyleColor(ImGuiCol_ButtonActive, k_bg_hover);
+    ImGui::PushStyleColor(ImGuiCol_Border, k_border);
+    ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 2.0f);
+    ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 1.0f);
     const auto text = listening ? std::string("...") : std::format("[ {} ]", key_name(value));
 
-    if (ImGui::Button(text.c_str(), {130.0f, 28.0f}) && !listening)
+    if (ImGui::Button(text.c_str(), {control_width, 24.0f}) && !listening)
     {
         g_listening_key = &value;
         g_listening_start_frame = ImGui::GetFrameCount();
         g_listening_armed = false;
     }
     pointer_cursor_if_hovered();
-    ImGui::PopStyleVar();
-    ImGui::PopStyleColor(2);
+    ImGui::PopStyleVar(2);
+    ImGui::PopStyleColor(4);
 
     if (g_listening_key == &value && ImGui::GetFrameCount() > g_listening_start_frame)
     {
@@ -565,9 +520,9 @@ void keybind_row(const char* label, int& value, bool keyboard_only, bool game_co
 
 void color_row(const char* label, render::draw::rgba& color)
 {
-    begin_row(label, 36.0f);
+    begin_row(label, 32.0f);
     const auto picker_id = ImGui::GetID("##picker");
-    ImGui::InvisibleButton("##preview", {36.0f, 22.0f});
+    ImGui::InvisibleButton("##preview", {32.0f, 24.0f});
     pointer_cursor_if_hovered();
     if (ImGui::IsItemClicked())
         ImGui::OpenPopup("##picker");
@@ -575,26 +530,21 @@ void color_row(const char* label, render::draw::rgba& color)
     const auto hovered = ImGui::IsItemHovered();
     const auto item_min = ImGui::GetItemRectMin();
     const auto item_max = ImGui::GetItemRectMax();
-    const auto expand = hovered ? 1.0f : 0.0f;
-    const auto preview_min = ImVec2{item_min.x - expand, item_min.y - expand * 0.5f};
-    const auto preview_max = ImVec2{item_max.x + expand, item_max.y + expand * 0.5f};
+    const auto preview_min = ImVec2{item_min.x + 1.0f, item_min.y + 4.0f};
+    const auto preview_max = ImVec2{item_max.x - 1.0f, item_max.y - 4.0f};
     auto* draw = ImGui::GetWindowDrawList();
-    draw->AddRectFilled(preview_min, preview_max, IM_COL32(142, 142, 148, 255), 8.0f);
-    const auto checker_min = preview_min + ImVec2{4.0f, 4.0f};
-    const auto checker_max = preview_max - ImVec2{4.0f, 4.0f};
-    for (int y = 0; y < 3; ++y)
+    draw->AddRectFilled(preview_min, preview_max, IM_COL32(150, 150, 150, 255));
+    for (int y = 0; y < 2; ++y)
     {
         for (int x = 0; x < 5; ++x)
         {
-            const auto a = ImVec2{checker_min.x + x * 7.0f, checker_min.y + y * 7.0f};
-            const auto b = ImVec2{std::min(a.x + 7.0f, checker_max.x), std::min(a.y + 7.0f, checker_max.y)};
-            if (a.x >= checker_max.x || a.y >= checker_max.y)
-                continue;
-            draw->AddRectFilled(a, b, (x + y) % 2 ? IM_COL32(120, 120, 120, 255) : IM_COL32(185, 185, 185, 255));
+            const auto a = ImVec2{preview_min.x + x * 5.2f, preview_min.y + y * 7.0f};
+            const auto b = ImVec2{std::min(a.x + 5.2f, preview_max.x), std::min(a.y + 7.0f, preview_max.y)};
+            draw->AddRectFilled(a, b, (x + y) % 2 ? IM_COL32(112, 112, 112, 255) : IM_COL32(190, 190, 190, 255));
         }
     }
-    draw->AddRectFilled(preview_min, preview_max, packed(to_imvec(color)), 8.0f);
-    draw->AddRect(preview_min, preview_max, hovered ? IM_COL32_WHITE : IM_COL32(255, 255, 255, 51), 8.0f);
+    draw->AddRectFilled(preview_min, preview_max, packed(to_imvec(color)));
+    draw->AddRect(preview_min, preview_max, hovered ? IM_COL32_WHITE : packed(k_outline_dark), 0.0f, 0, 1.0f);
 
     color_picker_popup(color, item_min, item_max, picker_id);
     end_row();

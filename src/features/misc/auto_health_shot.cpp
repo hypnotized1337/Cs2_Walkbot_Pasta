@@ -255,7 +255,7 @@ void auto_health_shot_t::tick()
         m_damage_at = now;
     m_last_health = health;
 
-    if (!cfg.auto_health_shot)
+    if (!cfg.enabled || !cfg.auto_health_shot)
     {
         reset();
         publish_debug(block::disabled);

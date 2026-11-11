@@ -136,7 +136,7 @@ void draw_general_tab()
         status = "Last session crashed";
         status_failed = true;
     }
-    card_in_column("support", "SUPPORT", 3 + (status ? 1 : 0), 1,
+    card_in_column("support", "SUPPORT", 4 + (status ? 1 : 0), 1,
                    [&]
                    {
                        if (button_row("Diagnostic Report", "Save", row_action_icon::save))
@@ -145,6 +145,8 @@ void draw_general_tab()
                            open_log_folder();
                        if (button_row("First-run Guide", "Show", row_action_icon::none))
                            config::first_run::repeat(platform::windows::runtime_storage::paths().configs);
+                       if (button_row("Unload PASTA", "Unload", row_action_icon::none))
+                           bound_overlay().request_shutdown();
                        if (status)
                            ImGui::TextColored(status_failed ? ImVec4{1.0f, 0.42f, 0.45f, 1.0f} : k_text_muted, "%s",
                                               render::localization::tr(status));
@@ -264,11 +266,11 @@ void menu_t::draw_misc()
     static constexpr void (*tab_pages[])(){draw_general_tab, draw_overlay_tab, draw_configs_tab};
     static constexpr const char* tabs[]{"General", "Overlay", "Configs"};
     static_assert(std::size(tabs) == std::size(tab_pages));
-    ImGui::SetCursorPos({24.0f, 24.0f});
+    ImGui::SetCursorPos({14.0f, 8.0f});
     for (int i = 0; i < static_cast<int>(std::size(tabs)); ++i)
     {
         if (i)
-            ImGui::SameLine(0.0f, 10.0f);
+            ImGui::SameLine(0.0f, 8.0f);
         if (tab_button(tabs[i], m_misc_group == i) && m_misc_group != i)
         {
             m_misc_group = i;
@@ -276,9 +278,19 @@ void menu_t::draw_misc()
         }
     }
 
-    ImGui::SetCursorPos({14.0f, 68.0f});
+    // Header-level unload: the same action as the General support row, reachable from any Misc subtab. It uses the
+    // page-tab primitive so it inherits the source underline/hover language without adding another card.
+    const auto* unload_text = render::localization::tr("Unload");
+    ImGui::SetCursorPos({772.0f - ImGui::CalcTextSize(unload_text).x - 24.0f, 8.0f});
+    if (tab_button("Unload", false))
+    {
+        bound_overlay().request_shutdown();
+        return;
+    }
+
+    ImGui::SetCursorPos({14.0f, 42.0f});
     ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, {0.0f, 0.0f});
-    ImGui::BeginChild("##misc_cards", {682.0f, 568.0f}, false);
+    ImGui::BeginChild("##misc_cards", {772.0f, 548.0f}, false);
     begin_cards("##misc_grid");
     tab_pages[std::clamp(m_misc_group, 0, static_cast<int>(std::size(tab_pages)) - 1)]();
     end_cards();

@@ -10,6 +10,7 @@
 #include <simulation/aim_parts.hpp>
 #include <simulation/ballistics.hpp>
 #include <simulation/collision.hpp>
+#include <simulation/multipoint.hpp>
 
 #include <algorithm>
 #include <cmath>
@@ -49,22 +50,29 @@ constexpr float k_half_fov_pitch = 37.0f;
     return {pitch - view.x, foundation::wrap_yaw(yaw - view.y)};
 }
 
-// A hitbox centre the walk bot may aim at, and whether one in sight exists at all.
+// A hitbox point the walk bot may aim at, and whether one in sight exists at all.
 struct aim_choice
 {
     foundation::vec3 point{};
     int part{};
     bool valid{};
+    int hitbox{-1};
+    int candidate{-1};
 };
 
 // Picks the point its own aim goes to from the hitboxes the user allowed. The selected parts have a fixed order
 // (head, body, arms, legs), so selecting the head keeps the one-tap aim and deselecting it moves the aim down; a
 // checked body point that would kill wins over the head when "Body If Lethal" is on. Every point has to be in sight,
-// so an enemy behind cover by the chosen part is not fought through it.
+// so an enemy behind cover by the chosen part is not fought through it. With multipoint enabled the centre, capsule
+// ends and lateral points are candidates; each one lies on the hitbox capsule the trigger traces, so the chosen point
+// is immediately shootable rather than needing a centre-only handoff.
 template<typename visible_fn>
 [[nodiscard]] aim_choice choose_aim_point(const game::player_snapshot& other, const int hitbox_mask,
-                                          const bool body_lethal, const foundation::vec3& eye,
-                                          const foundation::vec3& view, visible_fn&& visible)
+                                          const bool body_lethal, const bool multipoint,
+                                          const config::combat_profile::multipoint_settings& multipoint_settings,
+                                          const foundation::vec3& eye, const foundation::vec3& view, visible_fn&& visible,
+                                          const int preferred_hitbox = -1,
+                                          const int preferred_candidate = -1)
 {
     using part = config::combat_profile::aim_part;
     // Only checked parts are candidates. An empty mask means no target; there is no implicit head fallback.
@@ -81,8 +89,10 @@ template<typename visible_fn>
     {
         foundation::vec3 point{};
         int part{};
-        float angle{std::numeric_limits<float>::max()};
+        float score{std::numeric_limits<float>::max()};
         bool found{};
+        int hitbox{-1};
+        int candidate{-1};
     };
     constexpr std::array parts{part::head, part::body, part::arms, part::legs};
     std::array<best_point, parts.size()> best{};
@@ -98,39 +108,56 @@ template<typename visible_fn>
             continue;
         // Body If Lethal may only prefer a body point the user actually checked; it never widens the mask.
         const auto may_be_lethal_body = body_lethal && body_part == part::body;
-        const auto point = game::place_hitbox(other.bones.bones[static_cast<std::size_t>(box.bone)], box).center();
+        const auto& bone = other.bones.bones[static_cast<std::size_t>(box.bone)];
+        const auto candidates = simulation::build_aim_points(bone, box, multipoint, body_part, multipoint_settings);
         auto lethal_body = false;
         if (may_be_lethal_body)
         {
             // The same range falloff the trigger's direct trace uses: a body shot only counts as lethal when it
             // would still kill at this distance.
             const auto& weapon = simulation::ballistics().pen().get_weapon_data();
-            const auto distance = eye.distance(point);
+            const auto distance = eye.distance(candidates.points[0]);
             auto damage = simulation::ballistics().pen().get_max_damage(hitgroup, other.armor, other.has_helmet,
                                                                         other.team);
             damage *= std::pow(std::clamp(weapon.range_modifier, 0.0f, 1.0f), distance / 500.0f);
             lethal_body = weapon.damage > 0.0f && distance <= weapon.range && other.health > 0 &&
                           damage + 0.001f >= static_cast<float>(other.health);
         }
-        if (!visible(point))
-            continue;
-        const auto offset = view_offset(eye, view, point);
-        const auto angle = std::hypot(offset.x, offset.y);
         const auto slot = body_part == part::body   ? std::size_t{1}
                           : body_part == part::arms ? std::size_t{2}
                           : body_part == part::legs ? std::size_t{3}
                                                     : std::size_t{0};
-        if (angle < best[slot].angle)
-            best[slot] = {point, body_part, angle, true};
-        if (lethal_body && angle < best_lethal_body.angle)
-            best_lethal_body = {point, body_part, angle, true};
+        for (int candidate = 0; candidate < candidates.count; ++candidate)
+        {
+            const auto point = candidates.points[static_cast<std::size_t>(candidate)];
+            const auto offset = view_offset(eye, view, point);
+            const auto angle = std::hypot(offset.x, offset.y);
+            // Reusing the previous point when it is still in view keeps two neighbouring cap/side points from trading
+            // places every tick as the view moves. An out-of-view point never receives the preference, so it cannot
+            // win a slot and then be rejected by the final view check.
+            const auto in_view = std::abs(offset.y) <= k_half_fov_yaw && std::abs(offset.x) <= k_half_fov_pitch;
+            const auto sticky = in_view && preferred_hitbox == box.index && preferred_candidate == candidate;
+            const auto score = angle - (sticky ? 0.25f : 0.0f);
+            // Check the line of sight only when this point can improve a slot. With multipoint enabled a head has
+            // several candidates, and testing all of them through the collision world every movement tick is wasted
+            // when the closest one already won.
+            if (score >= best[slot].score && !(lethal_body && score < best_lethal_body.score))
+                continue;
+            if (!visible(point))
+                continue;
+            if (score < best[slot].score)
+                best[slot] = {point, body_part, score, true, box.index, candidate};
+            if (lethal_body && score < best_lethal_body.score)
+                best_lethal_body = {point, body_part, score, true, box.index, candidate};
+        }
     }
 
     if (best_lethal_body.found)
-        return {best_lethal_body.point, best_lethal_body.part, true};
+        return {best_lethal_body.point, best_lethal_body.part, true, best_lethal_body.hitbox,
+                best_lethal_body.candidate};
     for (std::size_t i = 0; i < parts.size(); ++i)
         if ((mask & parts[i]) != 0 && best[i].found)
-            return {best[i].point, best[i].part, true};
+            return {best[i].point, best[i].part, true, best[i].hitbox, best[i].candidate};
     return {};
 }
 
@@ -293,14 +320,15 @@ walk_bot_t::combat_plan walk_bot_t::combat(const player_state& player, const clo
         if (other.health <= 0 || !other.pawn || other.pawn == player.pawn || !game::local_player().is_enemy(other.team))
             continue;
         const auto head = head_of(other);
+        const auto head_offset = view_offset(player.eye, player.view, head);
+        const auto distance = other.origin.distance(player.origin);
         if (other.invulnerable)
         {
             // A protected enemy is still walked round even when the chosen hitboxes cannot be aimed at yet.
-            const auto offset = view_offset(player.eye, player.view, head);
-            const bool in_view = std::abs(offset.y) <= k_half_fov_yaw && std::abs(offset.x) <= k_half_fov_pitch;
+            const bool in_view = std::abs(head_offset.y) <= k_half_fov_yaw &&
+                                 std::abs(head_offset.x) <= k_half_fov_pitch;
             if (in_view && in_sight(head))
             {
-                const auto distance = other.origin.distance(player.origin);
                 if (distance < protected_distance)
                 {
                     protected_distance = distance;
@@ -309,8 +337,18 @@ walk_bot_t::combat_plan walk_bot_t::combat(const player_state& player, const clo
             }
             continue;
         }
-        const auto aim = choose_aim_point(other, cfg.aim_hitboxes, cfg.aim_body_lethal, player.eye, player.view,
-                                          in_sight);
+        // Multipoint candidates sit on or just inside the hitbox, so a head well outside a broad view cannot produce
+        // an in-view candidate. Skipping those enemies keeps route-looking cheap when several players are around.
+        // Inside 256 units the head and feet diverge enough that the view still has to see the candidates.
+        if (distance > 256.0f &&
+            (std::abs(head_offset.y) > k_half_fov_yaw + 18.0f ||
+             std::abs(head_offset.x) > k_half_fov_pitch + 18.0f))
+            continue;
+        const auto preferred_hitbox = other.pawn == m_fight_aim_pawn ? m_fight_aim_hitbox : -1;
+        const auto preferred_candidate = other.pawn == m_fight_aim_pawn ? m_fight_aim_candidate : -1;
+        const auto aim = choose_aim_point(other, cfg.aim_hitboxes, cfg.aim_body_lethal, cfg.aim_multipoint,
+                                          cfg.aim_multipoint_config, player.eye, player.view, in_sight,
+                                          preferred_hitbox, preferred_candidate);
         if (!aim.valid)
             continue;
         const auto offset = view_offset(player.eye, player.view, aim.point);
@@ -318,7 +356,7 @@ walk_bot_t::combat_plan walk_bot_t::combat(const player_state& player, const clo
         if (!in_view)
             continue;
         // The one nearest the crosshair, and the one already fought when it is about as near.
-        auto score = std::hypot(offset.x, offset.y) + other.origin.distance(player.origin) * 0.01f;
+        auto score = std::hypot(offset.x, offset.y) + distance * 0.01f;
         if (other.pawn == m_fight_target)
             score *= 0.6f;
         if (!fight || score < fight_score)
@@ -341,8 +379,9 @@ walk_bot_t::combat_plan walk_bot_t::combat(const player_state& player, const clo
             const auto distance = other.origin.distance(player.origin);
             if (distance > cfg.rear_defense_distance * 1.35f)
                 break;
-            const auto aim = choose_aim_point(other, cfg.rear_defense_hitboxes, false, player.eye, player.view,
-                                              in_sight);
+            const auto aim = choose_aim_point(other, cfg.rear_defense_hitboxes, false, false,
+                                              config::combat_profile::multipoint_settings{}, player.eye,
+                                              player.view, in_sight);
             if (!aim.valid)
                 break;
             combat_plan plan{};
@@ -374,8 +413,9 @@ walk_bot_t::combat_plan walk_bot_t::combat(const player_state& player, const clo
             const auto distance = other.origin.distance(player.origin);
             if (distance > rear_distance)
                 continue;
-            const auto aim = choose_aim_point(other, cfg.rear_defense_hitboxes, false, player.eye, player.view,
-                                              in_sight);
+            const auto aim = choose_aim_point(other, cfg.rear_defense_hitboxes, false, false,
+                                              config::combat_profile::multipoint_settings{}, player.eye,
+                                              player.view, in_sight);
             if (!aim.valid || !in_rear_cone(player.eye, player.view, aim.point, cfg.rear_defense_fov))
                 continue;
             rear = &other;
@@ -505,6 +545,9 @@ walk_bot_t::combat_plan walk_bot_t::combat(const player_state& player, const clo
             m_fight_react_until = now + std::chrono::milliseconds(std::clamp(cfg.aim_reaction_ms, 0, 500));
         }
         m_fight_target = fight->pawn;
+        m_fight_aim_pawn = fight->pawn;
+        m_fight_aim_hitbox = fight_aim.hitbox;
+        m_fight_aim_candidate = fight_aim.candidate;
         m_fight_seen_at = now;
         m_react_until = {};
         if (now >= m_fight_react_until)
@@ -525,11 +568,20 @@ walk_bot_t::combat_plan walk_bot_t::combat(const player_state& player, const clo
             for (const auto& other : *players)
                 if (other.pawn == m_fight_target && other.health > 0 && !other.invulnerable)
                 {
-                    const auto aim = choose_aim_point(other, cfg.aim_hitboxes, cfg.aim_body_lethal, player.eye,
-                                                      player.view, in_sight);
+                    const auto preferred_hitbox = other.pawn == m_fight_aim_pawn ? m_fight_aim_hitbox : -1;
+                    const auto preferred_candidate = other.pawn == m_fight_aim_pawn ? m_fight_aim_candidate : -1;
+                    const auto aim = choose_aim_point(other, cfg.aim_hitboxes, cfg.aim_body_lethal,
+                                                      cfg.aim_multipoint, cfg.aim_multipoint_config, player.eye,
+                                                      player.view, in_sight, preferred_hitbox,
+                                                      preferred_candidate);
                     if (aim.valid)
+                    {
+                        m_fight_aim_pawn = other.pawn;
+                        m_fight_aim_hitbox = aim.hitbox;
+                        m_fight_aim_candidate = aim.candidate;
                         return {combat_plan::kind::engage, {gaze::mode::fight, aim.point, 0.0f, 0.0f, aim.part},
                                 {}};
+                    }
                 }
     }
     else
@@ -537,6 +589,9 @@ walk_bot_t::combat_plan walk_bot_t::combat(const player_state& player, const clo
         m_fight_target = 0;
         m_fight_react_target = 0;
         m_fight_react_until = {};
+        m_fight_aim_pawn = 0;
+        m_fight_aim_hitbox = -1;
+        m_fight_aim_candidate = -1;
     }
 
     if (protected_one)

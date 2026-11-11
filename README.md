@@ -27,12 +27,12 @@ of that; only the differences are below. Compared with Vesta `main`, November
 Upstream's automation is spread through Misc. PASTA puts it on one page and adds
 combat tools Vesta does not have:
 
-- **Auto Crouch** holds duck while an aim or trigger engagement has any reachable
-  hitbox. It needs 100 ms of confirmed sight to crouch and 150 ms of confirmed
-  occlusion to stand, so one frame cannot toggle it. It releases on death, target
-  loss or full cover, and fails open without collision data rather than disabling
-  itself. Holding through a tight angle is deliberate: standing up mid-fight
-  looks worse than crouching through it.
+- **Auto Crouch** samples from the lower crouched eye before ducking, so a
+  barely exposed target is not hidden by the camera drop. It needs 100 ms of
+  confirmed crouched sight to start and 150 ms of full occlusion to stand. Once
+  committed it holds through a narrow angle rather than standing up after every
+  shot; it releases on death, target loss or full cover, and fails open without
+  collision data rather than disabling itself.
 - **Auto Health Shot** requires low health, a quiet damage window, no nearby
   enemy and no active aim/trigger/autofire. It draws the syringe, waits 600 ms
   for the deploy, holds attack until it is consumed, then restores a firearm.

@@ -558,8 +558,10 @@ static void from_json(const json& j, combat_profile::humanizer_settings& value)
 
 static void to_json(json& j, const combat_profile::multipoint_settings& value)
 {
-    j = json{{"caps", value.caps},
+    j = json{{"performance", value.performance},
+             {"caps", value.caps},
              {"sides", value.sides},
+             {"display", value.display},
              {"head_scale", value.head_scale},
              {"body_scale", value.body_scale},
              {"limb_scale", value.limb_scale}};
@@ -567,9 +569,15 @@ static void to_json(json& j, const combat_profile::multipoint_settings& value)
 
 static void from_json(const json& j, combat_profile::multipoint_settings& value)
 {
+    read_field(j, "performance", value.performance);
     read_field(j, "caps", value.caps);
     read_field(j, "sides", value.sides);
+    read_field(j, "display", value.display);
     read_field(j, "head_scale", value.head_scale);
+    value.performance = std::clamp(
+        value.performance,
+        static_cast<int>(combat_profile::multipoint_settings::preset::high_performance),
+        static_cast<int>(combat_profile::multipoint_settings::preset::low));
     read_field(j, "body_scale", value.body_scale);
     read_field(j, "limb_scale", value.limb_scale);
     value.head_scale = std::clamp(value.head_scale, 0.0f, 0.95f);
@@ -597,10 +605,7 @@ static void to_json(json& j, const combat_profile::rcs_settings& value)
              {"start_bullet", value.start_bullet},
              {"pitch", value.pitch},
              {"yaw", value.yaw},
-             {"response_ms", value.response_ms},
-             {"smoothness", value.smoothness},
-             {"randomness", value.randomness},
-             {"drift", value.drift}};
+             {"response_ms", value.response_ms}};
 }
 
 static void from_json(const json& j, combat_profile::rcs_settings& value)
@@ -610,16 +615,10 @@ static void from_json(const json& j, combat_profile::rcs_settings& value)
     read_field(j, "pitch", value.pitch);
     read_field(j, "yaw", value.yaw);
     read_field(j, "response_ms", value.response_ms);
-    read_field(j, "smoothness", value.smoothness);
-    read_field(j, "randomness", value.randomness);
-    read_field(j, "drift", value.drift);
     value.start_bullet = std::clamp(value.start_bullet, 1, 10);
     value.pitch = std::clamp(value.pitch, 0.0f, 200.0f);
     value.yaw = std::clamp(value.yaw, 0.0f, 200.0f);
     value.response_ms = std::clamp(value.response_ms, 1.0f, 150.0f);
-    value.smoothness = std::clamp(value.smoothness, 0.0f, 100.0f);
-    value.randomness = std::clamp(value.randomness, 0.0f, 30.0f);
-    value.drift = std::clamp(value.drift, 0.0f, 30.0f);
 }
 
 static void to_json(json& j, const combat_profile::fov_settings& value)
@@ -1807,6 +1806,8 @@ static void to_json(json& j, const general_profile::walk_bot& w)
              {"aim", w.aim},
              {"aim_speed", w.aim_speed},
              {"aim_hitboxes", w.aim_hitboxes},
+             {"aim_multipoint", w.aim_multipoint},
+             {"aim_multipoint_config", w.aim_multipoint_config},
              {"aim_body_lethal", w.aim_body_lethal},
              {"aim_smoothing", w.aim_smoothing},
              {"aim_jitter", w.aim_jitter},
@@ -1814,9 +1815,7 @@ static void to_json(json& j, const general_profile::walk_bot& w)
              {"auto_scope", w.auto_scope},
              {"autofire", w.autofire},
              {"autofire_spray", w.autofire_spray},
-             {"spray_burst", w.spray_burst},
-             {"spray_burst_count", w.spray_burst_count},
-             {"spray_burst_cooldown_ms", w.spray_burst_cooldown_ms},
+             {"spray_log", w.spray_log},
              {"auto_knife", w.auto_knife},
              {"auto_knife_distance", w.auto_knife_distance},
              {"auto_knife_afk_only", w.auto_knife_afk_only},
@@ -1877,6 +1876,13 @@ static void from_json(const json& j, general_profile::walk_bot& w)
     w.aim_speed = std::isfinite(w.aim_speed) ? std::clamp(w.aim_speed, 0.4f, 2.5f) : 1.0f;
     read_field(j, "aim_hitboxes", w.aim_hitboxes);
     w.aim_hitboxes &= config::combat_profile::aim_part::all;
+    read_field(j, "aim_multipoint", w.aim_multipoint);
+    read_field(j, "aim_multipoint_config", w.aim_multipoint_config);
+    const auto clamp_aim_scale = [](float& value)
+    { value = std::isfinite(value) ? std::clamp(value, 0.05f, 0.95f) : 0.5f; };
+    clamp_aim_scale(w.aim_multipoint_config.head_scale);
+    clamp_aim_scale(w.aim_multipoint_config.body_scale);
+    clamp_aim_scale(w.aim_multipoint_config.limb_scale);
     read_field(j, "aim_body_lethal", w.aim_body_lethal);
     read_field(j, "aim_smoothing", w.aim_smoothing);
     w.aim_smoothing = std::clamp(w.aim_smoothing, 0, 100);
@@ -1887,11 +1893,7 @@ static void from_json(const json& j, general_profile::walk_bot& w)
     read_field(j, "auto_scope", w.auto_scope);
     read_field(j, "autofire", w.autofire);
     read_field(j, "autofire_spray", w.autofire_spray);
-    read_field(j, "spray_burst", w.spray_burst);
-    read_field(j, "spray_burst_count", w.spray_burst_count);
-    w.spray_burst_count = std::clamp(w.spray_burst_count, 3, 30);
-    read_field(j, "spray_burst_cooldown_ms", w.spray_burst_cooldown_ms);
-    w.spray_burst_cooldown_ms = std::clamp(w.spray_burst_cooldown_ms, 100, 1500);
+    read_field(j, "spray_log", w.spray_log);
     read_field(j, "auto_knife", w.auto_knife);
     read_field(j, "auto_knife_distance", w.auto_knife_distance);
     w.auto_knife_distance = std::isfinite(w.auto_knife_distance) ? std::clamp(w.auto_knife_distance, 80.0f, 600.0f)
@@ -2026,6 +2028,7 @@ static void to_json(json& j, const general_profile& m)
              {"m_bomb_info", m.m_bomb_info},
              {"m_game_controls", m.m_game_controls},
              {"m_auto_stop", m.m_auto_stop},
+             {"trigger_debug_overlay", m.trigger_debug_overlay},
              {"m_walk_bot", m.m_walk_bot},
              {"language", m.language},
              {"menu_scale", m.menu_scale},
@@ -2061,6 +2064,7 @@ static void from_json(const json& j, general_profile& m)
     read_field(j, "m_bomb_info", m.m_bomb_info);
     read_field(j, "m_game_controls", m.m_game_controls);
     read_field(j, "m_auto_stop", m.m_auto_stop);
+    read_field(j, "trigger_debug_overlay", m.trigger_debug_overlay);
     read_field(j, "m_walk_bot", m.m_walk_bot);
     read_field(j, "language", m.language);
     m.language = std::clamp(m.language, 0, general_profile::k_language_count - 1);

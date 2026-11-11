@@ -41,29 +41,56 @@ private:
     const void* m_object;
     void (*m_call)(const void*);
 };
-inline ImVec4 k_bg_base{13.0f / 255.0f, 13.0f / 255.0f, 18.0f / 255.0f, 0.85f};
+inline ImVec4 k_bg_base{13.0f / 255.0f, 13.0f / 255.0f, 13.0f / 255.0f, 1.0f};
 
-inline ImVec4 k_bg_panel{20.0f / 255.0f, 20.0f / 255.0f, 26.0f / 255.0f, 0.70f};
+inline ImVec4 k_bg_panel{18.0f / 255.0f, 18.0f / 255.0f, 18.0f / 255.0f, 1.0f};
 
-inline ImVec4 k_bg_card{28.0f / 255.0f, 28.0f / 255.0f, 36.0f / 255.0f, 0.60f};
+inline ImVec4 k_bg_card{13.0f / 255.0f, 13.0f / 255.0f, 13.0f / 255.0f, 1.0f};
 
-inline ImVec4 k_bg_popup{13.0f / 255.0f, 13.0f / 255.0f, 18.0f / 255.0f, 0.78f};
+inline ImVec4 k_bg_popup{10.0f / 255.0f, 11.0f / 255.0f, 9.0f / 255.0f, 1.0f};
 
-inline ImVec4 k_bg_hover{1.0f, 1.0f, 1.0f, 0.08f};
+inline ImVec4 k_bg_hover{30.0f / 255.0f, 32.0f / 255.0f, 34.0f / 255.0f, 1.0f};
 
-inline ImVec4 k_accent{124.0f / 255.0f, 58.0f / 255.0f, 237.0f / 255.0f, 1.0f};
+inline ImVec4 k_accent{180.0f / 255.0f, 180.0f / 255.0f, 208.0f / 255.0f, 1.0f};
 
-inline ImVec4 k_text_main{248.0f / 255.0f, 248.0f / 255.0f, 242.0f / 255.0f, 1.0f};
+inline ImVec4 k_text_main{199.0f / 255.0f, 199.0f / 255.0f, 199.0f / 255.0f, 1.0f};
 
-inline ImVec4 k_text_muted{161.0f / 255.0f, 161.0f / 255.0f, 170.0f / 255.0f, 1.0f};
+inline ImVec4 k_text_muted{128.0f / 255.0f, 128.0f / 255.0f, 130.0f / 255.0f, 1.0f};
 
-inline ImVec4 k_border{1.0f, 1.0f, 1.0f, 0.06f};
+// Custom controls draw their own colors, so ImGui's disabled alpha alone cannot grey them. This value is applied by
+// packed() only while a disabled section is active; the widgets themselves remain unaware of the state.
+inline float g_widget_alpha{1.0f};
 
-inline ImVec4 k_border_light{1.0f, 1.0f, 1.0f, 0.12f};
+class widget_alpha_scope final
+{
+public:
+    explicit widget_alpha_scope(const float alpha)
+        : m_previous(g_widget_alpha)
+    {
+        g_widget_alpha = alpha;
+    }
+    ~widget_alpha_scope() { g_widget_alpha = m_previous; }
+    widget_alpha_scope(const widget_alpha_scope&) = delete;
+    widget_alpha_scope& operator=(const widget_alpha_scope&) = delete;
 
-inline constexpr float k_menu_width = 950.0f;
+private:
+    float m_previous{};
+};
 
-inline constexpr float k_menu_height = 650.0f;
+inline ImVec4 k_border{36.0f / 255.0f, 34.0f / 255.0f, 33.0f / 255.0f, 1.0f};
+
+inline ImVec4 k_border_light{58.0f / 255.0f, 58.0f / 255.0f, 62.0f / 255.0f, 1.0f};
+
+// The source frame is a three-layer ring: an almost-black outside, a warm-grey edge, then the window fill.
+inline ImVec4 k_outline_dark{3.0f / 255.0f, 2.0f / 255.0f, 2.0f / 255.0f, 1.0f};
+
+inline ImVec4 k_line{180.0f / 255.0f, 180.0f / 255.0f, 185.0f / 255.0f, 1.0f};
+
+inline constexpr float k_menu_width = 800.0f;
+
+// 800x630 is the source's 524x412 at 1.5x, including the 30px title/tab strip. The page containers below subtract the
+// strip so they end eight pixels above the bottom of the shell.
+inline constexpr float k_menu_height = 630.0f;
 
 [[nodiscard]] ImVec4 menu_color(const render::draw::rgba color);
 
@@ -190,7 +217,7 @@ inline bool g_listening_armed{};
 
 inline std::vector<float> g_row_start_y_stack{};
 
-inline constexpr auto k_row_height = 42.0f;
+inline constexpr auto k_row_height = 32.0f;
 
 inline ImVec2 g_menu_min{};
 
@@ -489,16 +516,18 @@ void slider_row_impl(const char* label, value_t& value, value_t minimum, value_t
     char value_text[48]{};
     format_value(value_text, sizeof(value_text), true);
     const auto text_size = ImGui::CalcTextSize(value_text);
-    ImGui::InvisibleButton("##slider", {control_width, 28.0f});
+    ImGui::InvisibleButton("##slider", {control_width, 24.0f});
     pointer_cursor_if_hovered();
     const auto item_min = ImGui::GetItemRectMin();
     const auto item_max = ImGui::GetItemRectMax();
     const auto actual_width = std::max(1.0f, item_max.x - item_min.x);
-    const auto track_a = ImVec2{item_min.x + 7.0f, item_min.y + 22.0f};
-    const auto track_b = ImVec2{item_max.x - 7.0f, item_min.y + 26.0f};
+    // Source Slider(): a seven-pixel bar at 1x (ten at 1.5x) with its value centred over it and no thumb.
+    const auto track_a = ImVec2{item_min.x, item_min.y + 7.0f};
+    const auto track_b = ImVec2{item_max.x, item_min.y + 17.0f};
     const auto track_width = std::max(1.0f, track_b.x - track_a.x);
-    const auto value_rect = ImRect{{item_max.x - text_size.x - 5.0f, item_min.y - 3.0f},
-                                   {item_max.x + 3.0f, item_min.y + text_size.y + 4.0f}};
+    const auto text_x = item_min.x + (actual_width - text_size.x) * 0.5f;
+    const auto value_rect = ImRect{{text_x - 5.0f, item_min.y + 1.0f},
+                                   {text_x + text_size.x + 5.0f, item_min.y + 19.0f}};
     const auto value_hovered = value_rect.Contains(ImGui::GetIO().MousePos);
     const auto active = ImGui::IsItemActive();
     auto& drag = g_slider_drags[id];
@@ -557,28 +586,28 @@ void slider_row_impl(const char* label, value_t& value, value_t minimum, value_t
     shown = active && drag.dragging ? target : approach(shown, target, 0.10f);
 
     auto* draw = ImGui::GetWindowDrawList();
-    if (!editing)
-        draw->AddText({item_max.x - text_size.x, item_min.y}, packed(k_text_muted), value_text);
-    draw->AddRectFilled(track_a, track_b, IM_COL32(255, 255, 255, 26), 2.0f);
+    draw->AddRectFilled(track_a, track_b, packed(k_outline_dark));
+    draw->AddRectFilled(track_a + ImVec2{1.0f, 1.0f}, track_b - ImVec2{1.0f, 1.0f}, packed(k_bg_panel));
     const auto x = track_a.x + track_width * shown;
-    draw->AddRectFilled(track_a, {x, track_b.y}, packed(k_accent), 2.0f);
-    const auto radius = ImGui::IsItemHovered() || (active && drag.dragging) ? 8.5f : 7.0f;
-    draw->AddCircleFilled({x, item_min.y + 24.0f}, radius, IM_COL32_WHITE);
-    draw->AddCircle({x, item_min.y + 24.0f}, radius, IM_COL32(0, 0, 0, 100));
+    draw->AddRectFilled(track_a + ImVec2{1.0f, 1.0f}, {std::max(track_a.x + 1.0f, x), track_b.y - 1.0f},
+                        packed(k_accent));
+    draw->AddRect(track_a, track_b, packed(k_border), 0.0f, 0, 1.0f);
+    if (!editing)
+        draw->AddText({text_x, item_min.y + 2.0f}, packed(k_text_main), value_text);
 
     if (editing)
     {
         g_slider_edit.last_seen_frame = GImGui->FrameCount;
         const auto editor_width = std::clamp(text_size.x + 18.0f, 52.0f, actual_width);
-        ImGui::SetCursorScreenPos({item_max.x - editor_width, item_min.y - 3.0f});
+        ImGui::SetCursorScreenPos({item_min.x + (actual_width - editor_width) * 0.5f, item_min.y});
         ImGui::PushStyleColor(ImGuiCol_FrameBg, k_bg_panel);
         ImGui::PushStyleColor(ImGuiCol_FrameBgHovered, k_bg_hover);
         ImGui::PushStyleColor(ImGuiCol_FrameBgActive, k_bg_hover);
         ImGui::PushStyleColor(ImGuiCol_Border, k_border_light);
         ImGui::PushStyleColor(ImGuiCol_Text, k_text_main);
-        ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 5.0f);
+        ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 2.0f);
         ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 1.0f);
-        ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, {6.0f, 2.0f});
+        ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, {6.0f, 3.0f});
         ImGui::SetNextItemWidth(editor_width);
         if (g_slider_edit.request_focus)
         {

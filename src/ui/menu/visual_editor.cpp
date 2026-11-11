@@ -1,4 +1,5 @@
 #include <stdafx.hpp>
+#include <cctype>
 #include <game/state/constants.hpp>
 #include <game/state/services.hpp>
 #include <render/presentation.hpp>
@@ -27,7 +28,7 @@ namespace
 {
 using player_profile = config::visual_profile::player;
 
-constexpr auto k_panel_size = ImVec2{320.0f, 650.0f};
+constexpr auto k_panel_size = ImVec2{320.0f, 630.0f};
 constexpr auto k_image_size = ImVec2{280.0f, 420.0f};
 constexpr int k_head_bone = 7;
 constexpr std::size_t k_preview_bone_count = 24;
@@ -161,17 +162,33 @@ struct preview_fonts
     return requested ? 1.0f - std::pow(1.0f - progress, 3.0f) : progress;
 }
 
-void draw_panel_frame(ImDrawList* draw, const ImVec2 panel_min, const ImVec2 panel_max, const float reveal)
+[[nodiscard]] std::string source_title(const char* key)
 {
-    draw->PushClipRectFullScreen();
-    soft_shadow(draw, panel_min, panel_max, 20.0f, {0.0f, 14.0f}, 30.0f, {0, 0, 0, 1}, reveal * 0.85f);
-    draw->PopClipRect();
-    draw->AddRectFilled(panel_min, panel_max, packed(k_bg_base), 20.0f);
-    draw->AddRect(panel_min, panel_max, packed(k_border), 20.0f);
-    draw->AddLine({panel_min.x + 20.0f, panel_min.y + 1.0f}, {panel_max.x - 20.0f, panel_min.y + 1.0f},
-                  IM_COL32(255, 255, 255, 20));
-    draw_section_title(draw, panel_min + ImVec2{20.0f, 20.0f}, panel_max.x - 20.0f,
-                       render::localization::tr("ESP EDITOR"));
+    auto title = std::string{render::localization::tr(key)};
+    if (render::localization::current() == render::localization::id::en)
+        for (auto& character : title)
+            character = static_cast<char>(std::tolower(static_cast<unsigned char>(character)));
+    return title;
+}
+
+void draw_panel_frame(ImDrawList* draw, const ImVec2 panel_min, const ImVec2 panel_max)
+{
+    // The editor now uses the menu's three-layer frame and title/card language: no shadow, a near-black outside, a
+    // light hairline edge, then the dark surface and a single separator under a lowercase heading.
+    draw->AddRectFilled(panel_min, panel_max, packed(k_outline_dark), 6.0f);
+    draw->AddRectFilled(panel_min + ImVec2{1.0f, 1.0f}, panel_max - ImVec2{1.0f, 1.0f}, packed(k_border), 5.0f);
+    draw->AddRectFilled(panel_min + ImVec2{2.0f, 2.0f}, panel_max - ImVec2{2.0f, 2.0f}, packed(k_bg_base), 4.0f);
+    draw->AddLine({panel_min.x + 8.0f, panel_min.y + 36.0f}, {panel_max.x - 8.0f, panel_min.y + 36.0f},
+                  packed(k_line), 1.0f);
+    const auto title = source_title("ESP EDITOR");
+    draw->AddText({panel_min.x + 12.0f, panel_min.y + 7.0f}, packed(k_text_main), title.c_str());
+}
+
+void draw_stage_frame(ImDrawList* draw, const ImVec2 stage_min, const ImVec2 stage_max)
+{
+    draw->AddRectFilled(stage_min, stage_max, packed(k_outline_dark), 4.0f);
+    draw->AddRectFilled(stage_min + ImVec2{1.0f, 1.0f}, stage_max - ImVec2{1.0f, 1.0f}, packed(k_border), 3.0f);
+    draw->AddRectFilled(stage_min + ImVec2{2.0f, 2.0f}, stage_max - ImVec2{2.0f, 2.0f}, packed(k_bg_card), 2.0f);
 }
 
 // Renders the agent last seen in a match through the chams preview, with the configured chams material; null when GPU
@@ -510,8 +527,10 @@ constexpr int k_no_dock = -1;
     {
         for (const auto& point : points)
         {
-            stage.draw->AddCircleFilled(point, 4.5f, IM_COL32(26, 25, 34, 235), 18);
-            stage.draw->AddCircle(point, 5.0f, IM_COL32(255, 255, 255, 92), 18, 1.2f);
+            stage.draw->AddRectFilled(point - ImVec2{2.0f, 2.0f}, point + ImVec2{2.0f, 2.0f},
+                                      IM_COL32(13, 13, 13, 235));
+            stage.draw->AddRect(point - ImVec2{3.0f, 3.0f}, point + ImVec2{3.0f, 3.0f}, packed(k_border_light), 0.0f,
+                                0, 1.0f);
         }
     }
 
@@ -531,9 +550,10 @@ constexpr int k_no_dock = -1;
     }
     if (dragging && target != k_no_dock)
     {
-        stage.draw->AddCircleFilled(points[target], 8.0f, packed(ImVec4{k_accent.x, k_accent.y, k_accent.z, 0.32f}),
-                                    24);
-        stage.draw->AddCircle(points[target], 7.0f, packed(k_accent), 24, 2.0f);
+        stage.draw->AddRectFilled(points[target] - ImVec2{4.0f, 4.0f}, points[target] + ImVec2{4.0f, 4.0f},
+                                  packed(ImVec4{k_accent.x, k_accent.y, k_accent.z, 0.32f}));
+        stage.draw->AddRect(points[target] - ImVec2{5.0f, 5.0f}, points[target] + ImVec2{5.0f, 5.0f},
+                            packed(k_accent), 0.0f, 0, 1.5f);
     }
     return ImGui::IsItemDeactivated() ? target : k_no_dock;
 }
@@ -579,7 +599,7 @@ int edit_element(const preview_stage& stage, const int id, player_profile::layou
     if (hovered && ImGui::GetIO().MouseWheel != 0.0f)
         element.scale = std::clamp(element.scale + ImGui::GetIO().MouseWheel * 0.08f, 0.55f, 2.0f);
     if (hovered || ImGui::IsItemActive())
-        stage.draw->AddRect(hit_min, hit_max, IM_COL32(255, 255, 255, 150), 5.0f, 0, 1.0f);
+        stage.draw->AddRect(hit_min, hit_max, packed(k_accent), 0.0f, 0, 1.0f);
     visual_editor_settings_popup(settings_rows, settings);
     ImGui::PopID();
     return dock;
@@ -811,7 +831,7 @@ void menu_t::draw_visual_editor()
     ImGui::SetNextWindowPos({panel_x + (1.0f - reveal) * 18.0f, g_menu_min.y}, ImGuiCond_Always);
     ImGui::SetNextWindowSize(k_panel_size, ImGuiCond_Always);
     ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, {0.0f, 0.0f});
-    ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 20.0f);
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 6.0f);
     ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
     ImGui::Begin("##esp_visual_editor", nullptr,
                  ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize |
@@ -819,12 +839,13 @@ void menu_t::draw_visual_editor()
 
     const auto panel_min = ImGui::GetWindowPos();
     auto* draw = ImGui::GetWindowDrawList();
-    draw_panel_frame(draw, panel_min, panel_min + k_panel_size, reveal);
+    push_menu_font(render::fonts().menu_source_18);
+    draw_panel_frame(draw, panel_min, panel_min + k_panel_size);
 
     // The model and the player box sit centered in the stage; the composition spans from slightly above the image top
     // to the feet.
     preview_stage stage{
-        .draw = draw, .min = panel_min + ImVec2{16.0f, 54.0f}, .max = panel_min + ImVec2{304.0f, 634.0f}};
+        .draw = draw, .min = panel_min + ImVec2{16.0f, 54.0f}, .max = panel_min + ImVec2{304.0f, 604.0f}};
     constexpr auto composition_top = -16.0f;
     constexpr auto composition_bottom = 380.0f;
     stage.image_min = {stage.min.x + (stage.max.x - stage.min.x - k_image_size.x) * 0.5f,
@@ -832,6 +853,7 @@ void menu_t::draw_visual_editor()
                            composition_top};
     stage.unit_min = stage.point({0.185f, 0.035f});
     stage.unit_max = stage.point({0.800f, 0.828f});
+    draw_stage_frame(draw, stage.min - ImVec2{6.0f, 6.0f}, stage.max + ImVec2{6.0f, 6.0f});
 
     auto* live_texture = render_live_model();
     stage.live_model = live_texture != nullptr;
@@ -868,6 +890,7 @@ void menu_t::draw_visual_editor()
     if (stage.live_model)
         orbit_model(m_preview_orbiting, stage);
 
+    ImGui::PopFont();
     ImGui::End();
     ImGui::PopStyleVar(3);
 }

@@ -32,7 +32,9 @@ aimbot_t::target aimbot_t::choose_target(const foundation::vec3& eye_pos, const 
 
         candidate.fov = foundation::angular_distance(view_angles, eye_pos, candidate.aim_point);
         const auto candidate_limit = selection_fov(config.aimbot, eye_pos, candidate.aim_point);
-        const auto score = detail::selection_cost(candidate.fov, player.pawn == m_aim_pawn);
+        const auto sticky = config.aimbot.multipoint &&
+                            sticky_aim_point(player.pawn, candidate.bone, candidate.aim_offset);
+        const auto score = detail::selection_cost(candidate.fov, player.pawn == m_aim_pawn, sticky);
         if ((!enforce_fov || candidate.fov <= candidate_limit) && score <= best_score)
         {
             best_score = score;
@@ -116,10 +118,13 @@ foundation::vec3 aimbot_t::get_aim_point(const foundation::vec3& eye_pos, const 
             const auto base_pos = candidates.points[i];
             const auto pos = base_pos + selection_prediction;
 
+            const auto local_offset = bone.to_local(base_pos);
             const auto fov = get_fov(view_angles, eye_pos, pos);
             if (!detail::should_trace_candidate(fov, selection_fov(cfg.aimbot, eye_pos, pos), enforce_fov))
                 continue;
-            const auto score = detail::selection_cost(fov, player.pawn == m_aim_pawn && hb.bone == m_aim_last_bone);
+            const auto sticky = cfg.aimbot.multipoint && sticky_aim_point(player.pawn, hb.bone, local_offset);
+            const auto score =
+                detail::selection_cost(fov, player.pawn == m_aim_pawn && hb.bone == m_aim_last_bone, sticky);
             if (score >= best_score)
             {
                 continue;
@@ -174,11 +179,19 @@ foundation::vec3 aimbot_t::get_aim_point(const foundation::vec3& eye_pos, const 
             out_bone = hb.bone;
             out_penetrated = penetrated;
 
-            out_offset = bone.to_local(base_pos);
+            out_offset = local_offset;
         }
     }
 
     return best_point;
+}
+
+bool aimbot_t::sticky_aim_point(const std::uintptr_t pawn, const int bone,
+                                const foundation::vec3& offset) const noexcept
+{
+    constexpr auto tolerance_sqr{0.75f * 0.75f};
+    return pawn != 0 && pawn == m_aim_pawn && bone >= 0 && bone == m_aim_last_bone &&
+           offset.distance_sqr(m_aim_last_offset) <= tolerance_sqr;
 }
 
 float aimbot_t::get_fov(const foundation::vec3& view_angles, const foundation::vec3& eye_pos,

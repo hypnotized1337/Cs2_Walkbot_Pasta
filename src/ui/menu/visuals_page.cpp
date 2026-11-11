@@ -511,11 +511,11 @@ void menu_t::draw_visuals()
                                            draw_radar_tab,   draw_effects_tab, draw_crosshair_tab};
     static constexpr const char* tabs[]{"Players", "Items", "Projectiles", "Bomb", "Radar", "Effects", "Crosshair"};
     static_assert(std::size(tabs) == std::size(tab_pages));
-    ImGui::SetCursorPos({24.0f, 24.0f});
+    ImGui::SetCursorPos({14.0f, 8.0f});
     for (int i = 0; i < static_cast<int>(std::size(tabs)); ++i)
     {
         if (i)
-            ImGui::SameLine(0.0f, 10.0f);
+            ImGui::SameLine(0.0f, 8.0f);
         if (tab_button(tabs[i], m_visual_group == i) && m_visual_group != i)
         {
             m_visual_group = i;
@@ -523,9 +523,9 @@ void menu_t::draw_visuals()
         }
     }
 
-    ImGui::SetCursorPos({14.0f, 68.0f});
+    ImGui::SetCursorPos({14.0f, 42.0f});
     ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, {0.0f, 0.0f});
-    ImGui::BeginChild("##visual_cards", {682.0f, 568.0f}, false);
+    ImGui::BeginChild("##visual_cards", {772.0f, 548.0f}, false);
     begin_cards("##visual_grid");
     tab_pages[std::clamp(m_visual_group, 0, static_cast<int>(std::size(tab_pages)) - 1)]();
     end_cards();

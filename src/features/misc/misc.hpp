@@ -101,8 +101,8 @@ private:
     // combat ticks without keeping the duck after target selection is genuinely lost.
     std::uintptr_t m_engaged_target{};
     std::chrono::steady_clock::time_point m_target_seen_at{};
-    // Sight gate. The duck stays down while any part of the enemy is still reachable, and is lifted
-    // only when the enemy is dead or fully behind cover; how much the duck exposes no longer decides when to stand up.
+    // Sight gate. Before crouching, the target must stay exposed from the lower crouched eye; once committed, the
+    // duck holds through a narrow angle and is lifted only when the enemy is dead or fully behind cover.
     std::chrono::steady_clock::time_point m_sight_ok_at{};
     std::chrono::steady_clock::time_point m_sight_bad_at{};
     std::chrono::steady_clock::time_point m_waiting_since{};

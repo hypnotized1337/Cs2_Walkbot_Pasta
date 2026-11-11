@@ -23,7 +23,7 @@ public:
 
 private:
     friend struct menu_render_test_access;
-    void draw_sidebar();
+    void draw_top_bar();
     void draw_content();
     void draw_guide();
     void draw_visual_editor();
@@ -35,6 +35,7 @@ private:
     void draw_visuals();
     void draw_walk_bot();
     void draw_misc();
+    void draw_configs();
     void reset_content_animation();
 
     std::atomic<bool> m_open{};
@@ -42,9 +43,6 @@ private:
     bool m_open_pending{};
     HWND m_hwnd{};
     int m_page{};
-    // Automation is a child of Walk Bot. The reveal is animated: it glides out when the Walk Bot section is selected
-    // and retracts when the user leaves it.
-    float m_automation_reveal{};
     int m_weapon_group{-1};
     int m_visual_group{};
     int m_misc_group{};

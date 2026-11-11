@@ -9,85 +9,70 @@ namespace features::aimbot
 void aimbot_t::recoil_control(const config::combat_profile::aimbot& cfg, bool defer_input)
 {
     VESTA_PERF_SCOPE(aim_recoil);
-    const auto clear_correction = [this](bool clear_burst)
+    // Ends the correction and forgets the shot count. Called whenever attack is not held, which is exactly when a
+    // spray session ends.
+    const auto stop = [this]
     {
-        m_rcs_raw = {};
-        m_rcs_target = {};
-        m_rcs_velocity = {};
         m_rcs_applied = {};
         m_rcs_mouse_error = {};
         m_rcs_pending_mouse = {};
+        m_rcs_last_call = {};
         m_rcs_last_input_sequence = -1;
-        m_rcs_last_input_time = {};
-        m_rcs_input_step = 24;
+        m_rcs_shots = 0;
+        m_rcs_last_fired = -1;
         m_rcs_active = false;
-        if (clear_burst)
-        {
-            m_rcs_weapon = 0;
-            m_rcs_last_clip = -1;
-            m_rcs_last_shot_time = -1.0f;
-            m_rcs_burst_shots = 0;
-        }
     };
+
+    // The walk bot's own aim is a closed loop on the rendered camera: every shot moves that camera, the aim sees the
+    // error and moves it back. RCS moving the same camera from raw punch is a second hand correcting the same recoil,
+    // so the two add up and overshoot. While the walk bot owns autofire, its aim is the single owner.
+    if (walk_aim_owns_recoil())
+    {
+        stop();
+        m_rcs_weapon = 0;
+        m_spray_log_rcs_delta = {};
+        return;
+    }
+
     const auto pawn = game::local_player().pawn();
-    if (!pawn || !cfg.rcs.enabled)
-    {
-        clear_correction(true);
-        return;
-    }
     const auto& weapon_ctx = ballistics().ctx();
-    const auto weapon = weapon_ctx.valid ? weapon_ctx.weapon : game::local_player().weapon();
-    if (weapon != m_rcs_weapon)
+    const auto physical_attack = game::physical_action_down(game::input_action::attack, platform::windows::bound_input());
+    // The spray owns the same attack button through m_trigger_held, so a held spray is corrected without a physical
+    // click. Seed presses use their own buttons and are not part of a gun spray.
+    const auto attack_held = physical_attack || (m_trigger_held && !m_seed_held_secondary && !m_seed_held_proxy);
+    if (!pawn || !cfg.rcs.enabled || !weapon_ctx.valid || !weapon_ctx.is_full_auto || !attack_held)
     {
-        clear_correction(true);
-        m_rcs_weapon = weapon;
-    }
-
-    if (!weapon_ctx.valid || weapon_ctx.weapon != weapon || !weapon_ctx.is_full_auto)
-    {
-        clear_correction(true);
+        stop();
+        m_rcs_weapon = 0;
         return;
     }
-    const auto reported_shots =
+    if (weapon_ctx.weapon != m_rcs_weapon)
+    {
+        stop();
+        m_rcs_weapon = weapon_ctx.weapon;
+    }
+
+    // One count for the whole burst. The game increments m_iShotsFired on every shot and resets it once the trigger
+    // has been up long enough; a drop therefore starts a fresh count too.
+    const auto fired =
         game::bound_memory().process.load<std::int32_t>(pawn + SCHEMA("C_CSPlayerPawn", "m_iShotsFired"_id));
-    if (weapon_ctx.valid && weapon_ctx.weapon == weapon)
-    {
-        if (m_rcs_last_clip >= 0 && weapon_ctx.clip >= 0 && weapon_ctx.clip < m_rcs_last_clip)
-        {
-            m_rcs_burst_shots += m_rcs_last_clip - weapon_ctx.clip;
-        }
-        m_rcs_last_clip = weapon_ctx.clip;
-        if (weapon_ctx.last_shot_time > m_rcs_last_shot_time + 0.0001f)
-        {
-            m_rcs_last_shot_time = weapon_ctx.last_shot_time;
-            m_rcs_burst_shots =
-                std::max(m_rcs_burst_shots, std::max(1, static_cast<int>(std::ceil(weapon_ctx.recoil_index))));
-        }
-        m_rcs_burst_shots =
-            std::max(m_rcs_burst_shots, std::max(0, static_cast<int>(std::ceil(weapon_ctx.recoil_index))));
-    }
-    m_rcs_burst_shots = std::max(m_rcs_burst_shots, std::max(reported_shots, 0));
+    if (m_rcs_last_fired < 0 || fired < m_rcs_last_fired)
+        m_rcs_shots = 0;
+    else if (fired > m_rcs_last_fired)
+        m_rcs_shots += fired - m_rcs_last_fired;
+    m_rcs_last_fired = fired;
 
-    const auto physical_attack =
-        game::physical_action_down(game::input_action::attack, platform::windows::bound_input());
-    const auto attack_owned_by_trigger = m_trigger_held && !m_seed_held_secondary && !m_seed_held_proxy;
-    if (!physical_attack && !attack_owned_by_trigger)
+    if (m_rcs_shots < std::clamp(cfg.rcs.start_bullet, 1, 10))
     {
-        clear_correction(false);
-        m_rcs_burst_shots = 0;
+        m_rcs_applied = {};
+        m_rcs_mouse_error = {};
+        m_rcs_pending_mouse = {};
+        m_rcs_active = false;
+        m_spray_log_rcs_delta = {};
+        if (!defer_input)
+            flush_recoil_input();
         return;
     }
-    if (m_rcs_burst_shots < std::max(cfg.rcs.start_bullet, 1))
-    {
-        clear_correction(false);
-        return;
-    }
-
-    const auto now = std::chrono::steady_clock::now();
-    auto dt = std::chrono::duration<float>(now - m_rcs_last_call).count();
-    if (dt <= 0.0f || dt > 0.1f)
-        dt = 0.004f;
-    m_rcs_last_call = now;
 
     const auto sensitivity = game::variables().get<float>(CONVAR("sensitivity"_id));
     const auto fov_adjust =
@@ -100,67 +85,27 @@ void aimbot_t::recoil_control(const config::combat_profile::aimbot& cfg, bool de
                                                             SCHEMA("C_CSPlayerPawn", "m_pAimPunchServices"_id));
     if (!punch_sample)
         return;
-    const auto punch = *punch_sample;
-    m_rcs_raw = punch;
 
-    if (!m_rcs_active)
-    {
-        // Humanization varies both the small residual error and the time profile of
-        // this burst. It must not turn a high setting into a wildly wrong endpoint.
-        const auto spread = std::clamp(cfg.rcs.randomness, 0.0f, 30.0f) * 0.001f;
-        m_rcs_gain = m_rng.uniform(1.0f - spread, 1.0f + spread);
-        const auto timing_spread = std::clamp(cfg.rcs.randomness, 0.0f, 30.0f) * 0.003f;
-        m_rcs_response_scale = m_rng.uniform(1.0f - timing_spread, 1.0f + timing_spread);
-        m_rcs_phase = m_rng.uniform(0.0f, 2.0f * std::numbers::pi_v<float>);
-        m_rcs_freq = m_rng.uniform(1.5f, 3.5f);
-        m_rcs_active = true;
-    }
-    m_rcs_phase += m_rcs_freq * dt;
+    const auto now = std::chrono::steady_clock::now();
+    auto dt = std::chrono::duration<float>(now - m_rcs_last_call).count();
+    if (!(dt > 0.0f) || dt > 0.1f)
+        dt = game::rules::simulation_step;
+    m_rcs_last_call = now;
 
-    auto desired = punch * m_rcs_gain;
-    desired.x *= std::clamp(cfg.rcs.pitch, 0.0f, 200.0f) * 0.01f;
-    desired.y *= std::clamp(cfg.rcs.yaw, 0.0f, 200.0f) * 0.01f;
-    const auto drift = std::clamp(cfg.rcs.drift, 0.0f, 30.0f) * 0.002f;
-    desired.x += punch.length_2d() * drift * std::sin(m_rcs_phase);
-    desired.y += punch.length_2d() * drift * 0.8f * std::cos(m_rcs_phase * 1.27f);
-
-    const auto smoothness = std::clamp(cfg.rcs.smoothness, 0.0f, 100.0f) * 0.01f;
-    const auto target_follow_time = std::lerp(0.0f, 0.020f, smoothness);
-    if (target_follow_time <= 0.0001f)
-    {
-        m_rcs_target = desired;
-    }
-    else
-    {
-        const auto target_blend = 1.0f - std::exp(-dt / std::max(target_follow_time, 0.001f));
-        m_rcs_target += (desired - m_rcs_target) * target_blend;
-    }
-
-    const auto follow_time =
-        std::clamp(cfg.rcs.response_ms * m_rcs_response_scale * std::lerp(1.0f, 1.35f, smoothness), 1.0f, 300.0f) *
-        0.001f;
-    const auto velocity_time = std::lerp(0.0f, 0.018f, smoothness);
-    const auto max_speed = std::lerp(360.0f, 80.0f, smoothness);
-    const auto smooth_axis = [dt, follow_time, velocity_time, max_speed](float current, float target, float& velocity)
-    {
-        const auto error = target - current;
-        const auto desired_velocity = std::clamp(error / std::max(follow_time, 0.001f), -max_speed, max_speed);
-        const auto velocity_blend = velocity_time <= 0.0001f ? 1.0f : 1.0f - std::exp(-dt / velocity_time);
-        velocity += (desired_velocity - velocity) * velocity_blend;
-        auto next = current + velocity * dt;
-        if ((target - current) * (target - next) <= 0.0f)
-        {
-            next = target;
-            velocity = 0.0f;
-        }
-        return next;
-    };
+    // read_cached_punch already returns the game's bullet-scale punch (AimPunchServices::BulletScale, 2x the raw aim
+    // punch), so it is not multiplied by two again here. Recoil strength is a share of that punch. The correction is
+    // one exponential approach at the configured response time: nothing else smooths, adds noise or integrates a
+    // velocity on top, so every tick makes exactly one correction.
+    const auto desired = foundation::vec3{punch_sample->x * std::clamp(cfg.rcs.pitch, 0.0f, 200.0f) * 0.01f,
+                                          punch_sample->y * std::clamp(cfg.rcs.yaw, 0.0f, 200.0f) * 0.01f, 0.0f};
+    const auto response = std::clamp(cfg.rcs.response_ms, 1.0f, 150.0f) * 0.001f;
     const auto previous = m_rcs_applied;
-    m_rcs_applied.x = smooth_axis(m_rcs_applied.x, m_rcs_target.x, m_rcs_velocity.x);
-    m_rcs_applied.y = smooth_axis(m_rcs_applied.y, m_rcs_target.y, m_rcs_velocity.y);
+    m_rcs_applied += (desired - m_rcs_applied) * (1.0f - std::exp(-dt / response));
     m_rcs_applied.z = 0.0f;
-    m_rcs_input_step = std::max(1, static_cast<int>(std::lround(std::lerp(24.0f, 5.0f, smoothness))));
+    m_rcs_active = true;
+
     const auto delta = m_rcs_applied - previous;
+    m_spray_log_rcs_delta = delta;
     m_rcs_mouse_error.x += delta.y / degrees_per_pixel;
     m_rcs_mouse_error.y -= delta.x / degrees_per_pixel;
     const auto dx = static_cast<int>(m_rcs_mouse_error.x);
@@ -179,7 +124,7 @@ void aimbot_t::recoil_control(const config::combat_profile::aimbot& cfg, bool de
 void aimbot_t::flush_recoil_input()
 {
     VESTA_PERF_SCOPE(aim_flush);
-    const auto limit = std::max(m_rcs_input_step, 1);
+    constexpr auto limit = k_rcs_max_pixels_per_tick;
     const auto dx = std::clamp(static_cast<int>(m_rcs_pending_mouse.x), -limit, limit);
     const auto dy = std::clamp(static_cast<int>(m_rcs_pending_mouse.y), -limit, limit);
     if (!dx && !dy)
@@ -193,6 +138,8 @@ void aimbot_t::flush_recoil_input()
     {
         m_rcs_pending_mouse.x -= static_cast<float>(dx);
         m_rcs_pending_mouse.y -= static_cast<float>(dy);
+        m_spray_log_rcs_pixels.x += static_cast<float>(dx);
+        m_spray_log_rcs_pixels.y += static_cast<float>(dy);
         if (m_aim_virtual_angles_valid && m_aim_degrees_per_pixel > 0.0f)
         {
             if (m_aim_pending_since.time_since_epoch().count() == 0)
@@ -326,10 +273,10 @@ void aimbot_t::aimbot(const foundation::vec3& eye_pos, const foundation::vec3& v
         sampled_control_angles = raw_angles;
     if (m_rcs_active)
     {
+        // m_rcs_applied already contains the whole correction for this burst, including pixels still pending behind
+        // the per-tick cap. Adding the pending pixels here as well counted them twice and made the aim think the
+        // camera was further corrected than it was, so the px sent together overshot by the pending amount.
         sampled_control_angles += m_rcs_applied;
-
-        sampled_control_angles.x += m_rcs_pending_mouse.y * deg_per_pixel;
-        sampled_control_angles.y -= m_rcs_pending_mouse.x * deg_per_pixel;
         sampled_control_angles.y = foundation::wrap_yaw(sampled_control_angles.y);
     }
     if (!m_aim_virtual_angles_valid || stale_control)
@@ -402,6 +349,7 @@ void aimbot_t::aimbot(const foundation::vec3& eye_pos, const foundation::vec3& v
     }
     m_aim_last_seen = now;
     m_aim_last_bone = tgt.bone;
+    m_aim_last_offset = tgt.aim_offset;
 
     if (h > 0.0f && now < m_aim_reaction_until)
         return;
@@ -633,7 +581,7 @@ void aimbot_t::aimbot(const foundation::vec3& eye_pos, const foundation::vec3& v
                     return;
             }
         }
-        const auto rcs_limit = std::max(m_rcs_input_step, 1);
+        constexpr auto rcs_limit = k_rcs_max_pixels_per_tick;
         const auto rcs_dx = std::clamp(static_cast<int>(m_rcs_pending_mouse.x), -rcs_limit, rcs_limit);
         const auto rcs_dy = std::clamp(static_cast<int>(m_rcs_pending_mouse.y), -rcs_limit, rcs_limit);
         if (platform::windows::bound_input().pointer(dx + rcs_dx, dy + rcs_dy,

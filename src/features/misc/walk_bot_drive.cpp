@@ -813,6 +813,9 @@ void walk_bot_t::reset_state()
     m_last_health = 0;
     m_hit_at = {};
     m_fight_target = 0;
+    m_fight_aim_pawn = 0;
+    m_fight_aim_hitbox = -1;
+    m_fight_aim_candidate = -1;
     m_fight_seen_at = {};
     m_fight_react_target = 0;
     m_fight_react_until = {};
@@ -852,7 +855,7 @@ void walk_bot_t::reset_state()
     m_rest_pitch = 4.0f;
 
     features::aimbot::g_walk_autofire.store(false, std::memory_order_release);
-    features::aimbot::g_walk_autofire_parts.store(0, std::memory_order_release);
+    features::aimbot::publish_walk_autofire_parts(0);
     features::aimbot::g_walk_autofire_spray.store(false, std::memory_order_release);
 
     {

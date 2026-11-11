@@ -22,12 +22,6 @@
 
 namespace ui
 {
-namespace
-{
-constexpr int k_walk_page = 3;
-constexpr int k_automation_page = 4;
-} // namespace
-
 using namespace ui::menu::detail;
 
 bool menu_t::initialize(HWND hwnd)
@@ -168,7 +162,7 @@ void menu_t::draw()
         ImGui::SetNextWindowPos(initial_position, ImGuiCond_FirstUseEver);
         ImGui::SetNextWindowSize({k_menu_width, k_menu_height}, ImGuiCond_Always);
         ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, {0.0f, 0.0f});
-        ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 20.0f);
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 8.0f);
         ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
         ImGui::PushStyleVar(ImGuiStyleVar_ScrollbarSize, 4.0f);
         ImGui::PushStyleVar(ImGuiStyleVar_ScrollbarRounding, 10.0f);
@@ -185,15 +179,17 @@ void menu_t::draw()
         g_menu_min = min;
         g_menu_max = max;
         auto* draw = ImGui::GetWindowDrawList();
-        draw->PushClipRectFullScreen();
-        soft_shadow(draw, min, max, 20.0f, {0.0f, 14.0f}, 34.0f, {0, 0, 0, 1}, 1.0f);
-        draw->PopClipRect();
-        draw->AddRectFilled(min, max, packed(k_bg_base), 20.0f);
-        draw->AddRect(min, max, packed(k_border), 20.0f);
-        draw->AddLine({min.x + 20.0f, min.y + 1.0f}, {max.x - 20.0f, min.y + 1.0f}, IM_COL32(255, 255, 255, 20));
+        // Source Ring(): nearly black outside, warm-grey edge, then the window fill. No drop shadow: the source window
+        // is a flat panel and the outer ring is what separates it from the game.
+        draw->AddRectFilled(min, max, packed(k_outline_dark), 8.0f);
+        draw->AddRectFilled(min + ImVec2{1.0f, 1.0f}, max - ImVec2{1.0f, 1.0f}, packed(k_border), 7.0f);
+        draw->AddRectFilled(min + ImVec2{2.0f, 2.0f}, max - ImVec2{2.0f, 2.0f}, packed(k_bg_base), 6.0f);
 
-        push_menu_font(render::fonts().menu_regular_12);
-        draw_sidebar();
+        // One source hairline separates the title/tab row from the page. The group boxes repeat it under their titles.
+        draw->AddLine({min.x + 6.0f, min.y + 30.0f}, {max.x - 6.0f, min.y + 30.0f}, packed(k_line), 1.0f);
+
+        push_menu_font(render::fonts().menu_source_18);
+        draw_top_bar();
         draw_content();
         ImGui::PopFont();
 
@@ -215,131 +211,70 @@ void menu_t::draw()
     scale_menu_draw_lists(transform_origin, menu_scale);
 }
 
-void menu_t::draw_sidebar()
+void menu_t::draw_top_bar()
 {
-    ImGui::SetCursorPos({0.0f, 0.0f});
-    ImGui::BeginChild("##sidebar", {240.0f, 650.0f}, false, ImGuiWindowFlags_NoScrollbar);
+    // The shell is deliberately close to the source: a wordmark at the left, muted lowercase sections at the right,
+    // and a single active underline. No navigation rail, icons or logo plate.
     const auto min = ImGui::GetWindowPos();
-    const auto max = ImVec2{min.x + 240.0f, min.y + 650.0f};
     auto* draw = ImGui::GetWindowDrawList();
 
-    add_vertical_gradient_rounded(draw, min, max, IM_COL32(0, 0, 0, 26), IM_COL32(0, 0, 0, 76), 20.0f,
-                                  ImDrawFlags_RoundCornersLeft);
-    draw->AddLine({max.x - 1.0f, min.y}, {max.x - 1.0f, max.y}, packed(k_border));
+    draw->AddText({min.x + 12.0f, min.y + 5.0f}, packed(k_text_main), "PASTA");
+    const auto wordmark_width = ImGui::CalcTextSize("PASTA").x;
+    draw->AddText({min.x + 12.0f + wordmark_width + 5.0f, min.y + 5.0f}, packed(k_text_muted), "(retard)");
 
-    // The plate logo sits above the wordmark; its PNG already has a transparent background. The source is 1188x840,
-    // so keep that aspect ratio rather than stretching it into a square.
-    constexpr auto logo_width = 180.0f;
-    constexpr auto logo_aspect = 840.0f / 1188.0f;
-    constexpr auto logo_height = logo_width * logo_aspect;
-    constexpr auto logo_top = 10.0f;
-    const auto logo_texture = ui::bound_overlay().pasta_logo_texture();
-    if (logo_texture)
+    // Stable IDs use the translation keys; English is shown in the source's lowercase style, other languages use the
+    // existing localized labels. This keeps both the source look and the old localization behaviour intact.
+    static constexpr const char* label_keys[]{"Aimbot", "Triggerbot", "Visuals", "Walk Bot", "Automation", "Misc", "Configs"};
+    static constexpr const char* english_labels[]{"aimbot", "triggerbot", "visuals", "walk bot", "automation", "misc", "configs"};
+    constexpr int tab_count = static_cast<int>(std::size(label_keys));
+    const auto english = render::localization::current() == render::localization::id::en;
+    const auto tab_text = [&](const int index) {
+        return english ? english_labels[index] : render::localization::tr(label_keys[index]);
+    };
+    std::array<float, tab_count> tab_x{};
+    constexpr auto tab_gap = 14.0f;
+    auto right = k_menu_width - 12.0f;
+    for (int i = tab_count - 1; i >= 0; --i)
     {
-        const auto texture_id = static_cast<ImTextureID>(reinterpret_cast<std::uintptr_t>(logo_texture));
-        const auto logo_min = ImVec2{min.x + (240.0f - logo_width) * 0.5f, min.y + logo_top};
-        draw->AddImage(ImTextureRef{texture_id}, logo_min,
-                       ImVec2{logo_min.x + logo_width, logo_min.y + logo_height});
+        const auto width = ImGui::CalcTextSize(tab_text(i)).x;
+        right -= width;
+        tab_x[static_cast<std::size_t>(i)] = right;
+        right -= tab_gap;
     }
 
-    const auto* brand = render::fonts().menu_brand_30;
-    const auto brand_size = brand && brand->im_font ? brand->font_size * 1.25f : 0.0f;
-    const auto text_top =
-        logo_texture ? logo_top + logo_height + 4.0f : (112.0f - brand_size) * 0.5f;
-    if (brand && brand->im_font)
+    for (int i = 0; i < tab_count; ++i)
     {
-        constexpr auto text = std::string_view{"PASTA"};
-        float width{};
-        for (const auto c : text)
-            width += brand->im_font->CalcTextSizeA(brand_size, FLT_MAX, 0.0f, &c, &c + 1).x;
-        constexpr auto letter_spacing = 2.5f;
-        width += letter_spacing * (text.size() - 1);
-        auto x = min.x + (240.0f - width) * 0.5f;
-        for (const auto c : text)
-        {
-            draw->AddText(brand->im_font, brand_size, {x, min.y + text_top}, IM_COL32_WHITE, &c, &c + 1);
-            x += brand->im_font->CalcTextSizeA(brand_size, FLT_MAX, 0.0f, &c, &c + 1).x + letter_spacing;
-        }
-    }
-
-    static constexpr const char* labels[]{"Aimbot", "Triggerbot", "Visuals", "Walk Bot", "Automation", "Misc"};
-    static constexpr int icons[]{0, 1, 2, 3, 6, 4};
-    ImGui::SetCursorPos({20.0f, logo_texture ? text_top + brand_size + 14.0f : 112.0f});
-    // Automation is a child of Walk Bot. It glides out while the Walk Bot section is selected and retracts into it
-    // when the user moves to another page; the reveal is advanced every frame so both directions animate.
-    const auto automation_selected = m_page == k_walk_page || m_page == k_automation_page;
-    m_automation_reveal = approach(m_automation_reveal, automation_selected ? 1.0f : 0.0f, 0.18f);
-    if (!automation_selected && m_automation_reveal < 0.002f)
-        m_automation_reveal = 0.0f;
-
-    ImVec2 walk_min{}, walk_max{};
-    for (int i = 0; i < static_cast<int>(std::size(labels)); ++i)
-    {
-        const auto automation = i == k_automation_page;
-        const auto reveal = std::clamp(m_automation_reveal, 0.0f, 1.0f);
-        if (automation && reveal <= 0.0f)
-            continue;
-        // The row and the gap after it share one animated slot, so the rows below slide instead of jumping when the
-        // child appears or retracts.
-        const auto slot = automation ? 54.0f * reveal : 0.0f;
-        if (automation)
-            ImGui::Dummy({0.0f, slot});
-        const auto slot_top = automation ? ImGui::GetCursorScreenPos().y - slot : 0.0f;
-        if (automation)
-        {
-            ImGui::SetCursorPosY(ImGui::GetCursorPosY() - slot);
-            ImGui::PushClipRect({min.x, slot_top}, {max.x, slot_top + slot}, true);
-            ImGui::BeginDisabled(reveal < 0.98f);
-        }
-        ImGui::SetCursorPosX(automation ? 36.0f + (1.0f - reveal) * 10.0f : 20.0f);
-        ImGui::PushID(i);
         const auto active = m_page == i;
-        const auto clicked = nav_button(labels[i], active, icons[i], automation ? 184.0f : 200.0f, automation ? reveal : 1.0f);
-        if (automation)
-        {
-            ImGui::EndDisabled();
-            ImGui::PopClipRect();
-            // nav_button always advances a full row; hand the shorter animated slot to the next row instead.
-            ImGui::SetCursorPosY(ImGui::GetCursorPosY() + slot - 48.0f);
-        }
+        const auto* label = tab_text(i);
+        const auto width = ImGui::CalcTextSize(label).x;
+        ImGui::SetCursorScreenPos({min.x + tab_x[static_cast<std::size_t>(i)] - 5.0f, min.y + 3.0f});
+        ImGui::PushID(i);
+        ImGui::InvisibleButton(label_keys[i], {width + 10.0f, 26.0f});
+        const auto clicked = ImGui::IsItemClicked();
+        const auto hovered = ImGui::IsItemHovered();
+        pointer_cursor_if_hovered();
         if (clicked && !active)
         {
             m_page = i;
             reset_content_animation();
         }
-        const auto row_min = ImGui::GetItemRectMin();
-        const auto row_max = ImGui::GetItemRectMax();
-        if (i == k_walk_page)
-        {
-            walk_min = row_min;
-            walk_max = row_max;
-        }
-        else if (automation)
-        {
-            // Keep the branch endpoint inside the animated slot while the row retracts.
-            const auto child_mid = row_min.y + std::min(24.0f, slot * 0.5f);
-            auto connector_color = k_border_light;
-            auto endpoint_color = k_accent;
-            connector_color.w *= reveal;
-            endpoint_color.w *= reveal;
-            const auto connector = packed(connector_color);
-            const auto endpoint = packed(endpoint_color);
-            draw->AddLine({walk_min.x, walk_max.y + 1.0f}, {walk_min.x, child_mid}, connector, 1.5f);
-            draw->AddLine({walk_min.x, child_mid}, {row_min.x, child_mid}, endpoint, 1.5f);
-            draw->AddCircleFilled({row_min.x, child_mid}, 1.7f, endpoint, 12);
-        }
         ImGui::PopID();
-        if (!automation && i != static_cast<int>(std::size(labels)) - 1)
-            ImGui::Dummy({0.0f, 6.0f});
-    }
 
-    ImGui::EndChild();
+        const auto ink = active ? k_text_main : hovered ? k_text_main : k_text_muted;
+        draw->AddText({min.x + tab_x[static_cast<std::size_t>(i)], min.y + 5.0f}, packed(ink), label);
+        if (active)
+        {
+            draw->AddLine({min.x + tab_x[static_cast<std::size_t>(i)] - 1.0f, min.y + 28.0f},
+                          {min.x + tab_x[static_cast<std::size_t>(i)] + width + 1.0f, min.y + 28.0f},
+                          packed(k_text_main), 1.5f);
+        }
+    }
 }
 
 void menu_t::draw_content()
 {
-    ImGui::SetCursorPos({240.0f, 0.0f});
-    ImGui::BeginChild("##content", {710.0f, 650.0f}, false, ImGuiWindowFlags_NoScrollbar);
+    ImGui::SetCursorPos({0.0f, 32.0f});
+    ImGui::BeginChild("##content", {k_menu_width, k_menu_height - 32.0f}, false, ImGuiWindowFlags_NoScrollbar);
     m_content_animation = std::min(1.0f, m_content_animation + ImGui::GetIO().DeltaTime / 0.14f);
     const auto t = 1.0f - std::pow(1.0f - m_content_animation, 3.0f);
     ImGui::SetCursorPosY((1.0f - t) * 4.0f);
@@ -350,12 +285,14 @@ void menu_t::draw_content()
         draw_triggerbot();
     else if (m_page == 2)
         draw_visuals();
-    else if (m_page == k_walk_page)
+    else if (m_page == 3)
         draw_walk_bot();
-    else if (m_page == k_automation_page)
+    else if (m_page == 4)
         draw_automation();
-    else
+    else if (m_page == 5)
         draw_misc();
+    else
+        draw_configs();
 
     ImGui::EndChild();
 }

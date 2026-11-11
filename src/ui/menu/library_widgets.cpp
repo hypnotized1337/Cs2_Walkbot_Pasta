@@ -11,8 +11,8 @@ namespace ui::menu::detail
 {
 namespace
 {
-constexpr float k_tile_rounding = 10.0f;
-constexpr float k_small_height = 28.0f;
+constexpr float k_tile_rounding = 2.0f;
+constexpr float k_small_height = 24.0f;
 
 [[nodiscard]] ImVec4 tone_color(const tone kind)
 {
@@ -82,32 +82,44 @@ void wide_card(const char* id, const char* title, const callback_ref body, const
 {
     // A fixed window inside the page: from the top of the free space to the bottom of the page.
     const auto top = std::max(g_cards_y[0], g_cards_y[1]);
-    const auto width = g_cards_width * 2.0f + 20.0f;
+    const auto width = g_cards_width * 2.0f + 16.0f;
     const auto page_bottom = ImGui::GetWindowPos().y + ImGui::GetWindowHeight();
     const auto height = std::max(160.0f, page_bottom - (g_cards_origin.y + top) - 1.0f);
-    const auto* title_font = render::fonts().menu_semibold_13;
-    const auto title_size = title_font && title_font->im_font ? title_font->font_size : ImGui::GetFontSize();
-    ImGui::SetCursorScreenPos({g_cards_origin.x, g_cards_origin.y + top});
+    const auto body_min = ImVec2{g_cards_origin.x, g_cards_origin.y + top};
+    const auto body_max = body_min + ImVec2{width, height};
+    ImGui::SetCursorScreenPos(body_min);
     ImGui::PushStyleColor(ImGuiCol_ChildBg, k_bg_card);
-    ImGui::PushStyleColor(ImGuiCol_Border, k_border);
-    ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, 14.0f);
+    ImGui::PushStyleColor(ImGuiCol_Border, k_outline_dark);
+    ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, 6.0f);
     ImGui::PushStyleVar(ImGuiStyleVar_ChildBorderSize, 1.0f);
-    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, {20.0f, 16.0f});
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, {14.0f, 10.0f});
     ImGui::BeginChild(id, {width, height}, true, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
     const auto title_pos = ImGui::GetCursorScreenPos();
     const auto right = ImGui::GetWindowPos().x + ImGui::GetWindowContentRegionMax().x;
-    draw_section_title(ImGui::GetWindowDrawList(), title_pos, right - actions_width - 12.0f,
-                       render::localization::tr(title));
+    auto* title_font = ImGui::GetFont();
+    auto* draw = ImGui::GetWindowDrawList();
+    draw->AddRect(body_min + ImVec2{1.0f, 1.0f}, body_max - ImVec2{1.0f, 1.0f}, packed(k_border), 5.0f, 0, 1.0f);
+    const auto title_size = ImGui::GetFontSize();
+    auto title_text = std::string{render::localization::tr(title)};
+    for (auto& character : title_text)
+        if (character >= 'A' && character <= 'Z')
+            character = static_cast<char>(character - 'A' + 'a');
+    const auto title_width = title_font->CalcTextSizeA(title_size, FLT_MAX, 0.0f, title_text.c_str()).x;
+    draw->AddText(title_font, title_size,
+                  {ImGui::GetWindowPos().x + (width - title_width) * 0.5f, title_pos.y - 4.0f}, packed(k_text_main),
+                  title_text.c_str());
+    draw->AddLine({ImGui::GetWindowPos().x + 3.0f, title_pos.y + 18.0f},
+                  {right - actions_width - 10.0f, title_pos.y + 18.0f}, packed(k_line), 1.0f);
     ImGui::SetCursorScreenPos({right - actions_width, title_pos.y + (title_size - k_small_height) * 0.5f});
     actions();
     ImGui::SetCursorScreenPos(title_pos);
     ImGui::Dummy({0.0f, title_size});
-    ImGui::Dummy({0.0f, 12.0f});
+    ImGui::Dummy({0.0f, 3.0f});
     body();
     ImGui::EndChild();
     ImGui::PopStyleVar(3);
     ImGui::PopStyleColor(2);
-    g_cards_y[0] = g_cards_y[1] = top + height + 20.0f;
+    g_cards_y[0] = g_cards_y[1] = top + height + 16.0f;
 }
 
 float small_button_width(const char* label, const glyph icon)
@@ -129,15 +141,16 @@ bool small_button(const char* id, const glyph icon, const char* label, const ton
     const auto max = ImGui::GetItemRectMax();
     auto* draw = ImGui::GetWindowDrawList();
     const auto base = tone_color(kind);
-    auto fill = mix(ImVec4{1.0f, 1.0f, 1.0f, 0.04f}, ImVec4{base.x, base.y, base.z, 0.16f}, hover_t);
-    draw->AddRectFilled(min, max, packed(fill), 8.0f);
-    draw->AddRect(min, max, packed(mix(k_border, k_border_light, hover_t)), 8.0f);
+    draw->AddRectFilled(min, max, packed(k_outline_dark), 2.0f);
+    auto fill = mix(k_bg_panel, ImVec4{base.x, base.y, base.z, 0.28f}, hover_t);
+    draw->AddRectFilled(min + ImVec2{1.0f, 1.0f}, max - ImVec2{1.0f, 1.0f}, packed(fill), 1.0f);
+    draw->AddRect(min, max, packed(mix(k_border, k_border_light, hover_t)), 2.0f, 0, 1.0f);
     const auto ink = packed(mix(k_text_muted, k_text_main, hover_t));
-    auto x = min.x + 12.0f;
+    auto x = min.x + 8.0f;
     if (icon != glyph::none)
     {
-        draw_glyph(draw, icon, {x + 7.0f, (min.y + max.y) * 0.5f}, ink);
-        x += 20.0f;
+        draw_glyph(draw, icon, {x + 6.0f, (min.y + max.y) * 0.5f}, ink);
+        x += 17.0f;
     }
     const auto* text = render::localization::tr(label);
     draw->AddText({x, min.y + (k_small_height - ImGui::GetTextLineHeight()) * 0.5f}, ink, text);
@@ -157,26 +170,29 @@ bool pill_button(const char* id, const char* label, const float width, const ton
     const auto max = ImGui::GetItemRectMax();
     auto* draw = ImGui::GetWindowDrawList();
     const auto base = tone_color(kind);
-    ImVec4 fill{};
-    if (kind == tone::normal)
-        fill = mix(ImVec4{27.0f / 255.0f, 27.0f / 255.0f, 35.0f / 255.0f, 0.88f},
-                   ImVec4{k_accent.x, k_accent.y, k_accent.z, 0.78f}, hover_t * 0.72f);
+    draw->AddRectFilled(min, max, packed(k_outline_dark), 2.0f);
+    ImVec4 fill = k_bg_panel;
+    ImVec4 ink = mix(k_text_muted, k_text_main, hover_t);
+    if (kind == tone::accent)
+    {
+        const auto top = mix(ImVec4{188.0f / 255.0f, 188.0f / 255.0f, 214.0f / 255.0f, 1.0f},
+                             ImVec4{204.0f / 255.0f, 204.0f / 255.0f, 224.0f / 255.0f, 1.0f}, hover_t);
+        const auto bottom = ImVec4{132.0f / 255.0f, 132.0f / 255.0f, 156.0f / 255.0f, 1.0f};
+        draw->AddRectFilledMultiColor(min + ImVec2{1.0f, 1.0f}, max - ImVec2{1.0f, 1.0f}, packed(top), packed(top),
+                                      packed(bottom), packed(bottom));
+        ink = ImVec4{18.0f / 255.0f, 18.0f / 255.0f, 20.0f / 255.0f, 1.0f};
+    }
     else
-        fill = mix(ImVec4{base.x, base.y, base.z, 0.85f}, ImVec4{base.x * 1.12f, base.y * 1.12f, base.z * 1.12f, 1.0f},
-                   hover_t);
-    fill = mix(fill, ImVec4{fill.x * 0.8f, fill.y * 0.8f, fill.z * 0.8f, fill.w}, held_t);
-    if (hover_t > 0.01f)
-        soft_shadow(draw, min, max, 9.0f, {0.0f, 3.0f}, 7.0f, {base.x, base.y, base.z, 1.0f}, hover_t * 0.24f);
-    draw->AddRectFilled(min, max, packed(fill), 9.0f);
-    if (kind == tone::normal)
-        draw->AddRect(min, max, packed(mix(k_border, ImVec4{k_accent.x, k_accent.y, k_accent.z, 0.55f}, hover_t)),
-                      9.0f);
+    {
+        fill = mix(k_bg_panel, ImVec4{base.x, base.y, base.z, 0.30f}, hover_t);
+        draw->AddRectFilled(min + ImVec2{1.0f, 1.0f}, max - ImVec2{1.0f, 1.0f}, packed(fill), 1.0f);
+    }
+    draw->AddRect(min, max, packed(mix(k_border, k_border_light, hover_t)), 2.0f, 0, 1.0f);
     const auto* text = render::localization::tr(label);
     const auto text_size = ImGui::CalcTextSize(text);
-    const auto ink = kind == tone::normal ? mix(k_text_muted, k_text_main, hover_t) : k_text_main;
     draw->PushClipRect(min, max, true);
     draw->AddText(
-        {min.x + std::max(8.0f, (width - text_size.x) * 0.5f), min.y + (height - text_size.y) * 0.5f + held_t},
+        {min.x + std::max(6.0f, (width - text_size.x) * 0.5f), min.y + (height - text_size.y) * 0.5f + held_t},
         packed(ink), text);
     draw->PopClipRect();
     return clicked;
@@ -191,9 +207,9 @@ bool hint_input(const char* id, const char* hint, char* buffer, const std::size_
     ImGui::PushStyleColor(ImGuiCol_Border, k_border_light);
     ImGui::PushStyleColor(ImGuiCol_Text, k_text_main);
     ImGui::PushStyleColor(ImGuiCol_TextDisabled, k_text_muted);
-    ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 8.0f);
+    ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 2.0f);
     ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 1.0f);
-    ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, {10.0f, 7.0f});
+    ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, {6.0f, 3.0f});
     ImGui::SetNextItemWidth(width);
     const auto submitted = ImGui::InputTextWithHint(id, render::localization::tr(hint), buffer, size,
                                                     flags | ImGuiInputTextFlags_EnterReturnsTrue);
@@ -204,8 +220,8 @@ bool hint_input(const char* id, const char* hint, char* buffer, const std::size_
 
 int action_menu(const char* id, const std::span<const menu_action> actions)
 {
-    constexpr float button = 30.0f;
-    constexpr float row = 32.0f;
+    constexpr float button = 24.0f;
+    constexpr float row = 28.0f;
     ImGui::PushID(id);
     ImGui::InvisibleButton("##more", {button, button});
     const auto popup_id = ImGui::GetID("##actions");
@@ -220,17 +236,18 @@ int action_menu(const char* id, const std::span<const menu_action> actions)
     const auto button_min = ImGui::GetItemRectMin();
     const auto button_max = ImGui::GetItemRectMax();
     auto* draw = ImGui::GetWindowDrawList();
-    draw->AddRectFilled(button_min, button_max, packed(mix(ImVec4{1, 1, 1, 0.04f}, ImVec4{1, 1, 1, 0.12f}, hover_t)),
-                        8.0f);
-    draw->AddRect(button_min, button_max, packed(mix(k_border, k_border_light, hover_t)), 8.0f);
+    draw->AddRectFilled(button_min, button_max, packed(k_outline_dark), 2.0f);
+    draw->AddRectFilled(button_min + ImVec2{1.0f, 1.0f}, button_max - ImVec2{1.0f, 1.0f},
+                        packed(mix(k_bg_panel, k_bg_hover, hover_t)), 1.0f);
+    draw->AddRect(button_min, button_max, packed(mix(k_border, k_border_light, hover_t)), 2.0f, 0, 1.0f);
     draw_glyph(draw, glyph::more, (button_min + button_max) * 0.5f, packed(mix(k_text_muted, k_text_main, hover_t)));
 
     float width = 170.0f;
     for (const auto& action : actions)
         width = std::max(width, ImGui::CalcTextSize(render::localization::tr(action.label)).x + 36.0f);
     width = std::max(width, ImGui::CalcTextSize(render::localization::tr("Click again to confirm")).x + 36.0f);
-    const auto height = 8.0f + row * static_cast<float>(actions.size());
-    ImGui::SetNextWindowPos({button_max.x - width, button_max.y + 6.0f}, ImGuiCond_Always);
+    const auto height = 4.0f + row * static_cast<float>(actions.size());
+    ImGui::SetNextWindowPos({button_max.x - width, button_max.y + 3.0f}, ImGuiCond_Always);
     ImGui::SetNextWindowSize({width, height}, ImGuiCond_Always);
     ImGui::PushStyleColor(ImGuiCol_PopupBg, ImVec4{0, 0, 0, 0});
     ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, {0.0f, 0.0f});
@@ -243,17 +260,15 @@ int action_menu(const char* id, const std::span<const menu_action> actions)
         const ImVec2 max{min.x + width, min.y + height};
         auto* popup = ImGui::GetWindowDrawList();
         popup->PushClipRectFullScreen();
-        soft_shadow(popup, min, max, 10.0f, {0.0f, 6.0f}, 12.0f, {0.0f, 0.0f, 0.0f, 1.0f}, 0.72f);
-        popup->AddRectFilled(min, max, IM_COL32(13, 13, 18, 235), 10.0f);
-        draw_popup_surface(popup, min, max, 10.0f);
+        draw_popup_surface(popup, min, max, 0.0f);
         popup->PopClipRect();
         const auto armed = g_armed_actions.contains(popup_id) ? g_armed_actions[popup_id] : -1;
         for (int index = 0; index < static_cast<int>(actions.size()); ++index)
         {
             const auto& action = actions[static_cast<std::size_t>(index)];
             ImGui::PushID(index);
-            ImGui::SetCursorScreenPos({min.x + 4.0f, min.y + 4.0f + row * static_cast<float>(index)});
-            ImGui::InvisibleButton("##action", {width - 8.0f, row});
+            ImGui::SetCursorScreenPos({min.x + 2.0f, min.y + 2.0f + row * static_cast<float>(index)});
+            ImGui::InvisibleButton("##action", {width - 4.0f, row});
             const auto hovered = ImGui::IsItemHovered();
             pointer_cursor_if_hovered();
             const auto item_min = ImGui::GetItemRectMin();
@@ -265,7 +280,7 @@ int action_menu(const char* id, const std::span<const menu_action> actions)
                 popup->AddRectFilled(item_min + ImVec2{0.0f, 1.0f}, item_max - ImVec2{0.0f, 1.0f},
                                      packed(waiting ? ImVec4{color.x, color.y, color.z, 0.16f}
                                                     : mix(ImVec4{1, 1, 1, 0}, k_bg_hover, item_hover)),
-                                     7.0f);
+                                     2.0f);
             const auto* text = render::localization::tr(waiting ? "Click again to confirm" : action.label);
             popup->AddText({item_min.x + 12.0f, item_min.y + (row - ImGui::GetTextLineHeight()) * 0.5f},
                            packed(action.kind == tone::danger ? color : mix(k_text_muted, k_text_main, item_hover)),
@@ -295,13 +310,13 @@ int action_menu(const char* id, const std::span<const menu_action> actions)
 
 void tile_background(ImDrawList* draw, const ImVec2 min, const ImVec2 max, const float hover, const bool active)
 {
-    auto fill = mix(ImVec4{1.0f, 1.0f, 1.0f, 0.035f}, ImVec4{1.0f, 1.0f, 1.0f, 0.07f}, hover);
+    auto fill = mix(ImVec4{1.0f, 1.0f, 1.0f, 0.025f}, ImVec4{1.0f, 1.0f, 1.0f, 0.06f}, hover);
     if (active)
-        fill = mix(fill, ImVec4{k_accent.x, k_accent.y, k_accent.z, 0.16f}, 0.85f);
+        fill = mix(fill, ImVec4{k_accent.x, k_accent.y, k_accent.z, 0.14f}, 0.85f);
     draw->AddRectFilled(min, max, packed(fill), k_tile_rounding);
     const auto edge = active ? ImVec4{k_accent.x, k_accent.y, k_accent.z, 0.55f} : mix(k_border, k_border_light, hover);
     draw->AddRect(min, max, packed(edge), k_tile_rounding);
     if (active)
-        draw->AddRectFilled({min.x + 1.0f, min.y + 12.0f}, {min.x + 4.0f, max.y - 12.0f}, packed(k_accent), 2.0f);
+        draw->AddRectFilled({min.x + 1.0f, min.y + 8.0f}, {min.x + 3.0f, max.y - 8.0f}, packed(k_accent));
 }
 } // namespace ui::menu::detail

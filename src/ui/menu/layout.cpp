@@ -26,7 +26,26 @@ namespace ui::menu::detail
 
 void synchronize_menu_palette()
 {
-    const auto& palette = config::general_settings.palette;
+    // The menu previously shipped with a violet accent and translucent blue-black surfaces. Existing installs carry
+    // those exact values in their live config, so upgrade only the untouched legacy default; a palette the user has
+    // actually customised is never overwritten.
+    auto& palette = config::general_settings.palette;
+    const auto legacy_default = palette.background.r == 13 && palette.background.g == 13 &&
+                                palette.background.b == 18 && palette.background.a == 217 &&
+                                palette.panel.r == 20 && palette.panel.g == 20 && palette.panel.b == 26 &&
+                                palette.panel.a == 179 && palette.card.r == 28 && palette.card.g == 28 &&
+                                palette.card.b == 36 && palette.card.a == 153 && palette.popup.r == 13 &&
+                                palette.popup.g == 13 && palette.popup.b == 18 && palette.popup.a == 199 &&
+                                palette.accent.r == 124 && palette.accent.g == 58 && palette.accent.b == 237 &&
+                                palette.accent.a == 255 && palette.text.r == 248 && palette.text.g == 248 &&
+                                palette.text.b == 242 && palette.text.a == 255 && palette.muted_text.r == 161 &&
+                                palette.muted_text.g == 161 && palette.muted_text.b == 170 &&
+                                palette.muted_text.a == 255 && palette.border.r == 255 && palette.border.g == 255 &&
+                                palette.border.b == 255 && palette.border.a == 15 && palette.hover.r == 255 &&
+                                palette.hover.g == 255 && palette.hover.b == 255 && palette.hover.a == 20;
+    if (legacy_default)
+        palette = config::general_profile::interface_palette{};
+
     k_bg_base = menu_color(palette.background);
     k_bg_panel = menu_color(palette.panel);
     k_bg_card = menu_color(palette.card);
@@ -108,7 +127,9 @@ void scale_menu_draw_lists(const ImVec2 origin, const float scale)
 
 ImU32 packed(const ImVec4& color)
 {
-    return ImGui::ColorConvertFloat4ToU32(color);
+    auto adjusted = color;
+    adjusted.w = std::clamp(adjusted.w * g_widget_alpha, 0.0f, 1.0f);
+    return ImGui::ColorConvertFloat4ToU32(adjusted);
 }
 
 ImVec4 to_imvec(const render::draw::rgba& color)
@@ -356,15 +377,15 @@ void begin_row(const char* label, float control_width)
         ImGui::PushID(label);
     const auto y = ImGui::GetCursorPosY();
     g_row_start_y_stack.push_back(y);
-    ImGui::SetCursorPosY(y + 13.0f);
+    ImGui::SetCursorPosY(y + 5.0f);
     const auto* translated = render::localization::tr(label);
     const auto text_min = ImGui::GetCursorScreenPos();
-    const auto label_max_x = ImGui::GetWindowPos().x + ImGui::GetWindowContentRegionMax().x - control_width - 8.0f;
+    const auto label_max_x = ImGui::GetWindowPos().x + ImGui::GetWindowContentRegionMax().x - control_width - 7.0f;
     if (label_max_x > text_min.x)
         ImGui::RenderTextEllipsis(ImGui::GetWindowDrawList(), text_min,
                                   {label_max_x, text_min.y + ImGui::GetTextLineHeight()}, label_max_x, translated,
                                   nullptr, nullptr);
-    ImGui::SetCursorPos({ImGui::GetWindowContentRegionMax().x - control_width, y + 9.0f});
+    ImGui::SetCursorPos({ImGui::GetWindowContentRegionMax().x - control_width, y + 4.0f});
 }
 
 void clipped_row_text(const std::string_view text, const ImVec4 color)
@@ -571,27 +592,42 @@ void card_in_column(const char* id, const char* title, int rows, int column, cal
     column = std::clamp(column, 0, 1);
     const auto card_id = ImGui::GetID(id);
     const auto card_min =
-        ImVec2{g_cards_origin.x + column * (g_cards_width + 20.0f), g_cards_origin.y + g_cards_y[column]};
+        ImVec2{g_cards_origin.x + column * (g_cards_width + 16.0f), g_cards_origin.y + g_cards_y[column]};
     ImGui::SetCursorScreenPos(card_min);
-    const auto target_height = 54.0f + rows * k_row_height;
+    // Source group box at 1.5x: 24px title band, 32px rows, a nine-pixel bottom inset.
+    const auto target_height = 36.0f + rows * k_row_height;
     auto& card_height = g_card_height_animations[card_id];
     if (card_height <= 0.0f)
         card_height = target_height;
     card_height = approach(card_height, target_height, 0.40f);
     const auto card_max = ImVec2{card_min.x + g_cards_width, card_min.y + card_height};
     ImGui::PushStyleColor(ImGuiCol_ChildBg, k_bg_card);
-    ImGui::PushStyleColor(ImGuiCol_Border, k_border);
-    ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, 14.0f);
+    ImGui::PushStyleColor(ImGuiCol_Border, k_outline_dark);
+    ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, 6.0f);
     ImGui::PushStyleVar(ImGuiStyleVar_ChildBorderSize, 1.0f);
-    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, {20.0f, 16.0f});
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, {14.0f, 10.0f});
     ImGui::BeginChild(id, {g_cards_width, card_height}, true,
                       ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
 
-    const auto* title_wrapper = render::fonts().menu_semibold_13;
-    const auto title_size = title_wrapper && title_wrapper->im_font ? title_wrapper->font_size : ImGui::GetFontSize();
-    const auto title_pos = ImGui::GetCursorScreenPos();
-    draw_section_title(ImGui::GetWindowDrawList(), title_pos,
-                       ImGui::GetWindowPos().x + ImGui::GetWindowContentRegionMax().x, render::localization::tr(title));
+    auto* title_draw = ImGui::GetWindowDrawList();
+    // The child's own border is the dark outer ring; this light inner ring completes the source group-box frame
+    // without drawing outside the page clip (the first column and top row would otherwise lose their edge).
+    title_draw->AddRect(card_min + ImVec2{1.0f, 1.0f}, card_max - ImVec2{1.0f, 1.0f}, packed(k_border), 5.0f, 0,
+                        1.0f);
+    auto* title_font = ImGui::GetFont();
+    const auto title_size = ImGui::GetFontSize();
+    auto title_text = std::string{render::localization::tr(title)};
+    for (auto& character : title_text)
+    {
+        if (character >= 'A' && character <= 'Z')
+            character = static_cast<char>(character - 'A' + 'a');
+    }
+    const auto title_width = title_font->CalcTextSizeA(title_size, FLT_MAX, 0.0f, title_text.c_str()).x;
+    title_draw->AddText(title_font, title_size,
+                        {card_min.x + (g_cards_width - title_width) * 0.5f, card_min.y + 5.0f},
+                        packed(k_text_main), title_text.c_str());
+    title_draw->AddLine({card_min.x + 3.0f, card_min.y + 28.0f}, {card_max.x - 3.0f, card_min.y + 28.0f},
+                        packed(k_line), 1.0f);
     ImGui::Dummy({0.0f, title_size});
     ImGui::Dummy({0.0f, 3.0f});
     callback();
@@ -599,7 +635,7 @@ void card_in_column(const char* id, const char* title, int rows, int column, cal
     ImGui::EndChild();
     ImGui::PopStyleVar(3);
     ImGui::PopStyleColor(2);
-    g_cards_y[column] += card_height + 20.0f;
+    g_cards_y[column] += card_height + 14.0f;
 }
 
 void card(const char* id, const char* title, int rows, callback_ref callback)
@@ -609,30 +645,28 @@ void card(const char* id, const char* title, int rows, callback_ref callback)
 
 bool tab_button(const char* label, bool active)
 {
+    // Source-style section tab: bare text with a single underline. Keeping the hit box slightly wider than the ink
+    // makes the short labels comfortable without reintroducing the old pill backgrounds.
     const auto* text = render::localization::tr(label);
     const auto text_size = ImGui::CalcTextSize(text);
-    const auto size = ImVec2{text_size.x + 32.0f, text_size.y + 16.0f};
+    const auto size = ImVec2{text_size.x + 24.0f, 28.0f};
     ImGui::InvisibleButton(label, size);
     const auto clicked = ImGui::IsItemClicked();
     const auto hovered = ImGui::IsItemHovered();
     pointer_cursor_if_hovered();
     const auto id = ImGui::GetItemID();
-    const auto hover_t = animate_state(g_hover_animations, id, hovered);
+    const auto hover_t = animate_state(g_hover_animations, id, hovered, 0.12f);
     const auto active_t = animate_selection(id, active);
     const auto min = ImGui::GetItemRectMin();
     const auto max = ImGui::GetItemRectMax();
     auto* draw = ImGui::GetWindowDrawList();
+    draw->AddText({min.x + 12.0f, min.y + (size.y - text_size.y) * 0.5f},
+                  packed(mix(k_text_muted, k_text_main, std::max(hover_t, active_t))), text);
     if (active_t > 0.01f)
     {
-        soft_shadow(draw, min, max, 20.0f, {0.0f, 4.0f}, 9.0f, {k_accent.x, k_accent.y, k_accent.z, 1.0f},
-                    active_t * 0.55f);
+        draw->AddLine({min.x + 10.0f, max.y - 2.0f}, {max.x - 10.0f, max.y - 2.0f},
+                      packed(mix(k_text_muted, k_text_main, active_t)), 1.5f);
     }
-    const auto idle = mix(k_bg_card, k_bg_hover, hover_t);
-    draw->AddRectFilled(min, max, packed(mix(idle, k_accent, active_t)), 20.0f);
-    if (active_t < 0.99f && hover_t > 0.01f)
-        draw->AddRect(min, max, packed(mix(k_border, k_border_light, hover_t)), 20.0f);
-    draw->AddText({min.x + 16.0f, min.y + (size.y - text_size.y) * 0.5f},
-                  packed(mix(k_text_muted, ImVec4{1, 1, 1, 1}, std::max(hover_t, active_t))), text);
     return clicked;
 }
 
@@ -772,7 +806,7 @@ void begin_cards(const char* id)
 {
     ImGui::PushID(id);
     g_cards_origin = ImGui::GetCursorScreenPos();
-    g_cards_width = (ImGui::GetContentRegionAvail().x - 20.0f) * 0.5f;
+    g_cards_width = (ImGui::GetContentRegionAvail().x - 16.0f) * 0.5f;
     g_cards_y[0] = g_cards_y[1] = 0.0f;
     g_cards_index = 0;
 }
@@ -781,7 +815,7 @@ void end_cards()
 {
     const auto content_height = std::max(g_cards_y[0], g_cards_y[1]);
     ImGui::SetCursorScreenPos(g_cards_origin);
-    ImGui::Dummy({g_cards_width * 2.0f + 20.0f, std::max(0.0f, content_height - 20.0f)});
+    ImGui::Dummy({g_cards_width * 2.0f + 16.0f, std::max(0.0f, content_height - 14.0f)});
     ImGui::PopID();
 }
 } // namespace ui::menu::detail
