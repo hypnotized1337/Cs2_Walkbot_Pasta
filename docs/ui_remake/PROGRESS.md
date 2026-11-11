@@ -18,7 +18,9 @@ See [ISOLATION.md](ISOLATION.md) for all changed source files/lines, exact paths
 - Resolver rejects a test-root junction/symlink redirected elsewhere, including for default logs.
 - Production trace environment variables no longer influence test tracing.
 - Diagnostic report saves to test logs; displayed paths/comments updated.
-- Static source checks completed. No Windows build or runtime verification claimed.
+- Static source checks completed; owner subsequently confirmed Windows compile and isolation.
+- Added repeatable UI call-site scanner and `source_calls.csv` (466 syntactic sites, not control count).
+- Proposed Astral tab layout/Automation slice and initial decision list written; final inventory in progress.
 
 ## Owner action now
 
