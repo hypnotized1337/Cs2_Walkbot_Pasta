@@ -1,0 +1,76 @@
+page,section,label,widget_type,config_key,default,min,max,condition,source_file,source_line
+Walkbot,WALK BOT,Enable Walk Bot,toggle,misc.m_walk_bot.enabled,false,,,,src/ui/menu/walk_bot_page.cpp,42
+Walkbot,WALK BOT,Routes,select,misc.m_walk_bot.route,0: Random Points (selected default); 1: Recorded Routes,0,1,,src/ui/menu/walk_bot_page.cpp,43-45
+Walkbot,WALK BOT,Hunt Enemies,toggle,misc.m_walk_bot.hunt,false,,,Behaviour popup,src/ui/menu/walk_bot_page.cpp,46-50
+Walkbot,WALK BOT,Turn Camera,toggle,misc.m_walk_bot.look,true,,,Behaviour popup,src/ui/menu/walk_bot_page.cpp,46-51
+Walkbot,WALK BOT,Break Obstacles,toggle,misc.m_walk_bot.breakables,true,,,Behaviour popup,src/ui/menu/walk_bot_page.cpp,46-52
+Walkbot,COMBAT,Own Aim,toggle+settings popup,misc.m_walk_bot.aim,true,,,,src/ui/menu/walk_bot_page.cpp,59-60
+Walkbot,COMBAT,Hand Speed,slider,misc.m_walk_bot.aim_speed,1.0,0.4,2.5,Own Aim popup; step 0.1,src/ui/menu/walk_bot_page.cpp,62
+Walkbot,COMBAT,Smoothing,slider,misc.m_walk_bot.aim_smoothing,20,0,100,Own Aim popup,src/ui/menu/walk_bot_page.cpp,63
+Walkbot,COMBAT,Jitter,slider,misc.m_walk_bot.aim_jitter,0.08,0.0,1.5,Own Aim popup; step 0.05,src/ui/menu/walk_bot_page.cpp,64
+Walkbot,COMBAT,Reaction Time (ms),slider,misc.m_walk_bot.aim_reaction_ms,100,0,500,Own Aim popup,src/ui/menu/walk_bot_page.cpp,65
+Walkbot,COMBAT,Body If Lethal,toggle,misc.m_walk_bot.aim_body_lethal,true,,,Own Aim popup,src/ui/menu/walk_bot_page.cpp,66
+Walkbot,COMBAT,Hitboxes,multiselect,misc.m_walk_bot.aim_hitboxes,"1: Head; bitmask options Head=1, Body=2, Arms=4, Legs=8",,,Own Aim popup,src/ui/menu/walk_bot_page.cpp;src/ui/menu/widgets.cpp,67;359-368
+Walkbot,COMBAT,Multi-Point,toggle+settings popup,misc.m_walk_bot.aim_multipoint,false,,,Own Aim popup,src/ui/menu/walk_bot_page.cpp;src/ui/menu/combat_widgets.cpp,68;135-152
+Walkbot,COMBAT,Performance,select,misc.m_walk_bot.aim_multipoint_config.performance,0: High Performance (selected default); 1: Medium; 2: Low,0,2,Multi-Point popup,src/ui/menu/combat_widgets.cpp,140-145
+Walkbot,COMBAT,Cap Points,toggle,misc.m_walk_bot.aim_multipoint_config.caps,true,,,Multi-Point popup,src/ui/menu/combat_widgets.cpp,146
+Walkbot,COMBAT,Side Points,toggle,misc.m_walk_bot.aim_multipoint_config.sides,true,,,Multi-Point popup,src/ui/menu/combat_widgets.cpp,147
+Walkbot,COMBAT,Display Multipoints,toggle,misc.m_walk_bot.aim_multipoint_config.display,false,,,Multi-Point popup,src/ui/menu/combat_widgets.cpp,148
+Walkbot,COMBAT,Head Scale,slider,misc.m_walk_bot.aim_multipoint_config.head_scale,0.50,0.05,0.95,Multi-Point popup; step 0.05,src/ui/menu/combat_widgets.cpp,149
+Walkbot,COMBAT,Body Scale,slider,misc.m_walk_bot.aim_multipoint_config.body_scale,0.50,0.05,0.95,Multi-Point popup; step 0.05,src/ui/menu/combat_widgets.cpp,150
+Walkbot,COMBAT,Limbs Scale,slider,misc.m_walk_bot.aim_multipoint_config.limb_scale,0.50,0.05,0.95,Multi-Point popup; step 0.05,src/ui/menu/combat_widgets.cpp,151
+Walkbot,COMBAT,Autofire (Triggerbot Settings),toggle,misc.m_walk_bot.autofire,true,,,,src/ui/menu/walk_bot_page.cpp,71
+Walkbot,COMBAT,Spray Mode (Beta),toggle+settings popup,misc.m_walk_bot.autofire_spray,false,,,,src/ui/menu/walk_bot_page.cpp,72-73
+Walkbot,COMBAT,Spray Log (CSV),toggle,misc.m_walk_bot.spray_log,false,,,Spray Mode popup,src/ui/menu/walk_bot_page.cpp,73
+Walkbot,COMBAT,Rear Defense,toggle+settings popup,misc.m_walk_bot.rear_defense,false,,,step 25,src/ui/menu/walk_bot_page.cpp,74-75
+Walkbot,COMBAT,Distance,slider,misc.m_walk_bot.rear_defense_distance,600.0,100.0,1500.0,Rear Defense popup; step 25,src/ui/menu/walk_bot_page.cpp,78
+Walkbot,COMBAT,Rear FOV,slider,misc.m_walk_bot.rear_defense_fov,120.0,40.0,180.0,Rear Defense popup; step 5; step 5,src/ui/menu/walk_bot_page.cpp,79
+Walkbot,COMBAT,Smoothing,slider,misc.m_walk_bot.rear_defense_smoothing,10,0,100,Rear Defense popup,src/ui/menu/walk_bot_page.cpp,80
+Walkbot,COMBAT,Hitboxes,multiselect,misc.m_walk_bot.rear_defense_hitboxes,"3: Head + Body; bitmask options Head=1, Body=2, Arms=4, Legs=8",,,Rear Defense popup,src/ui/menu/walk_bot_page.cpp;src/ui/menu/widgets.cpp,81;359-368
+Walkbot,COMBAT,Weapon,select,misc.m_walk_bot.rear_defense_weapon,0: Primary (selected default); 1: Knife,0,1,Rear Defense popup,src/ui/menu/walk_bot_page.cpp,82-83
+Walkbot,COMBAT,React To Hits,toggle,misc.m_walk_bot.react_to_hits,true,,,,src/ui/menu/walk_bot_page.cpp,85
+Walkbot,ROUTE DISPLAY,Show Route,toggle+settings popup,misc.m_walk_bot.show_path,true,,,,src/ui/menu/walk_bot_page.cpp,93-98
+Walkbot,ROUTE DISPLAY,Route Color,color,misc.m_walk_bot.path_color,"RGBA(120,170,255,220)",,,Show Route popup,src/ui/menu/walk_bot_page.cpp,96
+Walkbot,ROUTE DISPLAY,Route Thickness,slider,misc.m_walk_bot.path_thickness,2.0,0.5,6.0,Show Route popup; step 0.5,src/ui/menu/walk_bot_page.cpp,97
+Walkbot,ROUTE DISPLAY,Show Nav Mesh,toggle+settings popup,misc.m_walk_bot.show_mesh,true,,,,src/ui/menu/walk_bot_page.cpp,99-104
+Walkbot,ROUTE DISPLAY,Mesh Color,color,misc.m_walk_bot.mesh_color,"RGBA(235,240,255,46)",,,Show Nav Mesh popup,src/ui/menu/walk_bot_page.cpp,102
+Walkbot,ROUTE DISPLAY,Mesh Distance,slider,misc.m_walk_bot.mesh_distance,1400.0,200.0,4000.0,Show Nav Mesh popup; step 50,src/ui/menu/walk_bot_page.cpp,103
+Walkbot,ROUTE DISPLAY,Recorded Routes,toggle+settings popup,misc.m_walk_bot.show_recordings,false,,,,src/ui/menu/walk_bot_page.cpp,107-114
+Walkbot,ROUTE DISPLAY,Record Route Key,keybind,misc.m_walk_bot.record_key,VK_F8,,,Recorded Routes popup; keyboard-only; Escape clears,src/ui/menu/walk_bot_page.cpp,110
+Walkbot,ROUTE DISPLAY,Folder,button,@action.open_walkbot_folder,Opens runtime storage root/walkbot,,,Recorded Routes popup,src/ui/menu/walk_bot_page.cpp,111-113
+Walkbot,WALK BOT AUTOMATION,Auto Crouch,toggle,misc.auto_crouch,false,,,"Walk Bot enabled; controls are disabled and visually dimmed while false, with values preserved.",src/ui/menu/walk_bot_page.cpp,132
+Walkbot,WALK BOT AUTOMATION,Auto Scope,toggle,misc.m_walk_bot.auto_scope,true,,,"Walk Bot enabled; controls are disabled and visually dimmed while false, with values preserved.",src/ui/menu/walk_bot_page.cpp,133
+Walkbot,WALK BOT AUTOMATION,Auto Bonus Weapon,toggle+settings popup,misc.m_auto_bonus.enabled,false,,,"Walk Bot enabled; controls are disabled and visually dimmed while false, with values preserved.",src/ui/menu/walk_bot_page.cpp,134-139
+Walkbot,WALK BOT AUTOMATION,Pickup Key,keybind,misc.m_auto_bonus.key,'G' (71 decimal),,,Walk Bot enabled; Auto Bonus Weapon popup; keyboard-only=true; game_control=false,src/ui/menu/walk_bot_page.cpp,137
+Walkbot,WALK BOT AUTOMATION,Interval,slider,misc.m_auto_bonus.interval_ms,1000,250,5000,Walk Bot enabled; Auto Bonus Weapon popup,src/ui/menu/walk_bot_page.cpp,138
+Walkbot,WALK BOT AUTOMATION,Auto Knife,toggle+settings popup,misc.m_walk_bot.auto_knife,false,,,"Walk Bot enabled; controls are disabled and visually dimmed while false, with values preserved.",src/ui/menu/walk_bot_page.cpp,140-147
+Walkbot,WALK BOT AUTOMATION,Distance,slider,misc.m_walk_bot.auto_knife_distance,300.0,80.0,600.0,Walk Bot enabled; Auto Knife popup; step 10; step 10,src/ui/menu/walk_bot_page.cpp,143
+Walkbot,WALK BOT AUTOMATION,Respawn Grace (ms),slider,misc.m_walk_bot.auto_knife_respawn_grace_ms,1500,0,5000,Walk Bot enabled; Auto Knife popup,src/ui/menu/walk_bot_page.cpp,144
+Walkbot,WALK BOT AUTOMATION,Knife Only When Target Is AFK,toggle,misc.m_walk_bot.auto_knife_afk_only,true,,,Walk Bot enabled; Auto Knife popup,src/ui/menu/walk_bot_page.cpp,145
+Walkbot,WALK BOT AUTOMATION,Show Eligibility Debug,toggle,misc.m_walk_bot.auto_knife_debug,false,,,Walk Bot enabled; Auto Knife popup,src/ui/menu/walk_bot_page.cpp,146
+Walkbot,WALK BOT AUTOMATION,Auto Health Shot,toggle+settings popup,misc.m_walk_bot.auto_health_shot,false,,,Walk Bot enabled; UI locked when off although config comment describes standalone behavior.,src/ui/menu/walk_bot_page.cpp,148-156
+Walkbot,WALK BOT AUTOMATION,Health Below,slider,misc.m_walk_bot.health_shot_health,50,1,99,Walk Bot enabled; Auto Health Shot popup,src/ui/menu/walk_bot_page.cpp,151
+Walkbot,WALK BOT AUTOMATION,No Damage For,slider,misc.m_walk_bot.health_shot_damage_ms,5000,0,15000,Walk Bot enabled; Auto Health Shot popup; suffix ms,src/ui/menu/walk_bot_page.cpp,152
+Walkbot,WALK BOT AUTOMATION,No Enemy Within,slider,misc.m_walk_bot.health_shot_near_distance,400,0,2000,Walk Bot enabled; Auto Health Shot popup; suffix u; 0 disables gate,src/ui/menu/walk_bot_page.cpp,153
+Walkbot,WALK BOT AUTOMATION,Use Bind,keybind,misc.m_walk_bot.health_shot_key,'X' (88 decimal),,,Walk Bot enabled; Auto Health Shot popup; keyboard-only=true; game_control=false; Escape clears,src/ui/menu/walk_bot_page.cpp,154
+Walkbot,WALK BOT AUTOMATION,Show Debug,toggle,misc.m_walk_bot.health_shot_debug,false,,,Walk Bot enabled; Auto Health Shot popup,src/ui/menu/walk_bot_page.cpp,155
+Walkbot,WALK BOT AUTOMATION,Auto Reload,toggle,misc.m_walk_bot.auto_reload,true,,,"Walk Bot enabled; controls are disabled and visually dimmed while false, with values preserved.",src/ui/menu/walk_bot_page.cpp,157
+Walkbot,WALK BOT AUTOMATION,Auto Buy,toggle+settings popup,misc.m_walk_bot.auto_buy,false,,,"Walk Bot enabled; controls are disabled and visually dimmed while false, with values preserved.",src/ui/menu/walk_bot_page.cpp,158-211
+Walkbot,WALK BOT AUTOMATION,Preset,select,misc.m_walk_bot.buy_edit,0: Default (selected default); 1: Premier; 2: Competitive; 3: Wingman; 4: Casual; 5: Deathmatch,0,5,Walk Bot enabled; Auto Buy popup,src/ui/menu/walk_bot_page.cpp,162-164
+Walkbot,WALK BOT AUTOMATION,Own Preset,toggle,misc.m_walk_bot.buy_presets[*].custom,false per preset,,,Walk Bot enabled; Auto Buy popup; only shown when selected preset is non-Default,src/ui/menu/walk_bot_page.cpp,165-166
+Walkbot,WALK BOT AUTOMATION,One Random Item,toggle,misc.m_walk_bot.buy_presets[*].random_one,false per preset,,,Walk Bot enabled; Auto Buy popup; only if selected preset is Default or custom=true,src/ui/menu/walk_bot_page.cpp,167-169
+Walkbot,WALK BOT AUTOMATION,Enabled,toggle,misc.m_walk_bot.buy_presets[*].items[*].enabled,false in empty slot; add initializes true,,,Walk Bot enabled; Auto Buy popup; selected preset must be Default or custom=true; one row per populated item (0–10),src/ui/menu/walk_bot_page.cpp,171-188
+Walkbot,WALK BOT AUTOMATION,Buy Code,text input,misc.m_walk_bot.buy_presets[*].items[*].code,empty in empty slot; add initializes empty,0,3 chars (4-byte buffer incl NUL),Walk Bot enabled; Auto Buy popup; selected preset must be Default or custom=true; one row per populated item (0–10),src/ui/menu/walk_bot_page.cpp,173-188
+Walkbot,WALK BOT AUTOMATION,Side,select,misc.m_walk_bot.buy_presets[*].items[*].side,0: Both Sides (selected default); 1: T; 2: CT,0,2,Walk Bot enabled; Auto Buy popup; selected preset must be Default or custom=true; one row per populated item (0–10),src/ui/menu/walk_bot_page.cpp,189-190
+Walkbot,WALK BOT AUTOMATION,Money,select,misc.m_walk_bot.buy_presets[*].items[*].money_rule,0: Any Money (selected default); 1: Less Than; 2: At Least,0,2,Walk Bot enabled; Auto Buy popup; selected preset must be Default or custom=true; one row per populated item (0–10),src/ui/menu/walk_bot_page.cpp,191-192
+Walkbot,WALK BOT AUTOMATION,Amount,slider,misc.m_walk_bot.buy_presets[*].items[*].money,2000,0,16000,Walk Bot enabled; Auto Buy popup; selected preset must be Default or custom=true; one row per populated item (0–10); suffix $,src/ui/menu/walk_bot_page.cpp,193
+Walkbot,WALK BOT AUTOMATION,Remove Item,button,@action.remove_buy_item;misc.m_walk_bot.buy_presets[*].items[*];@ui.item_index,Removes selected item; remaining items shift up,,,Walk Bot enabled; Auto Buy popup; selected preset must be Default or custom=true; one row per populated item (0–10),src/ui/menu/walk_bot_page.cpp,194-203
+Walkbot,WALK BOT AUTOMATION,Add Item,button,@action.add_buy_item;misc.m_walk_bot.buy_presets[*].items[*],"Adds {enabled=true, code="""", side=0, money_rule=0, money=2000}; max 10 per preset",,,Walk Bot enabled; Auto Buy popup; preset must be Default or custom=true; only while count < 10,src/ui/menu/walk_bot_page.cpp,205-210
+Automation,MATCH AUTOMATION,Auto Accept Match,toggle,misc.auto_accept,true,,,,src/ui/menu/automation_page.cpp,25
+Automation,MATCH AUTOMATION,Auto Rejoin,toggle+settings popup,misc.m_walk_bot.auto_rejoin,false,,,,src/ui/menu/automation_page.cpp,26-36
+Automation,MATCH AUTOMATION,Game Mode,select,misc.m_walk_bot.game_mode,0: Deathmatch (selected default); 1: Casual; 2: Competitive; 3: Wingman; 4: Premier,0,4,Auto Rejoin popup,src/ui/menu/automation_page.cpp,29-32
+Automation,MATCH AUTOMATION,Team,select,misc.m_walk_bot.team,0: Terrorists (selected default); 1: Counter-Terrorists,0,1,Auto Rejoin popup,src/ui/menu/automation_page.cpp,33-35
+Automation,MATCH AUTOMATION,Auto Disconnect,toggle+settings popup,misc.m_walk_bot.auto_disconnect,false,,,,src/ui/menu/automation_page.cpp,37-43
+Automation,MATCH AUTOMATION,Score,slider,misc.m_walk_bot.disconnect_score,450,0,2000,Auto Disconnect popup,src/ui/menu/automation_page.cpp,40
+Automation,MATCH AUTOMATION,Minutes On Server,slider,misc.m_walk_bot.disconnect_minutes,4,0,60,Auto Disconnect popup; suffix min,src/ui/menu/automation_page.cpp,41
+Automation,MATCH AUTOMATION,Random Extra Time,slider,misc.m_walk_bot.disconnect_spread,20,0,100,Auto Disconnect popup; percent,src/ui/menu/automation_page.cpp,42
