@@ -6,13 +6,13 @@ Inventory source: `automation_controls.csv`, traced against `src/ui/menu/walk_bo
 
 | Page | Section | CSV rows |
 |---|---|---:|
-| Walkbot | WALK BOT | 5 |
+| Walkbot | WALK BOT | 6 |
 | Walkbot | COMBAT | 25 |
 | Walkbot | ROUTE DISPLAY | 9 |
 | Walkbot | WALK BOT AUTOMATION | 28 |
-| **Walkbot total** |  | **67** |
+| **Walkbot total** |  | **68** |
 | Automation | MATCH AUTOMATION | 8 |
-| **Total** |  | **75** |
+| **Total** |  | **76** |
 
 Counts are inventory entries, not the runtime number of expanded controls. Six rows describe one dynamic buy-item template (`buy_presets[*].items[*]`); the selected preset renders that template once per existing item (up to 10 items), with Add available below the limit. `[*]` means an array element, not a literal config key. The source field records the UI call site; helper-owned child rows cite their helper implementation too.
 

@@ -1,6 +1,7 @@
 page,section,label,widget_type,config_key,default,min,max,condition,source_file,source_line
 Walkbot,WALK BOT,Enable Walk Bot,toggle,misc.m_walk_bot.enabled,false,,,,src/ui/menu/walk_bot_page.cpp,42
 Walkbot,WALK BOT,Routes,select,misc.m_walk_bot.route,0: Random Points (selected default); 1: Recorded Routes,0,1,,src/ui/menu/walk_bot_page.cpp,43-45
+Walkbot,WALK BOT,Behaviour,settings_popup_button,@ui.walkbot.behaviour,closed,,,Opens Hunt Enemies / Turn Camera / Break Obstacles settings,src/ui/menu/walk_bot_page.cpp,46-53
 Walkbot,WALK BOT,Hunt Enemies,toggle,misc.m_walk_bot.hunt,false,,,Behaviour popup,src/ui/menu/walk_bot_page.cpp,46-50
 Walkbot,WALK BOT,Turn Camera,toggle,misc.m_walk_bot.look,true,,,Behaviour popup,src/ui/menu/walk_bot_page.cpp,46-51
 Walkbot,WALK BOT,Break Obstacles,toggle,misc.m_walk_bot.breakables,true,,,Behaviour popup,src/ui/menu/walk_bot_page.cpp,46-52

@@ -10,7 +10,7 @@ CALLS = {
     'toggle_row', 'toggle_color_row', 'toggle_color_popup_row', 'toggle_color2_row',
     'toggle_color2_popup_row', 'toggle_popup_row', 'slider_row', 'select_row',
     'multi_select_row', 'button_row', 'text_input_row', 'keybind_row', 'color_row',
-    'color_swatch', 'color_swatch_inline', 'color_swatch_labeled', 'settings_popup',
+    'settings_popup_row', 'color_swatch', 'color_swatch_inline', 'color_swatch_labeled', 'settings_popup',
     'subtabs', 'bar_settings_popup', 'player_weapon_popup', 'player_flags_popup',
     'material_popup', 'small_button', 'pill_button', 'hint_input', 'action_menu',
     'Checkbox', 'SliderInt', 'SliderFloat', 'Combo', 'Selectable', 'Button',
@@ -60,7 +60,7 @@ def main():
     args = parser.parse_args()
     rows = list(scan())
     with args.output.open('w', newline='', encoding='utf-8') as stream:
-        writer = csv.DictWriter(stream, fieldnames=['source_file', 'source_line', 'function', 'label_literal', 'arguments'])
+        writer = csv.DictWriter(stream, fieldnames=['source_file', 'source_line', 'function', 'label_literal', 'arguments'], lineterminator='\n')
         writer.writeheader()
         writer.writerows(rows)
     print(f'{len(rows)} syntactic call sites; expand shared helpers and dynamic arrays in controls.csv.')
