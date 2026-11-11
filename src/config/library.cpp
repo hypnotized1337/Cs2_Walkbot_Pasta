@@ -38,7 +38,8 @@ constexpr std::size_t k_max_files = 500;
 [[nodiscard]] bool is_config_file(const std::filesystem::directory_entry& item)
 {
     std::error_code error{};
-    return item.is_regular_file(error) && ::_wcsicmp(item.path().extension().c_str(), L".cfg") == 0;
+    return platform::windows::data_storage::is_test_data_path(item.path()) && item.is_regular_file(error) &&
+           ::_wcsicmp(item.path().extension().c_str(), L".cfg") == 0;
 }
 
 } // namespace
@@ -75,6 +76,18 @@ const std::optional<std::filesystem::path>& config_library::folder()
     {
         m_folder_read = true;
         m_folder = platform::windows::read_config_folder();
+        if (!m_folder)
+        {
+            const auto& configs = platform::windows::runtime_storage::paths().configs;
+            if (!configs.empty())
+            {
+                const auto named = configs / L"named";
+                std::error_code error;
+                std::filesystem::create_directories(named, error);
+                if (!error)
+                    m_folder = named;
+            }
+        }
     }
     return m_folder;
 }
@@ -203,6 +216,8 @@ std::string config_library::unique_name(const std::string_view base) const
 config_library::outcome config_library::write(const std::filesystem::path& path, const std::string_view name,
                                               const nlohmann::json& settings)
 {
+    if (!platform::windows::data_storage::is_test_data_path(path))
+        return outcome::rejected;
     if (const auto error = platform::windows::write_file_atomically(path, file::serialize(name, settings, unix_now())))
     {
         process_log().warning("[config] cannot save {}: {}", utf8(path), error.message());
@@ -213,6 +228,8 @@ config_library::outcome config_library::write(const std::filesystem::path& path,
 
 config_library::outcome config_library::load(const library_entry& entry)
 {
+    if (!platform::windows::data_storage::is_test_data_path(entry.path))
+        return outcome::rejected;
     refresh(true);
     const auto document = file::read(entry.path, true);
     if (!document)
@@ -258,6 +275,8 @@ config_library::outcome config_library::save_current_as(const std::string_view n
 
 config_library::outcome config_library::overwrite(const library_entry& entry)
 {
+    if (!platform::windows::data_storage::is_test_data_path(entry.path))
+        return outcome::rejected;
     if (entry.problem != file::problem::none)
         return outcome::rejected;
     const auto result = write(entry.path, entry.name, build_config_json());
@@ -269,6 +288,8 @@ config_library::outcome config_library::overwrite(const library_entry& entry)
 
 config_library::outcome config_library::rename(const library_entry& entry, const std::string_view name)
 {
+    if (!platform::windows::data_storage::is_test_data_path(entry.path))
+        return outcome::rejected;
     if (!folder())
         return outcome::no_folder;
     const auto cleaned = file::clean_name(name);
@@ -305,6 +326,8 @@ config_library::outcome config_library::rename(const library_entry& entry, const
 
 config_library::outcome config_library::duplicate(const library_entry& entry)
 {
+    if (!platform::windows::data_storage::is_test_data_path(entry.path))
+        return outcome::rejected;
     if (!folder())
         return outcome::no_folder;
     refresh(true);
@@ -322,6 +345,8 @@ config_library::outcome config_library::duplicate(const library_entry& entry)
 
 config_library::outcome config_library::remove(const library_entry& entry)
 {
+    if (!platform::windows::data_storage::is_test_data_path(entry.path))
+        return outcome::rejected;
     if (const auto error = platform::windows::move_to_recycle_bin(entry.path))
     {
         process_log().warning("[config] {} was not moved to the Recycle Bin: {}", utf8(entry.path.filename()),
@@ -336,6 +361,8 @@ config_library::outcome config_library::remove(const library_entry& entry)
 
 config_library::outcome config_library::import_file(const std::filesystem::path& source)
 {
+    if (!platform::windows::data_storage::is_test_data_path(source))
+        return outcome::rejected;
     if (!folder())
         return outcome::no_folder;
     const auto document = file::read(source, true);

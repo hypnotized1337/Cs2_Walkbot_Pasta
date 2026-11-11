@@ -226,7 +226,7 @@ private:
             fail(migration_stage::validate_paths, static_cast<DWORD>(error.value()));
             return false;
         }
-        m_source = extended_path(parent / L"vesta");
+        m_source = extended_path(parent / L"vesta_uitest");
         return true;
     }
     bool validate_source()
@@ -249,7 +249,7 @@ private:
             fail(migration_stage::validate_paths, static_cast<DWORD>(error.value()));
             return false;
         }
-        // Equal roots mean the new typed folders live inside the old data directory (%TEMP%\vesta): the old
+        // Equal roots mean the new typed folders live inside the old data directory (%TEMP%\vesta_uitest): the old
         // files are imported in place. Any other overlap could copy a tree into itself and is refused.
         m_in_place = inside(destination, legacy) && inside(legacy, destination);
         if (!m_in_place && (inside(destination, legacy) || inside(legacy, destination)))

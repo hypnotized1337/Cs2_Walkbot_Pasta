@@ -3,6 +3,7 @@
 #include <foundation/identity.hpp>
 #include <game/memory/bound_services.hpp>
 #include <simulation/shot_trace.hpp>
+#include <platform/windows/data_paths.hpp>
 #include <simulation/shot_clock_evidence.hpp>
 #include <game/memory/compatibility.hpp>
 #include <nlohmann/json.hpp>
@@ -690,28 +691,27 @@ void initialize()
                        auto& queue = output();
                        try
                        {
-                           const auto length = GetEnvironmentVariableW(L"VESTA_SEED_TRACE_DIR", nullptr, 0);
+                           const auto length = GetEnvironmentVariableW(L"VESTA_UITEST_SEED_TRACE_DIR", nullptr, 0);
                            if (length)
                            {
                                std::wstring path(length, L'\0');
                                const auto copied =
-                                   GetEnvironmentVariableW(L"VESTA_SEED_TRACE_DIR", path.data(), length);
+                                   GetEnvironmentVariableW(L"VESTA_UITEST_SEED_TRACE_DIR", path.data(), length);
                                if (!copied || copied >= length)
                                    return;
                                path.resize(copied);
                                queue.directory = path;
                                queue.explicit_directory = true;
-                               if (!queue.directory.is_absolute())
+                               if (!platform::windows::data_storage::is_test_data_path(queue.directory) ||
+                                   !platform::windows::data_storage::is_test_data_path(queue.directory.parent_path()))
                                    return;
                            }
                            else
                            {
-                               wchar_t path[32768]{};
-                               const auto copied =
-                                   GetModuleFileNameW(nullptr, path, static_cast<DWORD>(std::size(path)));
-                               if (!copied || copied >= std::size(path))
+                               const auto locations = platform::windows::data_storage::resolve_current_user();
+                               if (locations.error || locations.destination.research_logs.empty())
                                    return;
-                               queue.directory = std::filesystem::path(path).parent_path();
+                               queue.directory = locations.destination.research_logs / L"shots";
                            }
                            std::filesystem::create_directories(queue.directory);
                            queue.stop_path = queue.directory.parent_path() / L"STOP";
@@ -739,7 +739,7 @@ bool enabled() noexcept
     static const bool requested = []
     {
         wchar_t value[2]{};
-        const bool request = GetEnvironmentVariableW(L"VESTA_SEED_TRACE", value, 2) == 1 && value[0] == L'1';
+        const bool request = GetEnvironmentVariableW(L"VESTA_UITEST_SEED_TRACE", value, 2) == 1 && value[0] == L'1';
         if (request)
             initialize();
         return request;

@@ -1,5 +1,6 @@
 #include <stdafx.hpp>
 #include <platform/windows/user_settings.hpp>
+#include <platform/windows/data_paths.hpp>
 
 #include <shellapi.h>
 
@@ -7,7 +8,7 @@ namespace platform::windows
 {
 namespace
 {
-constexpr const wchar_t* k_key = L"Software\\Vesta";
+constexpr const wchar_t* k_key = L"Software\\VestaUITest";
 constexpr const wchar_t* k_config_folder = L"ConfigFolder";
 constexpr DWORD k_max_path_chars = 32767;
 } // namespace
@@ -27,7 +28,7 @@ std::optional<std::filesystem::path> read_config_folder() noexcept
             return std::nullopt;
         value.resize(::wcsnlen(value.c_str(), value.size()));
         std::filesystem::path folder{value};
-        if (!folder.is_absolute())
+        if (!data_storage::is_test_data_path(folder))
             return std::nullopt;
         return folder;
     }
@@ -41,7 +42,7 @@ bool write_config_folder(const std::filesystem::path& folder) noexcept
 {
     try
     {
-        if (!folder.is_absolute())
+        if (!data_storage::is_test_data_path(folder))
             return false;
         const auto& text = folder.native();
         if (text.size() > k_max_path_chars)
