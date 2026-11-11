@@ -35,6 +35,16 @@ constexpr ImU32 k_wm_text = IM_COL32(199, 199, 199, 255);
 constexpr ImU32 k_wm_muted = IM_COL32(128, 128, 130, 255);
 constexpr ImU32 k_wm_outline = IM_COL32(0, 0, 0, 220);
 
+// The three readability panels share one spacing grid and one menu-like surface language. Keeping the values together
+// prevents the watermark, spectators and active binds from drifting into three slightly different layouts.
+constexpr float k_hud_pad_x = 14.0f;
+constexpr float k_hud_pad_y = 10.0f;
+constexpr float k_hud_title_gap = 10.0f;
+constexpr float k_hud_row_gap = 5.0f;
+constexpr float k_hud_header_line_gap = 4.0f;
+constexpr float k_hud_rounding = 6.0f;
+constexpr float k_hud_accent_width = 2.0f;
+
 // Uppercase, matching the sidebar wordmark.
 constexpr const char* k_wm_brand = "PASTA";
 
@@ -298,6 +308,46 @@ ImU32 loss_icon_color(float loss, float low, float high)
     return ui::bound_overlay().ui_dpi_scale();
 }
 
+// The HUD reads the same live palette as the menu. Nothing here is cached, so changing an interface colour or the
+// shared opacity updates the readability panels on the next frame without a restart.
+[[nodiscard]] ImU32 hud_color(const foundation::rgba& color, const float opacity = 1.0f) noexcept
+{
+    const auto alpha =
+        static_cast<int>(std::lround(static_cast<float>(color.a) * std::clamp(opacity, 0.0f, 1.0f)));
+    return IM_COL32(static_cast<int>(color.r), static_cast<int>(color.g), static_cast<int>(color.b), alpha);
+}
+
+[[nodiscard]] ImU32 hud_accent()
+{
+    return hud_color(config::general_settings.palette.accent);
+}
+
+[[nodiscard]] ImU32 hud_text()
+{
+    return hud_color(config::general_settings.palette.text);
+}
+
+[[nodiscard]] ImU32 hud_muted()
+{
+    return hud_color(config::general_settings.palette.muted_text);
+}
+
+[[nodiscard]] ImU32 hud_border()
+{
+    return hud_color(config::general_settings.palette.border);
+}
+
+// The menu's card headers use a light hairline, separate from the darker outer border.
+[[nodiscard]] ImU32 hud_line()
+{
+    return hud_color(config::general_settings.palette.text, 0.90f);
+}
+
+[[nodiscard]] float hud_opacity()
+{
+    return std::clamp(config::general_settings.overlay_opacity, 0.25f, 1.0f);
+}
+
 [[nodiscard]] ImVec2 physical_mouse_position()
 {
     POINT cursor{};
@@ -481,6 +531,21 @@ void draw_panel_surface(ImDrawList* draw, const ImVec2 min, const ImVec2 max, co
                         std::max(0.0f, rounding - 2.0f));
 }
 
+// The three readability panels use the menu's group-box frame: a dark outer ring, a hairline border, a translucent
+// card fill, and one thin accent rule at the left edge. Other HUD panels keep their existing surfaces.
+void draw_readability_surface(ImDrawList* draw, const ImVec2 min, const ImVec2 max, const float metric)
+{
+    const auto rounding = k_hud_rounding * metric;
+    draw->AddRectFilled(min, max, k_wm_outer, rounding);
+    draw->AddRectFilled(min + ImVec2{1.0f, 1.0f}, max - ImVec2{1.0f, 1.0f}, hud_border(),
+                        std::max(0.0f, rounding - 1.0f));
+    draw->AddRectFilled(min + ImVec2{2.0f, 2.0f}, max - ImVec2{2.0f, 2.0f},
+                        hud_color(config::general_settings.palette.card, hud_opacity()),
+                        std::max(0.0f, rounding - 2.0f));
+    draw->AddRectFilled(min, {min.x + k_hud_accent_width * metric, max.y}, hud_accent(), rounding,
+                        ImDrawFlags_RoundCornersLeft);
+}
+
 [[nodiscard]] std::string panel_title(const char* key)
 {
     auto title = std::string{render::localization::tr(key)};
@@ -524,8 +589,9 @@ struct hud_state
 
 struct compact_panel_row
 {
-    std::string text{};
-    ImU32 color{k_wm_text};
+    std::string name{};
+    std::string state{};
+    bool active{};
 };
 
 [[nodiscard]] ImVec2 resolve_screen_layout(const config::general_profile::screen_layout& layout,
@@ -709,9 +775,9 @@ struct watermark_metrics
     m.brand_width = text_width(m.brand_font, m.brand_size, k_wm_brand);
     m.label_gap = 6.0f * m.scale;
 
-    m.h_pad_left = 26.0f * m.scale;
-    const auto h_pad_right = 28.0f * m.scale;
-    const auto h_pad_y = 5.0f * m.scale;
+    m.h_pad_left = k_hud_pad_x * m.scale;
+    const auto h_pad_right = k_hud_pad_x * m.scale;
+    const auto h_pad_y = k_hud_pad_y * m.scale;
     m.h_gap = 14.0f * m.scale;
     m.divider_gap = 14.0f * m.scale;
     auto h_content = m.brand_width;
@@ -721,10 +787,10 @@ struct watermark_metrics
         h_content += (i > 0 ? m.h_gap : 0.0f) + m.chip_width(chips.items[i]);
     m.horizontal_size = {h_content + m.h_pad_left + h_pad_right, std::max(m.brand_size, m.text_size) + h_pad_y * 2.0f};
 
-    m.v_pad_x = 18.0f * m.scale;
-    m.v_pad_y = 12.0f * m.scale;
-    m.v_brand_gap = 10.0f * m.scale;
-    m.v_line_gap = 7.0f * m.scale;
+    m.v_pad_x = k_hud_pad_x * m.scale;
+    m.v_pad_y = k_hud_pad_y * m.scale;
+    m.v_brand_gap = k_hud_title_gap * m.scale;
+    m.v_line_gap = k_hud_row_gap * m.scale;
     m.v_inner_width = m.brand_width;
     for (const auto& chip : chips.view())
         m.v_inner_width = std::max(m.v_inner_width, m.chip_width(chip));
@@ -797,13 +863,13 @@ void draw_watermark_vertical(ImDrawList* draw, const watermark_metrics& m, const
     draw_outlined_text(draw, m.brand_font, m.brand_size,
                        {min.x + (width - m.brand_width) * 0.5f,
                         ink_centered_y(m.brand_font, m.brand_size, {k_wm_brand}, y, m.brand_size)},
-                       k_wm_text, k_wm_brand);
+                       hud_text(), k_wm_brand);
     y += m.brand_size;
     if (chips.count == 0)
         return;
 
     y += m.v_brand_gap * 0.5f;
-    draw->AddLine({min.x + m.v_pad_x, y}, {max.x - m.v_pad_x, y}, k_wm_border, std::max(1.0f, m.scale));
+    draw->AddLine({min.x + m.v_pad_x, y}, {max.x - m.v_pad_x, y}, hud_line(), std::max(1.0f, m.scale));
     y += m.v_brand_gap * 0.5f;
 
     const auto block_x = min.x + (width - m.v_inner_width) * 0.5f;
@@ -829,13 +895,13 @@ void draw_watermark_horizontal(ImDrawList* draw, const watermark_metrics& m, con
     auto cursor_x = min.x + m.h_pad_left;
     draw_outlined_text(draw, m.brand_font, m.brand_size,
                        {cursor_x, ink_centered_y(m.brand_font, m.brand_size, {k_wm_brand}, min.y, height) + y_offset},
-                       k_wm_text, k_wm_brand);
+                       hud_text(), k_wm_brand);
     cursor_x += m.brand_width;
 
     if (chips.count > 0)
     {
         cursor_x += m.divider_gap;
-        draw->AddLine({cursor_x, min.y + 6.0f * m.scale}, {cursor_x, max.y - 6.0f * m.scale}, k_wm_border,
+        draw->AddLine({cursor_x, min.y + 6.0f * m.scale}, {cursor_x, max.y - 6.0f * m.scale}, hud_line(),
                       std::max(1.0f, m.scale));
         cursor_x += m.divider_gap;
     }
@@ -893,7 +959,7 @@ void panels::draw_watermark(const bool interactive)
     const auto max = placement.min + placement.size;
     state.watermark_bounds = {min, max, true};
     auto* draw = ImGui::GetForegroundDrawList();
-    draw_panel_surface(draw, min, max, 4.0f * metrics.scale);
+    draw_readability_surface(draw, min, max, metrics.scale);
 
     // Content is clipped to the animated panel so it reveals/hides cleanly while
     // the box grows or shrinks.
@@ -931,16 +997,16 @@ void panels::draw_spectator_list(bool interactive)
     const auto measure = [](ImFont* font, float size, const char* text)
     { return font->CalcTextSizeA(size, FLT_MAX, 0.0f, text).x; };
 
-    char header[48];
     const auto title = panel_title("Spectators");
-    std::snprintf(header, sizeof(header), "%s (%d)", title.c_str(), static_cast<int>(specs->size()));
-
-    const float pad_x = 14.0f * metric_scale;
-    const float pad_y = 10.0f * metric_scale;
-    const float row_gap = 5.0f * metric_scale;
-    const float title_gap = 10.0f * metric_scale;
+    const auto count = std::to_string(specs->size());
+    const float pad_x = k_hud_pad_x * metric_scale;
+    const float pad_y = k_hud_pad_y * metric_scale;
+    const float row_gap = k_hud_row_gap * metric_scale;
+    const float title_gap = k_hud_title_gap * metric_scale;
     const float row_height = text_size;
-    float inner_w = measure(title_font, title_size, header);
+    const auto title_w = measure(title_font, title_size, title.c_str());
+    const auto count_w = measure(title_font, title_size, count.c_str());
+    float inner_w = title_w + title_gap + count_w;
     for (const auto& s : *specs)
     {
         const float w = measure(text_font, text_size, s.name.c_str());
@@ -977,20 +1043,22 @@ void panels::draw_spectator_list(bool interactive)
     const ImVec2 draw_max{position.x + panel_w, position.y + panel_h};
 
     auto* draw = ImGui::GetForegroundDrawList();
-    const float rounding = 4.0f * metric_scale;
-    draw_panel_surface(draw, draw_min, draw_max, rounding);
+    draw_readability_surface(draw, draw_min, draw_max, metric_scale);
 
     draw->PushClipRect(draw_min, draw_max, true);
     float y = draw_min.y + pad_y;
-    draw_outlined_text(draw, title_font, title_size, {draw_min.x + pad_x, y}, k_wm_text, header);
-    const auto title_line_y = y + title_size + 4.0f * metric_scale;
-    draw->AddLine({draw_min.x + pad_x, title_line_y}, {draw_max.x - pad_x, title_line_y}, k_wm_line, 1.0f);
+    draw_outlined_text(draw, title_font, title_size, {draw_min.x + pad_x, y}, hud_text(), title.c_str());
+    draw_outlined_text(draw, title_font, title_size, {draw_max.x - pad_x - count_w, y},
+                       row_count > 0 ? hud_accent() : hud_muted(), count.c_str());
+    const auto title_line_y = y + title_size + k_hud_header_line_gap * metric_scale;
+    draw->AddLine({draw_min.x + pad_x, title_line_y}, {draw_max.x - pad_x, title_line_y}, hud_line(),
+                  std::max(1.0f, metric_scale));
     y += title_size + title_gap;
     for (const auto& s : *specs)
     {
         const auto name_x = draw_min.x + pad_x;
         const auto text_y = y + (row_height - text_size) * 0.5f;
-        draw_outlined_text(draw, text_font, text_size, {name_x, text_y}, k_wm_text, s.name.c_str());
+        draw_outlined_text(draw, text_font, text_size, {name_x, text_y}, hud_text(), s.name.c_str());
         y += row_height + row_gap;
     }
     draw->PopClipRect();
@@ -1004,48 +1072,64 @@ void draw_compact_panel(const char* title, const std::vector<compact_panel_row>&
 {
     if (rows.empty() && !interactive)
         return;
-    const auto dpi = overlay_dpi_scale();
+    const auto dpi_scale = overlay_dpi_scale();
     layout.scale = std::clamp(layout.scale, 0.55f, 2.0f);
-    const auto metric = dpi * layout.scale;
+    const auto metric = dpi_scale * layout.scale;
     const auto title_size = k_hud_title_size * metric;
     const auto title_font = resolve_hud_font(render::fonts().hud_text_40, title_size).font;
     const auto text_size = k_hud_text_size * metric;
     const auto text_font = resolve_hud_font(render::fonts().hud_text_40, text_size).font;
     const auto width_of = [](ImFont* font, float size, const char* value)
     { return font->CalcTextSizeA(size, FLT_MAX, 0.0f, value).x; };
-    const auto pad_x = 14.0f * metric, pad_y = 10.0f * metric;
-    const auto gap = 5.0f * metric, title_gap = 10.0f * metric;
-    auto inner_w = std::max(132.0f * metric, width_of(title_font, title_size, title));
+    const auto pad_x = k_hud_pad_x * metric, pad_y = k_hud_pad_y * metric;
+    const auto gap = k_hud_row_gap * metric, title_gap = k_hud_title_gap * metric;
+    const auto count = std::to_string(rows.size());
+    const auto count_w = width_of(title_font, title_size, count.c_str());
+    auto inner_w = std::max(132.0f * metric, width_of(title_font, title_size, title) + title_gap + count_w);
     for (const auto& row : rows)
-        inner_w = std::max(inner_w, width_of(text_font, text_size, row.text.c_str()));
+    {
+        const auto state_w = width_of(text_font, text_size, row.state.c_str());
+        inner_w = std::max(inner_w, width_of(text_font, text_size, row.name.c_str()) + 24.0f * metric + state_w);
+    }
     const auto row_count = std::max<std::size_t>(rows.size(), interactive ? 1 : 0);
     const ImVec2 panel_size{inner_w + pad_x * 2.0f, pad_y * 2.0f + title_size + title_gap + row_count * text_size +
                                                         (row_count ? row_count - 1 : 0) * gap};
     const screen_ui_space ui_space{};
     const auto display = ui_space.display(), position_scale = ui_space.position_scale();
-    migrate_screen_layout(layout, panel_size, display, dpi, position_scale);
-    auto position = resolve_screen_layout(layout, panel_size, display, dpi, position_scale);
+    migrate_screen_layout(layout, panel_size, display, dpi_scale, position_scale);
+    auto position = resolve_screen_layout(layout, panel_size, display, dpi_scale, position_scale);
     position = clamp_to_display(drag.update(interactive, position, panel_size), panel_size, display);
     if (!drag.active())
         position = avoid_panel_overlap(position, panel_size, display, avoid, avoid_count, 8.0f * metric);
     position = clamp_to_display(position, panel_size, display);
     if (drag.active())
-        capture_screen_layout(layout, position, panel_size, display, dpi, position_scale);
+        capture_screen_layout(layout, position, panel_size, display, dpi_scale, position_scale);
     auto* draw = ImGui::GetForegroundDrawList();
     const ImVec2 maximum{position.x + panel_size.x, position.y + panel_size.y};
-    draw_panel_surface(draw, position, maximum, 4.0f * metric);
+    draw_readability_surface(draw, position, maximum, metric);
     auto y = position.y + pad_y;
-    draw_outlined_text(draw, title_font, title_size, {position.x + pad_x, y}, k_wm_text, title);
-    const auto title_line_y = y + title_size + 4.0f * metric;
-    draw->AddLine({position.x + pad_x, title_line_y}, {maximum.x - pad_x, title_line_y}, k_wm_line, 1.0f);
+    draw_outlined_text(draw, title_font, title_size, {position.x + pad_x, y}, hud_text(), title);
+    draw_outlined_text(draw, title_font, title_size, {maximum.x - pad_x - count_w, y},
+                       rows.empty() ? hud_muted() : hud_accent(), count.c_str());
+    const auto title_line_y = y + title_size + k_hud_header_line_gap * metric;
+    draw->AddLine({position.x + pad_x, title_line_y}, {maximum.x - pad_x, title_line_y}, hud_line(),
+                  std::max(1.0f, metric));
     y += title_size + title_gap;
     if (rows.empty())
-        draw_outlined_text(draw, text_font, text_size, {position.x + pad_x, y}, k_wm_muted,
+        draw_outlined_text(draw, text_font, text_size, {position.x + pad_x, y}, hud_muted(),
                            render::localization::tr("No active entries"));
     else
         for (const auto& row : rows)
         {
-            draw_outlined_text(draw, text_font, text_size, {position.x + pad_x, y}, row.color, row.text.c_str());
+            const auto state_w = width_of(text_font, text_size, row.state.c_str());
+            const auto state_x = maximum.x - pad_x - state_w;
+            draw_outlined_text(draw, text_font, text_size, {position.x + pad_x, y},
+                               row.active ? hud_text() : hud_muted(), row.name.c_str());
+            if (row.active)
+                draw->AddCircleFilled({state_x - 6.0f * metric, y + text_size * 0.5f},
+                                      std::max(1.0f, 1.7f * metric), hud_accent(), 12);
+            draw_outlined_text(draw, text_font, text_size, {state_x, y},
+                               row.active ? hud_accent() : hud_muted(), row.state.c_str());
             y += text_size + gap;
         }
 }
@@ -1342,7 +1426,7 @@ void panels::draw_keybind_list(const bool interactive)
         const auto* mode_name = mode == config::combat_profile::activation::always   ? "always"
                                 : mode == config::combat_profile::activation::toggle ? "toggle"
                                                                                      : "hold";
-        rows.push_back({std::format("{}  [{}]", std::move(name), mode_name), k_wm_text});
+        rows.push_back({std::move(name), mode_name, true});
     };
     add_combat("Aimbot", combat.aimbot.enabled, combat.aimbot.activation_mode, combat.aimbot.key);
     add_combat("Trigger", combat.triggerbot.enabled, combat.triggerbot.activation_mode, combat.triggerbot.key);
@@ -1365,7 +1449,7 @@ void panels::draw_keybind_list(const bool interactive)
         const auto* mode = player_esp.activation_mode == config::visual_profile::player::always_on ? "always"
                            : player_esp.activation_mode == config::visual_profile::player::toggle  ? "toggle"
                                                                                                    : "hold";
-        rows.push_back({std::format("Player ESP  [{}]", mode), k_wm_text});
+        rows.push_back({"Player ESP", mode, true});
     }
     const auto& radar = config::visual_settings.m_radar;
     if (visual_mode_visible(radar.activation_mode) && radar.active())
@@ -1373,16 +1457,16 @@ void panels::draw_keybind_list(const bool interactive)
         const auto* mode = radar.activation_mode == config::visual_profile::radar::always_on ? "always"
                            : radar.activation_mode == config::visual_profile::radar::toggle  ? "toggle"
                                                                                              : "hold";
-        rows.push_back({std::format("Radar  [{}]", mode), k_wm_text});
+        rows.push_back({"Radar", mode, true});
     }
     const auto key_down = [](int key) { return key > 0 && (::GetAsyncKeyState(key) & 0x8000) != 0; };
     const auto& misc = config::general_settings;
     if (cfg.show_hold && misc.m_auto_stop.enabled && features::misc::auto_stop().active())
-        rows.push_back({"Auto Stop  [active]", k_wm_text});
+        rows.push_back({"Auto Stop", "active", true});
     if (cfg.show_always && config::visual_settings.m_no_flash.enabled)
-        rows.push_back({"No Flash  [always]", k_wm_text});
+        rows.push_back({"No Flash", "always", true});
     if (cfg.show_always && config::visual_settings.m_no_smoke.enabled)
-        rows.push_back({"No Smoke  [always]", k_wm_text});
+        rows.push_back({"No Smoke", "always", true});
     auto& state = *m_state;
     state.begin_panel_frame();
     const auto title = panel_title("Active Binds");

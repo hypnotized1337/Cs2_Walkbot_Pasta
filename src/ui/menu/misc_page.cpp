@@ -207,7 +207,7 @@ void draw_overlay_tab()
                        select_row("GPU Priority", p.gpu_priority, priorities);
                    });
 
-    card_in_column("overlay", "OVERLAY", 6, 0,
+    card_in_column("overlay", "OVERLAY", 7, 0,
                    [&]
                    {
                        toggle_row("OBS Bypass", p.obs_bypass);
@@ -250,6 +250,9 @@ void draw_overlay_tab()
                                             toggle_row("Toggle Binds", p.m_keybind_list.show_toggle);
                                         });
                        toggle_row("Show Bomb Info", config::visual_settings.m_bomb.show_info_panel);
+                       auto overlay_opacity = p.overlay_opacity * 100.0f;
+                       slider_row("Overlay Opacity", overlay_opacity, 25.0f, 100.0f, "%", 1.0f);
+                       p.overlay_opacity = overlay_opacity / 100.0f;
                    });
 }
 

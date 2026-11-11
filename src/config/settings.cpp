@@ -2032,6 +2032,7 @@ static void to_json(json& j, const general_profile& m)
              {"m_walk_bot", m.m_walk_bot},
              {"language", m.language},
              {"menu_scale", m.menu_scale},
+             {"overlay_opacity", m.overlay_opacity},
              {"palette", json{{"background", m.palette.background},
                               {"panel", m.palette.panel},
                               {"card", m.palette.card},
@@ -2072,6 +2073,8 @@ static void from_json(const json& j, general_profile& m)
     // here keeps lang and settings from drifting apart on load.
     read_field(j, "menu_scale", m.menu_scale);
     m.menu_scale = std::isfinite(m.menu_scale) ? std::clamp(m.menu_scale, 0.50f, 1.50f) : 1.0f;
+    read_field(j, "overlay_opacity", m.overlay_opacity);
+    m.overlay_opacity = std::isfinite(m.overlay_opacity) ? std::clamp(m.overlay_opacity, 0.25f, 1.0f) : 0.86f;
     if (j.contains("palette"))
     {
         const auto& p = j.at("palette");

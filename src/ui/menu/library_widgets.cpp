@@ -42,6 +42,27 @@ void stroke(ImDrawList* draw, const ImVec2 center, std::initializer_list<ImVec2>
 
 // The entry of each open action menu that waits for its confirming second click.
 std::unordered_map<ImGuiID, int> g_armed_actions{};
+
+// BeginDisabled() dims ImGui's own colors through style.Alpha, but these controls paint their own geometry. The item
+// flags carry the same state; apply the same alpha here so every custom button fades with the menu.
+[[nodiscard]] bool item_disabled() noexcept
+{
+    const auto* context = ImGui::GetCurrentContext();
+    return context && (context->CurrentItemFlags & ImGuiItemFlags_Disabled) != 0;
+}
+
+[[nodiscard]] ImVec4 dimmed(ImVec4 color, const float alpha)
+{
+    color.w *= alpha;
+    return color;
+}
+
+// Pick a readable label colour for a filled accent button instead of assuming the accent is always light.
+[[nodiscard]] ImVec4 readable_ink(const ImVec4& background)
+{
+    const auto luminance = 0.2126f * background.x + 0.7152f * background.y + 0.0722f * background.z;
+    return luminance > 0.58f ? ImVec4{0.07f, 0.07f, 0.08f, 1.0f} : ImVec4{1.0f, 1.0f, 1.0f, 1.0f};
+}
 } // namespace
 
 void draw_glyph(ImDrawList* draw, const glyph icon, const ImVec2 center, const ImU32 color)
@@ -136,16 +157,33 @@ bool small_button(const char* id, const glyph icon, const char* label, const ton
     const auto hovered = ImGui::IsItemHovered();
     pointer_cursor_if_hovered();
     const auto item = ImGui::GetItemID();
-    const auto hover_t = animate_state(g_hover_animations, item, hovered, 0.12f);
+    const auto disabled = item_disabled();
+    const auto held = ImGui::IsItemActive() && !disabled;
+    const auto focused = ImGui::IsItemFocused() && !disabled;
+    const auto hover_t = animate_state(g_hover_animations, item, hovered && !disabled, 0.12f);
+    const auto held_t = animate_state(g_active_animations, item, held, 0.08f);
+    const auto focus_t = animate_state(g_active_animations, item ^ 0x6f70656eu, focused, 0.12f);
+    const auto dim = disabled ? ImGui::GetStyle().Alpha : 1.0f;
     const auto min = ImGui::GetItemRectMin();
     const auto max = ImGui::GetItemRectMax();
     auto* draw = ImGui::GetWindowDrawList();
     const auto base = tone_color(kind);
-    draw->AddRectFilled(min, max, packed(k_outline_dark), 2.0f);
-    auto fill = mix(k_bg_panel, ImVec4{base.x, base.y, base.z, 0.28f}, hover_t);
-    draw->AddRectFilled(min + ImVec2{1.0f, 1.0f}, max - ImVec2{1.0f, 1.0f}, packed(fill), 1.0f);
-    draw->AddRect(min, max, packed(mix(k_border, k_border_light, hover_t)), 2.0f, 0, 1.0f);
-    const auto ink = packed(mix(k_text_muted, k_text_main, hover_t));
+    const auto emphasis = std::max(std::max(hover_t, held_t), focus_t);
+    draw->AddRectFilled(min, max, packed(dimmed(k_outline_dark, dim)), 2.0f);
+    const auto tint = kind == tone::accent ? 0.18f : 0.28f;
+    auto fill = mix(k_bg_panel, ImVec4{base.x, base.y, base.z, tint}, emphasis);
+    draw->AddRectFilled(min + ImVec2{1.0f, 1.0f}, max - ImVec2{1.0f, 1.0f}, packed(dimmed(fill, dim)), 1.0f);
+    auto border = mix(k_border, base, kind == tone::accent ? 0.30f + emphasis * 0.70f : emphasis * 0.70f);
+    if (focused)
+        border = mix(border, k_accent, 0.75f);
+    draw->AddRect(min, max, packed(dimmed(border, dim)), 2.0f, 0, 1.0f);
+    if (focus_t > 0.01f)
+        draw->AddRect(min - ImVec2{2.0f, 2.0f}, max + ImVec2{2.0f, 2.0f},
+                      packed(dimmed(k_accent, dim * focus_t)), 3.0f, 0, 1.0f);
+    const auto ink = packed(dimmed(kind == tone::accent
+                                       ? mix(k_text_main, base, 0.55f + emphasis * 0.35f)
+                                       : mix(k_text_muted, k_text_main, emphasis),
+                                  dim));
     auto x = min.x + 8.0f;
     if (icon != glyph::none)
     {
@@ -164,36 +202,49 @@ bool pill_button(const char* id, const char* label, const float width, const ton
     const auto hovered = ImGui::IsItemHovered();
     pointer_cursor_if_hovered();
     const auto item = ImGui::GetItemID();
-    const auto hover_t = animate_state(g_hover_animations, item, hovered, 0.12f);
-    const auto held_t = animate_state(g_active_animations, item, ImGui::IsItemActive(), 0.08f);
+    const auto disabled = item_disabled();
+    const auto held = ImGui::IsItemActive() && !disabled;
+    const auto focused = ImGui::IsItemFocused() && !disabled;
+    const auto hover_t = animate_state(g_hover_animations, item, hovered && !disabled, 0.12f);
+    const auto held_t = animate_state(g_active_animations, item, held, 0.08f);
+    const auto focus_t = animate_state(g_active_animations, item ^ 0x70696c6cu, focused, 0.12f);
+    const auto dim = disabled ? ImGui::GetStyle().Alpha : 1.0f;
     const auto min = ImGui::GetItemRectMin();
     const auto max = ImGui::GetItemRectMax();
     auto* draw = ImGui::GetWindowDrawList();
     const auto base = tone_color(kind);
-    draw->AddRectFilled(min, max, packed(k_outline_dark), 2.0f);
+    draw->AddRectFilled(min, max, packed(dimmed(k_outline_dark, dim)), 2.0f);
     ImVec4 fill = k_bg_panel;
-    ImVec4 ink = mix(k_text_muted, k_text_main, hover_t);
+    ImVec4 ink = mix(k_text_muted, k_text_main, std::max(hover_t, held_t));
+    ImVec4 border = mix(k_border, k_border_light, std::max(hover_t, focus_t));
     if (kind == tone::accent)
     {
-        const auto top = mix(ImVec4{188.0f / 255.0f, 188.0f / 255.0f, 214.0f / 255.0f, 1.0f},
-                             ImVec4{204.0f / 255.0f, 204.0f / 255.0f, 224.0f / 255.0f, 1.0f}, hover_t);
-        const auto bottom = ImVec4{132.0f / 255.0f, 132.0f / 255.0f, 156.0f / 255.0f, 1.0f};
-        draw->AddRectFilledMultiColor(min + ImVec2{1.0f, 1.0f}, max - ImVec2{1.0f, 1.0f}, packed(top), packed(top),
-                                      packed(bottom), packed(bottom));
-        ink = ImVec4{18.0f / 255.0f, 18.0f / 255.0f, 20.0f / 255.0f, 1.0f};
+        const auto normal = ImVec4{k_accent.x, k_accent.y, k_accent.z, 1.0f};
+        const auto hover = mix(normal, ImVec4{1.0f, 1.0f, 1.0f, 1.0f}, 0.12f);
+        const auto pressed = mix(normal, ImVec4{0.0f, 0.0f, 0.0f, 1.0f}, 0.18f);
+        fill = mix(normal, hover, hover_t);
+        fill = mix(fill, pressed, held_t);
+        border = mix(normal, ImVec4{1.0f, 1.0f, 1.0f, 1.0f}, 0.18f + 0.16f * hover_t);
+        border = mix(border, ImVec4{1.0f, 1.0f, 1.0f, 1.0f}, focus_t * 0.25f);
+        ink = readable_ink(fill);
+        draw->AddRectFilled(min + ImVec2{1.0f, 1.0f}, max - ImVec2{1.0f, 1.0f}, packed(dimmed(fill, dim)), 1.0f);
     }
     else
     {
         fill = mix(k_bg_panel, ImVec4{base.x, base.y, base.z, 0.30f}, hover_t);
-        draw->AddRectFilled(min + ImVec2{1.0f, 1.0f}, max - ImVec2{1.0f, 1.0f}, packed(fill), 1.0f);
+        fill = mix(fill, ImVec4{base.x, base.y, base.z, 0.42f}, held_t);
+        draw->AddRectFilled(min + ImVec2{1.0f, 1.0f}, max - ImVec2{1.0f, 1.0f}, packed(dimmed(fill, dim)), 1.0f);
     }
-    draw->AddRect(min, max, packed(mix(k_border, k_border_light, hover_t)), 2.0f, 0, 1.0f);
+    draw->AddRect(min, max, packed(dimmed(border, dim)), 2.0f, 0, 1.0f);
+    if (focus_t > 0.01f)
+        draw->AddRect(min - ImVec2{2.0f, 2.0f}, max + ImVec2{2.0f, 2.0f},
+                      packed(dimmed(k_accent, dim * focus_t)), 3.0f, 0, 1.0f);
     const auto* text = render::localization::tr(label);
     const auto text_size = ImGui::CalcTextSize(text);
     draw->PushClipRect(min, max, true);
     draw->AddText(
         {min.x + std::max(6.0f, (width - text_size.x) * 0.5f), min.y + (height - text_size.y) * 0.5f + held_t},
-        packed(ink), text);
+        packed(dimmed(ink, dim)), text);
     draw->PopClipRect();
     return clicked;
 }
@@ -231,16 +282,28 @@ int action_menu(const char* id, const std::span<const menu_action> actions)
         g_armed_actions.erase(popup_id);
     }
     pointer_cursor_if_hovered();
+    const auto disabled = item_disabled();
     const auto open = ImGui::IsPopupOpen("##actions");
-    const auto hover_t = animate_state(g_hover_animations, ImGui::GetItemID(), ImGui::IsItemHovered() || open, 0.12f);
+    const auto hover_t =
+        animate_state(g_hover_animations, ImGui::GetItemID(), (ImGui::IsItemHovered() || open) && !disabled, 0.12f);
+    const auto held_t = animate_state(g_active_animations, ImGui::GetItemID() ^ 0x6d6f7265u,
+                                      ImGui::IsItemActive() && !disabled, 0.08f);
+    const auto focus_t = animate_state(g_active_animations, ImGui::GetItemID() ^ 0x666f6375u,
+                                       ImGui::IsItemFocused() && !disabled, 0.12f);
+    const auto dim = disabled ? ImGui::GetStyle().Alpha : 1.0f;
     const auto button_min = ImGui::GetItemRectMin();
     const auto button_max = ImGui::GetItemRectMax();
     auto* draw = ImGui::GetWindowDrawList();
-    draw->AddRectFilled(button_min, button_max, packed(k_outline_dark), 2.0f);
+    const auto emphasis = std::max(std::max(hover_t, held_t), focus_t);
+    draw->AddRectFilled(button_min, button_max, packed(dimmed(k_outline_dark, dim)), 2.0f);
+    auto fill = mix(k_bg_panel, k_bg_hover, hover_t);
+    fill = mix(fill, ImVec4{k_accent.x, k_accent.y, k_accent.z, 0.16f}, std::max(held_t, focus_t));
     draw->AddRectFilled(button_min + ImVec2{1.0f, 1.0f}, button_max - ImVec2{1.0f, 1.0f},
-                        packed(mix(k_bg_panel, k_bg_hover, hover_t)), 1.0f);
-    draw->AddRect(button_min, button_max, packed(mix(k_border, k_border_light, hover_t)), 2.0f, 0, 1.0f);
-    draw_glyph(draw, glyph::more, (button_min + button_max) * 0.5f, packed(mix(k_text_muted, k_text_main, hover_t)));
+                        packed(dimmed(fill, dim)), 1.0f);
+    draw->AddRect(button_min, button_max, packed(dimmed(mix(k_border, k_accent, 0.30f + emphasis * 0.70f), dim)), 2.0f,
+                  0, 1.0f);
+    draw_glyph(draw, glyph::more, (button_min + button_max) * 0.5f,
+               packed(dimmed(mix(k_text_muted, k_accent, emphasis), dim)));
 
     float width = 170.0f;
     for (const auto& action : actions)
@@ -275,11 +338,12 @@ int action_menu(const char* id, const std::span<const menu_action> actions)
             const auto item_max = ImGui::GetItemRectMax();
             const auto item_hover = animate_state(g_hover_animations, ImGui::GetItemID(), hovered, 0.10f);
             const auto waiting = armed == index;
-            const auto color = action.kind == tone::danger ? tone_color(tone::danger) : k_text_main;
+            const auto color = action.kind == tone::danger ? tone_color(tone::danger) : k_accent;
             if (item_hover > 0.01f || waiting)
                 popup->AddRectFilled(item_min + ImVec2{0.0f, 1.0f}, item_max - ImVec2{0.0f, 1.0f},
                                      packed(waiting ? ImVec4{color.x, color.y, color.z, 0.16f}
-                                                    : mix(ImVec4{1, 1, 1, 0}, k_bg_hover, item_hover)),
+                                                    : mix(ImVec4{1, 1, 1, 0},
+                                                          ImVec4{color.x, color.y, color.z, 0.10f}, item_hover)),
                                      2.0f);
             const auto* text = render::localization::tr(waiting ? "Click again to confirm" : action.label);
             popup->AddText({item_min.x + 12.0f, item_min.y + (row - ImGui::GetTextLineHeight()) * 0.5f},

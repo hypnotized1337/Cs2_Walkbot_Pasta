@@ -97,14 +97,14 @@ void header_actions()
 {
     const auto has_folder = config::library().folder().has_value();
     ImGui::BeginDisabled(!has_folder);
-    if (small_button("##import", glyph::import, k_header_labels[0]))
+    if (small_button("##import", glyph::import, k_header_labels[0], tone::accent))
         bound_overlay().request_file(ui::overlay_t::file_request::import_config);
     ImGui::SameLine(0.0f, 8.0f);
-    if (small_button("##open_folder", glyph::folder, k_header_labels[1]) && has_folder)
+    if (small_button("##open_folder", glyph::folder, k_header_labels[1], tone::accent) && has_folder)
         static_cast<void>(platform::windows::open_folder(*config::library().folder()));
     ImGui::EndDisabled();
     ImGui::SameLine(0.0f, 8.0f);
-    if (small_button("##change_folder", glyph::none, k_header_labels[2]))
+    if (small_button("##change_folder", glyph::none, k_header_labels[2], tone::accent))
         bound_overlay().request_file(ui::overlay_t::file_request::choose_config_folder);
 }
 

@@ -265,6 +265,7 @@ struct general_profile
     static constexpr int k_language_count = 2;
     int language{0};
     float menu_scale{1.0f};
+    float overlay_opacity{0.86f};
     struct interface_palette
     {
         // Insomnia-style defaults: near-black surfaces, hairline warm-grey borders and a periwinkle accent.

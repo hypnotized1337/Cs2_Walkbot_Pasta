@@ -662,6 +662,7 @@ const std::unordered_map<std::string_view, const char*>& russian()
         {"LANGUAGE", "ЯЗЫК"},
         {"Language", "Язык"},
         {"DPI Scale", "Масштаб DPI"},
+        {"Overlay Opacity", "Непрозрачность оверлея"},
 
         // --- misc: movement ---------------------------------------------
         {"GAME ACTION BINDS", "КНОПКИ ДЕЙСТВИЙ"},

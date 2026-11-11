@@ -4,8 +4,8 @@
 
 namespace ui::hud
 {
-// The three readability overlays share these sizes (DIPs). Change them here to rescale the watermark, spectator
-// list and active binds together; the TTF is rasterized larger than the draw size so it stays sharp.
+// The three readability overlays share these base sizes at 100% DPI Scale. They are multiplied by the menu's DPI
+// Scale setting and each panel's own scale; ImGui bakes the TTF at the draw size, so no atlas rebuild is needed.
 inline constexpr float k_hud_text_size = 19.0f;
 inline constexpr float k_hud_title_size = 21.0f;
 inline constexpr float k_hud_brand_size = 25.0f;
@@ -34,4 +34,5 @@ private:
     struct state;
     std::unique_ptr<state> m_state;
 };
+
 } // namespace ui::hud
