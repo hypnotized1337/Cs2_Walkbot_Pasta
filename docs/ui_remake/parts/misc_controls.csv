@@ -1,0 +1,83 @@
+page,section,label,widget_type,config_key,default,min,max,condition,source_file,source_line
+Misc/General,Game Binds,Forward,keybind,misc.m_game_controls.forward,W,,,Game controls; Attack binds may capture mouse; keyboard-only for other listed binds,src/ui/menu/misc_page.cpp,107
+Misc/General,Game Binds,Back,keybind,misc.m_game_controls.back,S,,,Game controls; Attack binds may capture mouse; keyboard-only for other listed binds,src/ui/menu/misc_page.cpp,108
+Misc/General,Game Binds,Left,keybind,misc.m_game_controls.left,A,,,Game controls; Attack binds may capture mouse; keyboard-only for other listed binds,src/ui/menu/misc_page.cpp,109
+Misc/General,Game Binds,Right,keybind,misc.m_game_controls.right,D,,,Game controls; Attack binds may capture mouse; keyboard-only for other listed binds,src/ui/menu/misc_page.cpp,110
+Misc/General,Game Binds,Walk,keybind,misc.m_game_controls.walk,VK_SHIFT,,,Game controls; Attack binds may capture mouse; keyboard-only for other listed binds,src/ui/menu/misc_page.cpp,111
+Misc/General,Game Binds,Duck,keybind,misc.m_game_controls.duck,VK_CONTROL,,,Game controls; Attack binds may capture mouse; keyboard-only for other listed binds,src/ui/menu/misc_page.cpp,112
+Misc/General,Game Binds,Jump,keybind,misc.m_game_controls.jump,VK_SPACE,,,Game controls; Attack binds may capture mouse; keyboard-only for other listed binds,src/ui/menu/misc_page.cpp,113
+Misc/General,Game Binds,Attack,keybind,misc.m_game_controls.attack,VK_LBUTTON,,,Game controls; Attack binds may capture mouse; keyboard-only for other listed binds,src/ui/menu/misc_page.cpp,118
+Misc/General,Game Binds,Secondary Attack,keybind,misc.m_game_controls.attack2,VK_RBUTTON,,,Game controls; Attack binds may capture mouse; keyboard-only for other listed binds,src/ui/menu/misc_page.cpp,119
+Misc/General,Game Binds,Use,keybind,misc.m_game_controls.use,E,,,Game controls; Attack binds may capture mouse; keyboard-only for other listed binds,src/ui/menu/misc_page.cpp,120
+Misc/General,Game Binds,Reload Weapon,keybind,misc.m_game_controls.reload,R,,,Game controls; Attack binds may capture mouse; keyboard-only for other listed binds,src/ui/menu/misc_page.cpp,121
+Misc/General,Game Binds,Buy Menu,keybind,misc.m_game_controls.buy_menu,B,,,Game controls; Attack binds may capture mouse; keyboard-only for other listed binds,src/ui/menu/misc_page.cpp,122
+Misc/General,Game Binds,Reset Game Binds,action,@action.misc.reset_game_binds,,,,Always; restores game_controls struct defaults,src/ui/menu/misc_page.cpp,123
+Misc/General,Support,Diagnostic Report,action,@action.misc.save_diagnostic_report,,,,Always,src/ui/menu/misc_page.cpp,142
+Misc/General,Support,Logs,action,@action.misc.open_logs_folder,,,,Always,src/ui/menu/misc_page.cpp,144
+Misc/General,Support,First-run Guide,action,@action.misc.show_first_run_guide,,,,Always,src/ui/menu/misc_page.cpp,146
+Misc/General,Support,Unload PASTA,action,@action.misc.unload,,,,Always,src/ui/menu/misc_page.cpp,148
+Misc/Overlay,Interface,Language,select,misc.language,0: English,0,1,Options English=0; Русский=1,src/ui/menu/misc_page.cpp,163
+Misc/Overlay,Interface,DPI Scale,select,misc.menu_scale,1.00 (100%),0.5,1.5,"Options 50%, 75%, 100%, 125%, 150%; stored as 0.50, 0.75, 1.00, 1.25, 1.50",src/ui/menu/misc_page.cpp,171
+Misc/Overlay,Interface Colors / Typography,Primary Text,color,misc.palette.text,"199,199,199,255",0,255,Interface Colors popup; RGBA channels,src/ui/menu/misc_page.cpp,179
+Misc/Overlay,Interface Colors / Typography,Muted Text,color,misc.palette.muted_text,"128,128,130,255",0,255,Interface Colors popup; RGBA channels,src/ui/menu/misc_page.cpp,180
+Misc/Overlay,Interface Colors / Surfaces,Menu Background,color,misc.palette.background,"13,13,13,255",0,255,Interface Colors popup; RGBA channels,src/ui/menu/misc_page.cpp,185
+Misc/Overlay,Interface Colors / Surfaces,Controls,color,misc.palette.panel,"18,18,18,255",0,255,Interface Colors popup; RGBA channels,src/ui/menu/misc_page.cpp,186
+Misc/Overlay,Interface Colors / Surfaces,Containers,color,misc.palette.card,"13,13,13,255",0,255,Interface Colors popup; RGBA channels,src/ui/menu/misc_page.cpp,187
+Misc/Overlay,Interface Colors / Surfaces,Popups,color,misc.palette.popup,"10,11,9,255",0,255,Interface Colors popup; RGBA channels,src/ui/menu/misc_page.cpp,188
+Misc/Overlay,Interface Colors / Interaction,Accent,color,misc.palette.accent,"180,180,208,255",0,255,Interface Colors popup; RGBA channels,src/ui/menu/misc_page.cpp,193
+Misc/Overlay,Interface Colors / Interaction,Hover,color,misc.palette.hover,"30,32,34,255",0,255,Interface Colors popup; RGBA channels,src/ui/menu/misc_page.cpp,194
+Misc/Overlay,Interface Colors / Interaction,Borders,color,misc.palette.border,"36,34,33,255",0,255,Interface Colors popup; RGBA channels,src/ui/menu/misc_page.cpp,195
+Misc/Overlay,Engine,FPS Limiter,toggle-popup,misc.limit_fps,true,,,FPS slider popup available regardless of toggle state,src/ui/menu/misc_page.cpp,202
+Misc/Overlay,Engine,Maximum FPS,slider,misc.fps_limit,240,30,1000,FPS Limiter popup; step uses widget default,src/ui/menu/misc_page.cpp,203
+Misc/Overlay,Engine,GPU Effects,toggle,misc.use_gpu,true,,,,src/ui/menu/misc_page.cpp,204
+Misc/Overlay,Engine,CPU Priority,select,misc.cpu_priority,1: Balanced,0,2,Options Game First=0; Balanced=1; Overlay First=2,src/ui/menu/misc_page.cpp,206
+Misc/Overlay,Engine,GPU Priority,select,misc.gpu_priority,0: Game First,0,2,Options Game First=0; Balanced=1; Overlay First=2,src/ui/menu/misc_page.cpp,207
+Misc/Overlay,Overlay,OBS Bypass,toggle,misc.obs_bypass,false,,,,src/ui/menu/misc_page.cpp,213
+Misc/Overlay,Overlay,Show Watermark,toggle-popup,misc.m_watermark.enabled,true,,,Watermark settings popup available regardless of toggle state,src/ui/menu/misc_page.cpp,214
+Misc/Overlay,Watermark,Show Ping,toggle,misc.m_watermark.show_ping,true,,,Show Watermark popup,src/ui/menu/misc_page.cpp,217
+Misc/Overlay,Watermark,Show Loss,toggle,misc.m_watermark.show_loss,true,,,Show Watermark popup,src/ui/menu/misc_page.cpp,218
+Misc/Overlay,Watermark,Show CPU Load,toggle,misc.m_watermark.show_cpu,true,,,Show Watermark popup,src/ui/menu/misc_page.cpp,219
+Misc/Overlay,Watermark,Show FPS,toggle,misc.m_watermark.show_fps,true,,,Show Watermark popup,src/ui/menu/misc_page.cpp,220
+Misc/Overlay,Overlay,Show Spectators,toggle,misc.m_spectator_list.enabled,false,,,,src/ui/menu/misc_page.cpp,222
+Misc/Overlay,Overlay,Show Event Log,toggle-popup,misc.m_event_log.enabled,false,,,Event Log settings popup available regardless of toggle state,src/ui/menu/misc_page.cpp,223
+Misc/Overlay,Event Log,Duration,slider,misc.m_event_log.duration,5.0,0.5,20.0,Show Event Log popup; step 0.5 s,src/ui/menu/misc_page.cpp,226
+Misc/Overlay,Event Log,Maximum Entries,slider,misc.m_event_log.max_entries,5,1,5,Show Event Log popup,src/ui/menu/misc_page.cpp,227
+Misc/Overlay,Event Log,Events,multiselect,misc.m_event_log.show_shots;misc.m_event_log.show_hits;misc.m_event_log.show_kills;misc.m_event_log.show_misses;misc.m_event_log.show_blocked;misc.m_event_log.show_info,true;true;true;true;true;true,,,"Show Event Log popup; options Shots, Hits, Kills, Misses, Blocked, Info; all selected by default",src/ui/menu/misc_page.cpp,237
+Misc/Overlay,Overlay,Show Active Binds,toggle-popup,misc.m_keybind_list.enabled,false,,,Active Binds settings popup available regardless of toggle state,src/ui/menu/misc_page.cpp,245
+Misc/Overlay,Active Binds,Always On Binds,toggle,misc.m_keybind_list.show_always,true,,,Show Active Binds popup,src/ui/menu/misc_page.cpp,248
+Misc/Overlay,Active Binds,Hold Binds,toggle,misc.m_keybind_list.show_hold,true,,,Show Active Binds popup,src/ui/menu/misc_page.cpp,249
+Misc/Overlay,Active Binds,Toggle Binds,toggle,misc.m_keybind_list.show_toggle,true,,,Show Active Binds popup,src/ui/menu/misc_page.cpp,250
+Misc/Overlay,Overlay,Show Bomb Info,toggle,esp.m_bomb.show_info_panel,true,,,"Value belongs to the serialized esp section, not misc",src/ui/menu/misc_page.cpp,252
+Misc/Overlay,Overlay,Overlay Opacity,slider,misc.overlay_opacity,0.86 (86%),25,100,Step 1%; UI percentage is stored as 0.25–1.00 scalar,src/ui/menu/misc_page.cpp,254
+Configs,Folder,Import,action,@action.config.import,,,,Configured config folder required; opens native config-file picker,src/ui/menu/configs_page.cpp,100
+Configs,Folder,Open folder,action,@action.config.open_folder,,,,Configured folder required; disabled without folder,src/ui/menu/configs_page.cpp,103
+Configs,Folder,Change folder,action,@action.config.change_folder,,,,Always; opens native folder chooser,src/ui/menu/configs_page.cpp,107
+Configs,Folder,Choose folder,action,@action.config.choose_folder,,,,Empty state when no config folder is selected; opens native folder chooser,src/ui/menu/configs_page.cpp,153
+Configs,Save New,New config,input,@ui.config.new_name,,,,Always; Enter submits save; Save button disabled without folder or with empty name,src/ui/menu/configs_page.cpp,321
+Configs,Save New,Save,action,@action.config.save_new,,,,Configured folder and non-empty name; Enter in name field also saves,src/ui/menu/configs_page.cpp;src/ui/menu/configs_page.cpp,81-84;326
+Configs,Config Tile Actions,Overwrite with current,menu-action,@action.config.overwrite,,,,Healthy config tile action menu only; rescans after operation,src/ui/menu/configs_page.cpp,187
+Configs,Config Tile Actions,Rename,menu-action,@action.config.rename,,,,Healthy config tile action menu only; opens inline rename input,src/ui/menu/configs_page.cpp,190
+Configs,Config Tile Actions,Duplicate,menu-action,@action.config.duplicate,,,,Healthy config tile action menu only; rescans after operation,src/ui/menu/configs_page.cpp,196
+Configs,Config Tile Actions,Delete,menu-action,@action.config.delete,,,,All config tiles; broken tiles expose Delete only; rescans after operation,src/ui/menu/configs_page.cpp,201
+Configs,Config Tile,Load,action,@action.config.load,,,,Healthy config tile only; omitted for broken entries,src/ui/menu/configs_page.cpp,213
+Configs,Config Tile,Rename name,input,@ui.config.rename_name,,,,Only after Rename; Enter submits; Escape or loss of input focus cancels,src/ui/menu/configs_page.cpp,231-236
+Guide,Language,English,choice-card,@ui.guide.language,0: English,0,1,First step; applies immediately and persists through general settings,src/ui/menu/guide_page.cpp,289
+Guide,Language,Русский,choice-card,@ui.guide.language,1: Русский,0,1,First step; applies immediately and persists through general settings,src/ui/menu/guide_page.cpp,289
+Guide,Hotkeys,Open / close the menu,key-select,hotkeys.menu,Insert,,,Hotkeys step; choices F1–F12; Insert; Delete; Home; End; Page Up/Down; Pause; Scroll Lock; Num Lock; must differ from exit key; saves hotkeys.cfg,src/ui/menu/guide_page.cpp,344-366
+Guide,Hotkeys,Exit PASTA,key-select,hotkeys.exit,End,,,Hotkeys step; choices F1–F12; Insert; Delete; Home; End; Page Up/Down; Pause; Scroll Lock; Num Lock; must differ from menu key; saves hotkeys.cfg,src/ui/menu/guide_page.cpp,344-366
+Guide,Good to know,Open data folder,action,@action.guide.open_data_folder,,,,Good to know step; opens runtime data root in Explorer,src/ui/menu/guide_page.cpp,397
+Guide,Navigation,Back,button,@ui.guide.back,,,,Steps 2–4 only,src/ui/menu/guide_page.cpp,578
+Guide,Navigation,Next / Finish,button,@ui.guide.next_or_finish,,,,Next on steps 1–3; Finish on step 4; marks guide completed,src/ui/menu/guide_page.cpp,585
+Guide,Navigation,Skip,button,@ui.guide.skip,,,,All steps; marks guide completed,src/ui/menu/guide_page.cpp,602
+Navigation,Top Tabs,Aimbot,tab_button,@ui.menu.page,m_page=0,,,Always; switches top-level page and resets page animation,src/ui/menu/menu.cpp,227-260
+Navigation,Top Tabs,Triggerbot,tab_button,@ui.menu.page,m_page=1,,,Always; switches top-level page and resets page animation,src/ui/menu/menu.cpp,227-260
+Navigation,Top Tabs,Visuals,tab_button,@ui.menu.page,m_page=2,,,Always; switches top-level page and resets page animation,src/ui/menu/menu.cpp,227-260
+Navigation,Top Tabs,Walk Bot,tab_button,@ui.menu.page,m_page=3,,,Always; switches top-level page and resets page animation,src/ui/menu/menu.cpp,227-260
+Navigation,Top Tabs,Automation,tab_button,@ui.menu.page,m_page=4,,,Always; switches top-level page and resets page animation,src/ui/menu/menu.cpp,227-260
+Navigation,Top Tabs,Misc,tab_button,@ui.menu.page,m_page=5,,,Always; switches top-level page and resets page animation,src/ui/menu/menu.cpp,227-260
+Navigation,Top Tabs,Configs,tab_button,@ui.menu.page,m_page=6,,,Always; switches top-level page and resets page animation,src/ui/menu/menu.cpp,227-260
+Navigation,Misc Subnav,General,tab_button,@ui.misc.group,m_misc_group=0,,,Visible on Misc page; selects Misc subpage and resets content animation,src/ui/menu/misc_page.cpp,269-281
+Navigation,Misc Subnav,Overlay,tab_button,@ui.misc.group,m_misc_group=1,,,Visible on Misc page; selects Misc subpage and resets content animation,src/ui/menu/misc_page.cpp,269-281
+Navigation,Misc Subnav,Configs,tab_button,@ui.misc.group,m_misc_group=2,,,Visible on Misc page; selects Misc subpage and resets content animation,src/ui/menu/misc_page.cpp,269-281
+Navigation,Misc Header,Unload,tab_button,@action.misc.unload,,,,Visible on every Misc subpage; requests shutdown,src/ui/menu/misc_page.cpp,284-291
+Configs,Folder,Selected config folder,display-state,@state.registry.ConfigFolder,,,,Current configured folder; shown in status line when no recent operation notice is visible; stored in HKCU\Software\VestaUITest\ConfigFolder,src/ui/menu/configs_page.cpp;src/platform/windows/user_settings.cpp,132-133;55-56
