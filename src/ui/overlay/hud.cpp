@@ -17,6 +17,7 @@
 #include <ui/overlay/system_notices.hpp>
 #include <imgui.h>
 #include <ui/menu/menu.hpp>
+#include <ui/menu/internal.hpp>
 
 namespace ui::hud
 {
@@ -205,6 +206,12 @@ ImU32 threshold_color(float value, float low, float high)
 [[nodiscard]] float overlay_dpi_scale()
 {
     return ui::bound_overlay().ui_dpi_scale();
+}
+
+[[nodiscard]] float readability_dpi_scale()
+{
+    const auto display = ImGui::GetIO().DisplaySize;
+    return ui::menu::detail::current_menu_scale(display.x, display.y);
 }
 
 // The HUD reads the same live palette as the menu. Nothing here is cached, so changing an interface colour or the
@@ -479,7 +486,7 @@ void draw_readability_surface(ImDrawList* draw, const ImVec2 min, const ImVec2 m
         draw->AddRectFilled(min, {max.x, min.y + k_hud_accent_width * metric}, hud_accent(), rounding,
                             ImDrawFlags_RoundCornersTop);
     }
-    draw->AddRect(min, max, IM_COL32(0x3a, 0x3e, 0x4c, static_cast<int>(150.0f * opacity)), rounding);
+    draw->AddRect(min, max, IM_COL32(0x3a, 0x3e, 0x4c, static_cast<int>(150.0f * opacity)), rounding, 0, metric);
 }
 
 constexpr ImU32 k_astral_hud_text = IM_COL32(201, 204, 212, 255);
@@ -770,7 +777,7 @@ void panels::draw_watermark(const bool interactive)
     const auto cpu = state.cpu.sample();
     const auto chips = collect_chips(cfg, fps, ping, loss, cpu);
 
-    const auto dpi_scale = overlay_dpi_scale();
+    const auto dpi_scale = readability_dpi_scale();
     cfg.layout.scale = std::clamp(cfg.layout.scale, 0.55f, 2.0f);
     const auto metrics = measure_watermark(dpi_scale, cfg.layout.scale, chips);
     const auto placement = place_watermark(cfg, metrics, state.watermark, state.watermark_size, interactive, dpi_scale);
@@ -802,7 +809,7 @@ void panels::draw_spectator_list(bool interactive)
 
     auto& state = *m_state;
     state.begin_panel_frame();
-    const auto dpi_scale = overlay_dpi_scale();
+    const auto dpi_scale = readability_dpi_scale();
     cfg.layout.scale = std::clamp(cfg.layout.scale, 0.55f, 2.0f);
     const auto user_scale = cfg.layout.scale;
     const auto metric_scale = dpi_scale * user_scale;
@@ -883,7 +890,7 @@ void draw_compact_panel(const char* title, const std::vector<compact_panel_row>&
 {
     if (rows.empty() && !interactive)
         return;
-    const auto dpi_scale = overlay_dpi_scale();
+    const auto dpi_scale = readability_dpi_scale();
     layout.scale = std::clamp(layout.scale, 0.55f, 2.0f);
     const auto metric = dpi_scale * layout.scale;
     const auto title_size = k_hud_title_size * metric;
