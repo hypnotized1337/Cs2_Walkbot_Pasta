@@ -72,6 +72,7 @@ constexpr design k_design[static_cast<std::size_t>(icon_id::count)] = {
     { 21.0f, 16.0f }, // code
     { 16.0f, 16.0f }, // search
     { 16.0f, 16.0f }, // gear_small
+    { 16.0f, 18.0f }, // person
 };
 
 [[nodiscard]] float gear_sdf(vec2 p, float cx, float body, float tooth_center, vec2 tooth_half, float hole) noexcept
@@ -142,6 +143,14 @@ constexpr design k_design[static_cast<std::size_t>(icon_id::count)] = {
     case icon_id::search: {
         const float eye_ring = ring(p, vec2{ 9.6f, 6.4f }, 4.85f, 1.05f);
         return combine(eye_ring, segment(p, vec2{ 6.2f, 9.8f }, vec2{ 1.7f, 14.3f }, 1.25f));
+    }
+    case icon_id::person: {
+        float d = ring(p, { 8.0f, 3.0f }, 2.0f, 0.8f);
+        d = combine(d, segment(p, { 8.0f, 6.0f }, { 8.0f, 11.0f }, 0.85f));
+        d = combine(d, segment(p, { 3.0f, 9.0f }, { 8.0f, 7.0f }, 0.85f));
+        d = combine(d, segment(p, { 8.0f, 7.0f }, { 13.0f, 9.0f }, 0.85f));
+        d = combine(d, segment(p, { 8.0f, 11.0f }, { 4.0f, 17.0f }, 0.85f));
+        return combine(d, segment(p, { 8.0f, 11.0f }, { 12.0f, 17.0f }, 0.85f));
     }
     case icon_id::count:
     default:

@@ -26,6 +26,7 @@ enum class icon_id : int
     code,
     search,
     gear_small,
+    person,
     count
 };
 
