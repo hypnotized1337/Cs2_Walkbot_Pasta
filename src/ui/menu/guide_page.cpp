@@ -392,7 +392,7 @@ void draw_notes_step(const guide_content& content)
     card(content.draw, min, {min.x + k_content_width, min.y + data_height}, content.alpha);
     ImGui::SetCursorPos({k_margin + content.slide + 18.0f, k_content_top + 10.0f});
     ImGui::PushTextWrapPos(k_margin + content.slide + k_content_width - 18.0f);
-    ImGui::TextUnformatted(loc::tr("Settings, cache and logs live in %TEMP%\\vesta_uitest. Cleaning tools may remove it; "
+    ImGui::TextUnformatted(loc::tr("Settings, cache and logs live in %TEMP%\\vesta. Cleaning tools may remove it; "
                                    "PASTA then starts with default settings."));
     ImGui::PopTextWrapPos();
     ImGui::SetCursorPos({k_margin + content.slide + 18.0f, k_content_top + data_height - 44.0f});

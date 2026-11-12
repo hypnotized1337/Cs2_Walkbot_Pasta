@@ -1,3 +1,3 @@
 key,storage,default,control_label,source_file
-hotkeys.menu,%TEMP%\vesta_uitest\configs\hotkeys.cfg,INSERT,Guide / Hotkeys / Open / close the menu,src/config/hotkeys.cpp
-hotkeys.exit,%TEMP%\vesta_uitest\configs\hotkeys.cfg,END,Guide / Hotkeys / Exit PASTA,src/config/hotkeys.cpp
+hotkeys.menu,%TEMP%\vesta\configs\hotkeys.cfg,INSERT,Guide / Hotkeys / Open / close the menu,src/config/hotkeys.cpp
+hotkeys.exit,%TEMP%\vesta\configs\hotkeys.cfg,END,Guide / Hotkeys / Exit PASTA,src/config/hotkeys.cpp

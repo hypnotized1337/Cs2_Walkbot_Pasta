@@ -691,20 +691,17 @@ void initialize()
                        auto& queue = output();
                        try
                        {
-                           const auto length = GetEnvironmentVariableW(L"VESTA_UITEST_SEED_TRACE_DIR", nullptr, 0);
+                           const auto length = GetEnvironmentVariableW(L"VESTA_SEED_TRACE_DIR", nullptr, 0);
                            if (length)
                            {
                                std::wstring path(length, L'\0');
                                const auto copied =
-                                   GetEnvironmentVariableW(L"VESTA_UITEST_SEED_TRACE_DIR", path.data(), length);
+                                   GetEnvironmentVariableW(L"VESTA_SEED_TRACE_DIR", path.data(), length);
                                if (!copied || copied >= length)
                                    return;
                                path.resize(copied);
                                queue.directory = path;
                                queue.explicit_directory = true;
-                               if (!platform::windows::data_storage::is_test_data_path(queue.directory) ||
-                                   !platform::windows::data_storage::is_test_data_path(queue.directory.parent_path()))
-                                   return;
                            }
                            else
                            {
@@ -739,7 +736,7 @@ bool enabled() noexcept
     static const bool requested = []
     {
         wchar_t value[2]{};
-        const bool request = GetEnvironmentVariableW(L"VESTA_UITEST_SEED_TRACE", value, 2) == 1 && value[0] == L'1';
+        const bool request = GetEnvironmentVariableW(L"VESTA_SEED_TRACE", value, 2) == 1 && value[0] == L'1';
         if (request)
             initialize();
         return request;

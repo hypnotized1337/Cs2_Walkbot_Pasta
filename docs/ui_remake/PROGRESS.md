@@ -51,7 +51,7 @@ cmake --build --preset debug-local --target vesta -- -m
 
 Use the existing Visual Studio CMake path from `AGENTS.md` if `cmake` is not on PATH.
 For the unchanged legacy menu, reconfigure with `-DVESTA_ASTRAL_MENU=OFF` and rebuild.
-Use only the test executable and `%TEMP%\vesta_uitest`; do not replace the production binary.
+Use the UI-remake build with `%TEMP%\vesta`; do not replace an installed production binary.
 
 ### Verification and required owner feedback
 
@@ -94,7 +94,7 @@ Stage 0 is accepted; Stage 1 inventory and reference audit are complete for revi
 **Stage 2 has not started.** No skin, widget, page or gameplay implementation was changed
 in Stage 1. The original checkout remains clean.
 
-The owner reported a successful Windows compile and creation of `vesta_uitest` without
+The owner reported a successful Windows compile and creation of the runtime data root without
 changing `vesta` on 2026-11-11. That is owner-reported Stage 0 verification, not a local
 build or proof of a future UI. Storage isolation remains as documented in `ISOLATION.md`.
 

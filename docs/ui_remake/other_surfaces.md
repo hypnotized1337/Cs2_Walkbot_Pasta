@@ -32,5 +32,5 @@ These Vesta UI-related persisted values are outside the JSON config-key crosswal
 
 - **Lifecycle hotkeys:** menu and exit keys are stored separately in `hotkeys.cfg` under the active configs directory (`src/config/hotkeys.cpp:100-105,131-140`; UI editing in `src/ui/menu/guide_page.cpp`). They are not JSON profile keys.
 - **First-run guide marker:** `guide.done` in the configs directory records whether the guide was completed/skipped; the “show again” action removes it (`src/config/first_run.hpp:6-9`, `src/config/first_run.cpp:13-18,31-40,68-76`). It is a marker file, not a profile setting.
-- **Selected config folder:** stored in the Windows registry at `HKCU\Software\VestaUITest\ConfigFolder` (`src/platform/windows/user_settings.cpp:8-15,31-42`). This registry state is not part of the JSON profile inventory and remains fenced to the isolated test-data path.
+- **Selected config folder:** stored in the Windows registry at `HKCU\Software\Vesta\ConfigFolder` (`src/platform/windows/user_settings.cpp:8-15,31-42`). This registry state is not part of the JSON profile inventory and remains the user-selected named-config folder.
 

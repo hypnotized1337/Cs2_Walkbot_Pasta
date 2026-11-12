@@ -12,10 +12,10 @@ namespace diagnostics
 {
 struct journal_options
 {
-    // Empty selects %TEMP%\vesta_uitest\logs on the writer.
+    // Empty selects %TEMP%\vesta\logs on the writer.
     std::filesystem::path directory;
     std::size_t file_bytes{64 * 1024};
-    std::wstring writer_gate{L"Local\\VestaUITestDiagnosticJournal-v1"};
+    std::wstring writer_gate{L"Local\\VestaDiagnosticJournal-v1"};
 };
 enum class storage_stage : std::uint32_t
 {

@@ -25,11 +25,9 @@ struct resolved_locations
     std::filesystem::path legacy;
     std::uint32_t error{};
 };
-// Resolves the data root %TEMP%\vesta_uitest (the owner keeps cache and configuration temporary). The old flat
+// Resolves the data root %TEMP%\vesta (the owner keeps cache and configuration temporary). The old flat
 // layout in the same directory is imported in place by prepare(). Does not create files/directories.
 [[nodiscard]] resolved_locations resolve_current_user() noexcept;
-// Test-build boundary for user-selected folders, imports and diagnostic destinations.
-[[nodiscard]] bool is_test_data_path(const std::filesystem::path& path) noexcept;
 
 enum class migration_stage : std::uint8_t
 {

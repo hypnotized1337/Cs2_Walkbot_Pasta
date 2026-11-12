@@ -86,8 +86,8 @@ void export_diagnostic_report()
     summary += " overlay=";
     summary += readiness::name(diagnostics::health().overlay.snapshot().value);
     summary += system_summary();
-    const auto logs = diagnostics::default_logs_directory();
-    const auto result = diagnostics::export_report(logs, logs, summary);
+    const auto result =
+        diagnostics::export_report(diagnostics::default_logs_directory(), diagnostics::desktop_directory(), summary);
     g_report_outcome = result.ok ? report_outcome::saved : report_outcome::failed;
 }
 
@@ -128,7 +128,7 @@ void draw_general_tab()
     bool status_failed{};
     if (g_report_outcome != report_outcome::none)
     {
-        status = g_report_outcome == report_outcome::saved ? "Report saved to test logs" : "Report failed";
+        status = g_report_outcome == report_outcome::saved ? "Report saved to Desktop" : "Report failed";
         status_failed = g_report_outcome == report_outcome::failed;
     }
     else if (diagnostics::health().previous_session_crashed.load(std::memory_order_acquire))

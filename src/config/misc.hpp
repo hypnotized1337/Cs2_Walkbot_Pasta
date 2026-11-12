@@ -167,7 +167,7 @@ struct general_profile
         bool auto_scope{true};
         bool autofire{true};
         bool autofire_spray{false}; // beta: holds the trigger on SMGs, rifles and machine guns instead of one press per shot
-        bool spray_log{false};      // opt-in: writes one CSV row per spray tick to %TEMP%\vesta_uitest\logs
+        bool spray_log{false};      // opt-in: writes one CSV row per spray tick to %TEMP%\vesta\logs
         // Close-quarters knife: an enemy inside this range is finished with slot 3 and a secondary attack instead of
         // the gun. The AFK check keeps the bot from chasing an active player.
         bool auto_knife{false};

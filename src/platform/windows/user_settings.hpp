@@ -6,8 +6,8 @@
 
 namespace platform::windows
 {
-// The only machine-persistent setting Vesta keeps outside %TEMP%\vesta_uitest: the folder the user chose for named configs,
-// as one string value under HKCU\Software\VestaUITest. Nothing else is written there.
+// The only machine-persistent setting Vesta keeps outside %TEMP%\vesta: the folder the user chose for named configs,
+// as one string value under HKCU\Software\Vesta. Nothing else is written there.
 [[nodiscard]] std::optional<std::filesystem::path> read_config_folder() noexcept;
 [[nodiscard]] bool write_config_folder(const std::filesystem::path& folder) noexcept;
 

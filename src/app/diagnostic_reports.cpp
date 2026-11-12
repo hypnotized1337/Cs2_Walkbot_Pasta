@@ -7,7 +7,6 @@
 #include <game/memory/bound_services.hpp>
 #include <game/state/services.hpp>
 #include <app/diagnostic_reports.hpp>
-#include <platform/windows/data_paths.hpp>
 #include <features/misc/misc.hpp>
 #include <game/input/bindings.hpp>
 #include <game/memory/compatibility.hpp>
@@ -141,8 +140,6 @@ std::optional<int> run_diagnostic_report(const int argc, char** argv)
     else
         return std::nullopt;
 
-    if (!platform::windows::data_storage::is_test_data_path(std::filesystem::path(argv[2])))
-        return 3;
     std::ofstream out(argv[2], std::ios::trunc);
     if (!out)
         return 3;

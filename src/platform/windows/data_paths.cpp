@@ -53,7 +53,7 @@ resolved_locations resolve_current_user() noexcept
     resolved_locations result;
     try
     {
-        // Data is temporary by design and lives in %TEMP%\vesta_uitest. The TEMP parent may legitimately be
+        // Data is temporary by design and lives in %TEMP%\vesta. The TEMP parent may legitimately be
         // redirected: normalize that system-provided parent, not arbitrary entries in the data itself.
         std::error_code error;
         const auto temporary = std::filesystem::temp_directory_path(error);
@@ -68,56 +68,12 @@ resolved_locations resolve_current_user() noexcept
             result.error = static_cast<std::uint32_t>(error.value());
             return result;
         }
-        const auto root = parent / L"vesta_uitest";
-        const auto canonical = std::filesystem::weakly_canonical(root, error);
-        if (error)
-        {
-            result.error = static_cast<std::uint32_t>(error.value());
-            return result;
-        }
-        // Do not let a pre-existing junction redirect the test root into production data.
-        if (::CompareStringOrdinal(root.c_str(), -1, canonical.c_str(), -1, TRUE) != CSTR_EQUAL)
-        {
-            result.error = ERROR_ACCESS_DENIED;
-            return result;
-        }
-        result.destination = locations::under(root);
+        result.destination = locations::under(parent / L"vesta");
     }
     catch (...)
     {
         result.error = ERROR_NOT_ENOUGH_MEMORY;
     }
     return result;
-}
-bool is_test_data_path(const std::filesystem::path& path) noexcept
-{
-    try
-    {
-        if (!path.is_absolute())
-            return false;
-        const auto locations = resolve_current_user();
-        if (locations.error || locations.destination.root.empty())
-            return false;
-        std::error_code error;
-        const auto root = plain_path(std::filesystem::weakly_canonical(locations.destination.root, error));
-        if (error)
-            return false;
-        const auto candidate = plain_path(std::filesystem::weakly_canonical(path, error));
-        if (error)
-            return false;
-        auto part = candidate.begin();
-        for (const auto& expected : root)
-        {
-            if (part == candidate.end() ||
-                ::CompareStringOrdinal(part->c_str(), -1, expected.c_str(), -1, TRUE) != CSTR_EQUAL)
-                return false;
-            ++part;
-        }
-        return true;
-    }
-    catch (...)
-    {
-        return false;
-    }
 }
 } // namespace platform::windows::data_storage

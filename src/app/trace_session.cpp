@@ -9,7 +9,6 @@
 #include <config/misc.hpp>
 #include <simulation/collision.hpp>
 #include <app/trace_session.hpp>
-#include <platform/windows/data_paths.hpp>
 #include <simulation/shot_trace.hpp>
 #include <game/state/level.hpp>
 #include <nlohmann/json.hpp>
@@ -31,12 +30,10 @@ void initialize()
     if (!simulation::shot_trace::enabled())
         return;
     wchar_t directory[32768]{};
-    const auto size = GetEnvironmentVariableW(L"VESTA_UITEST_SEED_TRACE_DIR", directory, std::size(directory));
+    const auto size = GetEnvironmentVariableW(L"VESTA_SEED_TRACE_DIR", directory, std::size(directory));
     if (!size || size >= std::size(directory))
         return;
     const auto root = std::filesystem::path(directory).parent_path();
-    if (!platform::windows::data_storage::is_test_data_path(root))
-        return;
     try
     {
         std::filesystem::create_directories(root);

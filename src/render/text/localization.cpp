@@ -115,9 +115,9 @@ const std::unordered_map<std::string_view, const char*>& russian()
          "Новые клавиши уже работают, но сохранить hotkeys.cfg не удалось."},
         {"Movement keys are released while the menu is open, so your character does not keep running.",
          "Клавиши движения отпускаются, пока меню открыто, поэтому персонаж не продолжает бежать."},
-        {"Settings, cache and logs live in %TEMP%\\vesta_uitest. Cleaning tools may remove it; PASTA then starts with default "
+        {"Settings, cache and logs live in %TEMP%\\vesta. Cleaning tools may remove it; PASTA then starts with default "
          "settings.",
-         "Настройки, кэш и журналы лежат в %TEMP%\\vesta_uitest. Программы очистки могут её удалить, тогда PASTA запустится с "
+         "Настройки, кэш и журналы лежат в %TEMP%\\vesta. Программы очистки могут её удалить, тогда PASTA запустится с "
          "настройками по умолчанию."},
         {"Hotkeys", "Горячие клавиши"},
         {"Good to know", "Полезно знать"},
