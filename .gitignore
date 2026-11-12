@@ -1,4 +1,5 @@
 build/
+reference/
 out/
 cmake-build-*/
 website/dist/
