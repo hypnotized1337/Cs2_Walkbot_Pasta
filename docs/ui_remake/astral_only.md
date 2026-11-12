@@ -14,3 +14,9 @@ Astral is a presentation reference only. These showcase features are not part of
 | Arbitrary bind editing | Exclude editing arbitrary binds; preserve Vesta's existing configured key bindings and supported interactions. |
 
 These exclusions follow `ASTRAL_AUDIT.md`, `FEATURE_MAPPING.csv`, and `feature_mapping.md`. Reusable styling and widget patterns may be adapted only when connected to existing Vesta settings and operations.
+
+## Legit-page controls with no matching Vesta feature
+
+These Astral controls have no equivalent in Vesta's current combat settings and should not be ported as dead toggles: per-weapon selection (Vesta exposes global and weapon-group profiles, not individual weapon profiles); backtrack and its maximum-time setting; maximum aim time; target-swap delay; trigger overshoot and amount; spread adjustment, mode, and limited option; trigger hitbox extension; Passive/Aggressive assist mode; mouse redirection and strength; and aim-assist Quick stop (Vesta's triggerbot Auto Stop is a separate behavior).
+
+The mapping CSV records the other Legit controls as direct matches or decision-required candidates. In particular, Astral has seven `LegitWeapon w[group]` profiles, one per group; its weapon selector is UI state and does not select a separate per-weapon settings object. Vesta stores global settings and weapon-group overrides. Decisions are also required for different group taxonomies, boolean wall penetration versus Vesta's three wall policies, Astral's extra Feet hitbox, and the documented range/unit/scale differences; no conversion is assumed. These rows are an audit only: the Legit page has not been ported.

@@ -188,3 +188,26 @@ No original checkout or production branch changes were made.
 above resolved or explicitly deferred. Stop here until approval.** Then provide the exact
 source-file list at each implementation checkpoint and wait for the owner's Windows compile
 feedback. Do not run the production loader or replace the working executable.
+
+## Shared-widget restyle — Step 1
+
+The Astral-enabled menu now applies the fork's shared presentation to legacy cards,
+section headers, tabs, sliders, toggles, selectors, inputs, keybinds, buttons, color
+previews and popups. Config-library controls use the same live palette. Existing
+bindings and input paths remain; the compile-time legacy fallback remains available.
+The Walkbot disabled section and its tooltip are unchanged.
+
+Only Automation has the new page structure. Aimbot, Triggerbot, Visuals, Walkbot,
+Misc and Configs retain their layouts; the Guide and Visual Editor still contain
+specialized drawing. See `raw_widget_audit.md` for the remaining custom surfaces.
+
+`astral_mapping.csv` audits 37 Legit controls: 4 bound, 15 with no matching feature,
+and 18 requiring an owner decision. This is a mapping audit, not a port. No Legit
+page implementation or unit/range/scale conversion is authorized by this checkpoint.
+
+Portable ImGui checks passed for shared cards and integer/float sliders, row bounds,
+disabled input, slider numeric entry, live accent changes and scoped-style restoration.
+The extracted library-widget implementation also passed syntax checks with Astral on
+and off. These checks use temporary platform stubs and do not replace a Windows/MSVC build.
+Native screenshots and live overlay interaction remain unverified in this Linux
+workspace. Stop for owner compile/visual feedback before another page group.

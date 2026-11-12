@@ -156,6 +156,9 @@ void menu_t::draw()
     const auto menu_scale = current_menu_scale(display.x, display.y);
     const auto transform_origin = menu_transform_origin(display.x, display.y);
     const menu_render_scope render_scope{display, transform_origin, menu_scale};
+#if defined(VESTA_ASTRAL_MENU)
+    const astral_style_scope style_scope;
+#endif
     if (menu_open)
     {
 #if defined(VESTA_ASTRAL_MENU)

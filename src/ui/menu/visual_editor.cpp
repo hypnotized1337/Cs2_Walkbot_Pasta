@@ -1,4 +1,5 @@
 #include <stdafx.hpp>
+#include "library_widgets.hpp"
 #include <cctype>
 #include <game/state/constants.hpp>
 #include <game/state/services.hpp>
@@ -581,7 +582,7 @@ int edit_element(const preview_stage& stage, const int id, player_profile::layou
     const auto hit_max = bounds.max + hit_padding;
     ImGui::PushID(id);
     ImGui::SetCursorScreenPos(hit_min);
-    ImGui::InvisibleButton("##preview_element", hit_max - hit_min);
+    detail::hit_region("##preview_element", hit_max - hit_min);
     const auto hovered = ImGui::IsItemHovered();
     if (hovered)
         ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeAll);

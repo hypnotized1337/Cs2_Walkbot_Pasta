@@ -14,9 +14,24 @@
 #include <d3dcompiler.h>
 
 #include <ui/menu/internal.hpp>
+#if defined(VESTA_ASTRAL_MENU)
+#include <ui/astral/draw.hpp>
+#include <ui/astral/widgets.hpp>
+#endif
 
 namespace ui::menu::detail
 {
+#if defined(VESTA_ASTRAL_MENU)
+namespace
+{
+bool widget_disabled()
+{
+    const auto* context = ImGui::GetCurrentContext();
+    return context && (context->CurrentItemFlags & ImGuiItemFlags_Disabled) != 0;
+}
+}
+#endif
+
 void popup_blur_callback(const ImDrawList*, const ImDrawCmd* command)
 {
     if (!command || command->UserCallbackDataSize != sizeof(popup_blur_request))
@@ -97,16 +112,30 @@ void popup_blur_callback(const ImDrawList*, const ImDrawCmd* command)
 
 void draw_popup_surface(ImDrawList* draw, ImVec2 min, ImVec2 max, float rounding)
 {
+#if defined(VESTA_ASTRAL_MENU)
+    const auto& context = ui::astral::widgets::get();
+    const auto radius = context.m.popup_rounding;
+    const auto glow_color = packed(ui::astral::draw::fade(context.pal.accent, 0.035f));
+    ui::astral::draw::glow(draw, min, max, radius, glow_color, ui::astral::widgets::px(10.0f));
+    draw->AddRectFilled(min, max, packed(context.pal.popup_border), radius);
+    draw->AddRectFilled(min + ImVec2{1.0f, 1.0f}, max - ImVec2{1.0f, 1.0f}, packed(context.pal.popup),
+                        std::max(0.0f, radius - 1.0f));
+    static_cast<void>(rounding);
+#else
     // Source popups are flat panels with one hairline, not frosted glass. The rounding argument is kept for the
     // callers that still pass one, but the source surface itself is square.
     static_cast<void>(rounding);
     draw->AddRectFilled(min, max, packed(k_outline_dark));
     draw->AddRectFilled(min + ImVec2{1.0f, 1.0f}, max - ImVec2{1.0f, 1.0f}, packed(k_border));
     draw->AddRectFilled(min + ImVec2{2.0f, 2.0f}, max - ImVec2{2.0f, 2.0f}, packed(k_bg_popup));
+#endif
 }
 
 void color_picker_popup(render::draw::rgba& color, ImVec2 item_min, ImVec2 item_max, ImGuiID picker_id)
 {
+#if defined(VESTA_ASTRAL_MENU)
+    const auto disabled = widget_disabled();
+#endif
     auto value = to_imvec(color);
     constexpr auto picker_size = ImVec2{312.0f, 314.0f};
     constexpr auto picker_area = 216.0f;
@@ -119,13 +148,24 @@ void color_picker_popup(render::draw::rgba& color, ImVec2 item_min, ImVec2 item_
                                             settings_bounds_max().y - picker_size.y - 8.0f);
     ImGui::SetNextWindowPos(picker_position, ImGuiCond_Always);
     ImGui::SetNextWindowSize(picker_size, ImGuiCond_Always);
+#if defined(VESTA_ASTRAL_MENU)
+    const auto& palette = ui::astral::widgets::get().pal;
+    ImGui::PushStyleColor(ImGuiCol_PopupBg, palette.popup);
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, {0, 0});
+    ImGui::PushStyleVar(ImGuiStyleVar_PopupRounding, ui::astral::widgets::get().m.popup_rounding);
+    ImGui::PushStyleVar(ImGuiStyleVar_PopupBorderSize, 0.0f);
+#else
     ImGui::PushStyleColor(ImGuiCol_PopupBg, ImVec4{0, 0, 0, 0});
     ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, {0, 0});
     ImGui::PushStyleVar(ImGuiStyleVar_PopupRounding, 0.0f);
     ImGui::PushStyleVar(ImGuiStyleVar_PopupBorderSize, 0.0f);
+#endif
     if (ImGui::BeginPopup("##picker", ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse |
                                           ImGuiWindowFlags_NoBackground))
     {
+#if defined(VESTA_ASTRAL_MENU)
+        ImGui::BeginDisabled(disabled);
+#endif
         const auto popup_min = ImGui::GetWindowPos();
         const auto popup_max = popup_min + picker_size;
         auto* popup_draw = ImGui::GetWindowDrawList();
@@ -147,11 +187,22 @@ void color_picker_popup(render::draw::rgba& color, ImVec2 item_min, ImVec2 item_
         ImGui::ColorConvertHSVtoRGB(hue, 1.0f, 1.0f, hue_r, hue_g, hue_b);
         const auto hue_color = IM_COL32(static_cast<int>(hue_r * 255.0f), static_cast<int>(hue_g * 255.0f),
                                         static_cast<int>(hue_b * 255.0f), 255);
+#if defined(VESTA_ASTRAL_MENU)
+        add_linear_gradient_rounded(popup_draw, sv_min, sv_max, IM_COL32_WHITE, hue_color, 4.0f,
+                                    ImDrawFlags_RoundCornersAll, true);
+        add_linear_gradient_rounded(popup_draw, sv_min, sv_max, IM_COL32(0, 0, 0, 0), IM_COL32_BLACK, 4.0f,
+                                    ImDrawFlags_RoundCornersAll, false);
+#else
         add_linear_gradient_rounded(popup_draw, sv_min, sv_max, IM_COL32_WHITE, hue_color, 8.0f,
                                     ImDrawFlags_RoundCornersAll, true);
         add_linear_gradient_rounded(popup_draw, sv_min, sv_max, IM_COL32(0, 0, 0, 0), IM_COL32_BLACK, 8.0f,
                                     ImDrawFlags_RoundCornersAll, false);
+#endif
+#if defined(VESTA_ASTRAL_MENU)
+        popup_draw->AddRect(sv_min, sv_max, packed(palette.popup_border), 6.0f, 0, 1.0f);
+#else
         popup_draw->AddRect(sv_min, sv_max, packed(k_border_light), 8.0f, 0, 1.5f);
+#endif
 
         ImGui::SetCursorPos(sv_min - popup_min);
         ImGui::InvisibleButton("##sv", sv_max - sv_min);
@@ -180,9 +231,14 @@ void color_picker_popup(render::draw::rgba& color, ImVec2 item_min, ImVec2 item_
             const auto corners = slice == 0   ? ImDrawFlags_RoundCornersTop
                                  : slice == 5 ? ImDrawFlags_RoundCornersBottom
                                               : ImDrawFlags_RoundCornersNone;
+#if defined(VESTA_ASTRAL_MENU)
+            constexpr auto bar_rounding = 4.0f;
+#else
+            constexpr auto bar_rounding = 7.0f;
+#endif
             add_linear_gradient_rounded(popup_draw, {hue_min.x, y0}, {hue_max.x, y1},
                                         ImGui::ColorConvertFloat4ToU32({r0, g0, b0, 1}),
-                                        ImGui::ColorConvertFloat4ToU32({r1, g1, b1, 1}), 7.0f, corners, false);
+                                        ImGui::ColorConvertFloat4ToU32({r1, g1, b1, 1}), bar_rounding, corners, false);
         }
         popup_draw->AddRect(hue_min, hue_max, packed(k_border_light), 7.0f);
         ImGui::SetCursorPos(hue_min - popup_min);
@@ -203,16 +259,28 @@ void color_picker_popup(render::draw::rgba& color, ImVec2 item_min, ImVec2 item_
 
         const auto alpha_min = popup_min + ImVec2{272.0f, 16.0f};
         const auto alpha_max = alpha_min + ImVec2{16.0f, picker_area};
+#if defined(VESTA_ASTRAL_MENU)
+        ui::astral::draw::checkerboard(popup_draw, alpha_min, alpha_max, 8.0f, packed(palette.frame),
+                                       packed(palette.panel));
+        constexpr auto alpha_rounding = 4.0f;
+#else
         popup_draw->AddRectFilled(alpha_min, alpha_max, IM_COL32(112, 112, 120, 255), 7.0f);
         for (int y = 1; y < 13; ++y)
             for (int x = 0; x < 2; ++x)
                 popup_draw->AddRectFilled(alpha_min + ImVec2{x * 8.0f, y * 16.0f},
                                           alpha_min + ImVec2{(x + 1) * 8.0f, std::min((y + 1) * 16.0f, picker_area)},
                                           (x + y) % 2 ? IM_COL32(100, 100, 106, 255) : IM_COL32(174, 174, 180, 255));
+        constexpr auto alpha_rounding = 7.0f;
+#endif
         add_linear_gradient_rounded(
             popup_draw, alpha_min, alpha_max, ImGui::ColorConvertFloat4ToU32({value.x, value.y, value.z, 1}),
-            ImGui::ColorConvertFloat4ToU32({value.x, value.y, value.z, 0}), 7.0f, ImDrawFlags_RoundCornersAll, false);
-        popup_draw->AddRect(alpha_min, alpha_max, packed(k_border_light), 7.0f);
+            ImGui::ColorConvertFloat4ToU32({value.x, value.y, value.z, 0}), alpha_rounding, ImDrawFlags_RoundCornersAll,
+            false);
+#if defined(VESTA_ASTRAL_MENU)
+        popup_draw->AddRect(alpha_min, alpha_max, packed(palette.popup_border), alpha_rounding, 0, 1.0f);
+#else
+        popup_draw->AddRect(alpha_min, alpha_max, packed(k_border_light), alpha_rounding);
+#endif
         ImGui::SetCursorPos(alpha_min - popup_min);
         ImGui::InvisibleButton("##alpha", alpha_max - alpha_min);
         pointer_cursor_if_hovered();
@@ -231,12 +299,23 @@ void color_picker_popup(render::draw::rgba& color, ImVec2 item_min, ImVec2 item_
         if (ImGui::IsWindowAppearing() || !ImGui::IsAnyItemActive())
             std::snprintf(hex.data(), hex.size(), "#%02X%02X%02X", color.r, color.g, color.b);
         ImGui::SetCursorPos({16.0f, 250.0f});
+#if defined(VESTA_ASTRAL_MENU)
+        ImGui::PushStyleColor(ImGuiCol_FrameBg, palette.frame);
+        ImGui::PushStyleColor(ImGuiCol_FrameBgHovered, palette.frame_hover);
+        ImGui::PushStyleColor(ImGuiCol_FrameBgActive, palette.frame_active);
+        ImGui::PushStyleColor(ImGuiCol_Border, palette.popup_border);
+        ImGui::PushStyleColor(ImGuiCol_Text, palette.text);
+        ImGui::PushStyleColor(ImGuiCol_TextSelectedBg, palette.accent);
+        ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, ui::astral::widgets::get().m.frame_rounding);
+        ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 1.0f);
+#else
         ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4{1, 1, 1, 0.045f});
         ImGui::PushStyleColor(ImGuiCol_FrameBgHovered, ImVec4{1, 1, 1, 0.075f});
         ImGui::PushStyleColor(ImGuiCol_FrameBgActive, ImVec4{1, 1, 1, 0.09f});
         ImGui::PushStyleColor(ImGuiCol_Border, k_border_light);
         ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 7.0f);
         ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 1.0f);
+#endif
         ImGui::SetNextItemWidth(88.0f);
         if (ImGui::InputText("##hex", hex.data(), hex.size(),
                              ImGuiInputTextFlags_CharsHexadecimal | ImGuiInputTextFlags_EnterReturnsTrue))
@@ -274,7 +353,14 @@ void color_picker_popup(render::draw::rgba& color, ImVec2 item_min, ImVec2 item_
         popup_draw->AddText(popup_min + ImVec2{222.0f, 286.0f}, packed(k_text_muted), "B");
         popup_draw->AddText(popup_min + ImVec2{268.0f, 286.0f}, packed(k_text_muted), "A");
         ImGui::PopStyleVar(2);
+#if defined(VESTA_ASTRAL_MENU)
+        ImGui::PopStyleColor(6);
+#else
         ImGui::PopStyleColor(4);
+#endif
+#if defined(VESTA_ASTRAL_MENU)
+        ImGui::EndDisabled();
+#endif
         ImGui::EndPopup();
     }
     ImGui::PopStyleVar(3);
@@ -283,6 +369,9 @@ void color_picker_popup(render::draw::rgba& color, ImVec2 item_min, ImVec2 item_
 
 void settings_popup(ImVec2 anchor_min, ImVec2 anchor_max, int rows, callback_ref callback)
 {
+#if defined(VESTA_ASTRAL_MENU)
+    const auto disabled = widget_disabled();
+#endif
     auto* parent = ImGui::GetCurrentWindow();
     const auto parent_min = ImGui::GetWindowPos();
     const auto parent_size = ImGui::GetWindowSize();
@@ -311,13 +400,23 @@ void settings_popup(ImVec2 anchor_min, ImVec2 anchor_max, int rows, callback_ref
     popup_position.y = ui::menu::fit_popup(popup_position.y, bounds_min.y + 8.0f, bounds_max.y - popup_size.y - 8.0f);
     ImGui::SetNextWindowPos(popup_position, ImGuiCond_Always);
     ImGui::SetNextWindowSize(popup_size, ImGuiCond_Always);
+#if defined(VESTA_ASTRAL_MENU)
+    ImGui::PushStyleColor(ImGuiCol_PopupBg, ui::astral::widgets::get().pal.popup);
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, {12.0f, 0.0f});
+    ImGui::PushStyleVar(ImGuiStyleVar_PopupRounding, ui::astral::widgets::get().m.popup_rounding);
+    ImGui::PushStyleVar(ImGuiStyleVar_PopupBorderSize, 0.0f);
+#else
     ImGui::PushStyleColor(ImGuiCol_PopupBg, ImVec4{0, 0, 0, 0});
     ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, {12.0f, 0.0f});
     ImGui::PushStyleVar(ImGuiStyleVar_PopupRounding, 0.0f);
     ImGui::PushStyleVar(ImGuiStyleVar_PopupBorderSize, 0.0f);
+#endif
     if (ImGui::BeginPopup("##settings", ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse |
                                             ImGuiWindowFlags_NoBackground))
     {
+#if defined(VESTA_ASTRAL_MENU)
+        ImGui::BeginDisabled(disabled);
+#endif
         const auto popup_min = ImGui::GetWindowPos();
         const auto popup_max = popup_min + popup_size;
         auto* popup_draw = ImGui::GetWindowDrawList();
@@ -327,6 +426,9 @@ void settings_popup(ImVec2 anchor_min, ImVec2 anchor_max, int rows, callback_ref
 
         ImGui::SetCursorPos({12.0f, 10.0f});
         callback();
+#if defined(VESTA_ASTRAL_MENU)
+        ImGui::EndDisabled();
+#endif
         ImGui::EndPopup();
     }
     ImGui::PopStyleVar(3);
@@ -341,13 +443,29 @@ void settings_popup_row(const char* label, int rows, callback_ref callback)
     const auto options_min = ImGui::GetItemRectMin();
     const auto options_max = ImGui::GetItemRectMax();
     pointer_cursor_if_hovered();
+#if defined(VESTA_ASTRAL_MENU)
+    const auto disabled = widget_disabled();
+    if (!disabled && ImGui::IsItemClicked())
+#else
     if (ImGui::IsItemClicked())
+#endif
         ImGui::OpenPopup("##settings");
 
     auto* draw = ImGui::GetWindowDrawList();
     const auto dot_y = (options_min.y + options_max.y) * 0.5f;
+#if defined(VESTA_ASTRAL_MENU)
+    const auto options_hover = ImGui::IsItemHovered();
+    const auto options_id = ImGui::GetItemID();
+    const auto& palette = ui::astral::widgets::get().pal;
+    const auto hover = ui::astral::widgets::animate(options_id, "options_hover", options_hover ? 1.0f : 0.0f,
+                                                    12.0f, 0.0f);
+    for (int dot = 0; dot < 3; ++dot)
+        draw->AddCircleFilled({options_min.x + 4.0f + dot * 6.0f, dot_y}, 1.0f,
+                              packed(ui::astral::draw::mix(palette.text_dim, palette.accent, hover)), 10);
+#else
     for (int dot = 0; dot < 3; ++dot)
         draw->AddCircleFilled({options_min.x + 4.0f + dot * 6.0f, dot_y}, 1.0f, packed(ImVec4{1, 1, 1, 1}), 10);
+#endif
 
     settings_popup(options_min, options_max, rows, callback);
     end_row();
@@ -364,13 +482,29 @@ void toggle_popup_row(const char* label, bool& value, int rows, callback_ref cal
     const auto options_min = ImGui::GetItemRectMin();
     const auto options_max = ImGui::GetItemRectMax();
     pointer_cursor_if_hovered();
+#if defined(VESTA_ASTRAL_MENU)
+    const auto disabled = widget_disabled();
+    if (!disabled && ImGui::IsItemClicked())
+#else
     if (ImGui::IsItemClicked())
+#endif
         ImGui::OpenPopup("##settings");
 
     auto* draw = ImGui::GetWindowDrawList();
     const auto dot_y = (options_min.y + options_max.y) * 0.5f;
+#if defined(VESTA_ASTRAL_MENU)
+    const auto options_hover = ImGui::IsItemHovered();
+    const auto options_id = ImGui::GetItemID();
+    const auto& palette = ui::astral::widgets::get().pal;
+    const auto hover = ui::astral::widgets::animate(options_id, "options_hover", options_hover ? 1.0f : 0.0f,
+                                                    12.0f, 0.0f);
+    for (int dot = 0; dot < 3; ++dot)
+        draw->AddCircleFilled({options_min.x + 4.0f + dot * 6.0f, dot_y}, 1.0f,
+                              packed(ui::astral::draw::mix(palette.text_dim, palette.accent, hover)), 10);
+#else
     for (int dot = 0; dot < 3; ++dot)
         draw->AddCircleFilled({options_min.x + 4.0f + dot * 6.0f, dot_y}, 1.0f, packed(ImVec4{1, 1, 1, 1}), 10);
+#endif
 
     ImGui::SetCursorScreenPos({options_max.x + spacing, options_min.y});
     toggle_control(value);
@@ -383,7 +517,12 @@ void visual_editor_settings_popup(int rows, callback_ref callback)
 {
     const auto element_min = ImGui::GetItemRectMin();
     const auto element_max = ImGui::GetItemRectMax();
+#if defined(VESTA_ASTRAL_MENU)
+    const auto disabled = widget_disabled();
+    if (!disabled && ImGui::IsItemHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Right))
+#else
     if (ImGui::IsItemHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Right))
+#endif
         ImGui::OpenPopup("##element_settings");
 
     const auto popup_size = ImVec2{300.0f, 20.0f + rows * k_row_height};
@@ -397,13 +536,23 @@ void visual_editor_settings_popup(int rows, callback_ref callback)
     popup_position.y = ui::menu::fit_popup(popup_position.y, 8.0f, display.y - popup_size.y - 8.0f);
     ImGui::SetNextWindowPos(popup_position, ImGuiCond_Appearing);
     ImGui::SetNextWindowSize(popup_size, ImGuiCond_Always);
+#if defined(VESTA_ASTRAL_MENU)
+    ImGui::PushStyleColor(ImGuiCol_PopupBg, ui::astral::widgets::get().pal.popup);
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, {12.0f, 0.0f});
+    ImGui::PushStyleVar(ImGuiStyleVar_PopupRounding, ui::astral::widgets::get().m.popup_rounding);
+    ImGui::PushStyleVar(ImGuiStyleVar_PopupBorderSize, 0.0f);
+#else
     ImGui::PushStyleColor(ImGuiCol_PopupBg, ImVec4{0, 0, 0, 0});
     ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, {12.0f, 0.0f});
     ImGui::PushStyleVar(ImGuiStyleVar_PopupRounding, 0.0f);
     ImGui::PushStyleVar(ImGuiStyleVar_PopupBorderSize, 0.0f);
+#endif
     if (ImGui::BeginPopup("##element_settings", ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse |
                                                     ImGuiWindowFlags_NoBackground))
     {
+#if defined(VESTA_ASTRAL_MENU)
+        ImGui::BeginDisabled(disabled);
+#endif
         const auto popup_min = ImGui::GetWindowPos();
         const auto popup_max = popup_min + popup_size;
         auto* popup_draw = ImGui::GetWindowDrawList();
@@ -412,6 +561,9 @@ void visual_editor_settings_popup(int rows, callback_ref callback)
         popup_draw->PopClipRect();
         ImGui::SetCursorPos({12.0f, 10.0f});
         callback();
+#if defined(VESTA_ASTRAL_MENU)
+        ImGui::EndDisabled();
+#endif
         ImGui::EndPopup();
     }
     ImGui::PopStyleVar(3);

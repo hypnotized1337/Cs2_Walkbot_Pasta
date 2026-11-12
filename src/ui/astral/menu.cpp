@@ -124,7 +124,7 @@ void menu_t::draw_astral(float display_width, float display_height)
         draw_astral_automation();
     else
     {
-        // Unported pages keep their original widgets, dimensions and popup behavior until their checkpoint.
+        // Layout stays in place while shared helpers use the Astral presentation.
         push_menu_font(render::fonts().menu_source_18);
         switch (m_page)
         {

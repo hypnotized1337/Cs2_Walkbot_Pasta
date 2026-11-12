@@ -3,6 +3,10 @@
 #include <ui/menu/geometry.hpp>
 #include <render/text/localization.hpp>
 #include <imgui_internal.h>
+#if defined(VESTA_ASTRAL_MENU)
+#include <ui/astral/widgets.hpp>
+#include <ui/astral/draw.hpp>
+#endif
 #include <d3d11.h>
 #include <d3dcompiler.h>
 #include <algorithm>
@@ -101,6 +105,20 @@ inline constexpr float k_menu_surface_height = k_menu_height;
 [[nodiscard]] ImVec4 menu_color(const render::draw::rgba color);
 
 void synchronize_menu_palette();
+
+#if defined(VESTA_ASTRAL_MENU)
+class astral_style_scope
+{
+public:
+    astral_style_scope();
+    ~astral_style_scope();
+    astral_style_scope(const astral_style_scope&) = delete;
+    astral_style_scope& operator=(const astral_style_scope&) = delete;
+private:
+    ImGuiStyle m_saved;
+};
+#endif
+
 
 [[nodiscard]] float current_menu_scale(const float display_width, const float display_height);
 
@@ -484,7 +502,11 @@ template<typename value_t>
 void slider_row_impl(const char* label, value_t& value, value_t minimum, value_t maximum, const char* suffix,
                      value_t step)
 {
+#if defined(VESTA_ASTRAL_MENU)
+    const auto control_width = ImGui::GetContentRegionAvail().x;
+#else
     constexpr auto control_width = 130.0f;
+#endif
     begin_row(label, control_width);
     const auto id = ImGui::GetID("##slider");
     const auto range = static_cast<double>(maximum) - static_cast<double>(minimum);
@@ -528,13 +550,30 @@ void slider_row_impl(const char* label, value_t& value, value_t minimum, value_t
     const auto item_max = ImGui::GetItemRectMax();
     const auto actual_width = std::max(1.0f, item_max.x - item_min.x);
     // Source Slider(): a seven-pixel bar at 1x (ten at 1.5x) with its value centred over it and no thumb.
+#if defined(VESTA_ASTRAL_MENU)
+    const auto track_y = item_min.y + 16.0f;
+    const auto track_a = ImVec2{item_min.x, track_y};
+    const auto track_b = ImVec2{item_max.x, track_y + 3.0f};
+#else
     const auto track_a = ImVec2{item_min.x, item_min.y + 7.0f};
     const auto track_b = ImVec2{item_max.x, item_min.y + 17.0f};
+#endif
     const auto track_width = std::max(1.0f, track_b.x - track_a.x);
+#if defined(VESTA_ASTRAL_MENU)
+    const auto text_x = item_max.x - text_size.x;
+#else
     const auto text_x = item_min.x + (actual_width - text_size.x) * 0.5f;
+#endif
     const auto value_rect = ImRect{{text_x - 5.0f, item_min.y + 1.0f},
                                    {text_x + text_size.x + 5.0f, item_min.y + 19.0f}};
+#if defined(VESTA_ASTRAL_MENU)
+    const auto disabled = (GImGui->LastItemData.ItemFlags & ImGuiItemFlags_Disabled) != 0;
+    if (disabled && g_slider_edit.id == id)
+        g_slider_edit = {};
+    const auto value_hovered = !disabled && value_rect.Contains(ImGui::GetIO().MousePos);
+#else
     const auto value_hovered = value_rect.Contains(ImGui::GetIO().MousePos);
+#endif
     const auto active = ImGui::IsItemActive();
     auto& drag = g_slider_drags[id];
 
@@ -592,6 +631,23 @@ void slider_row_impl(const char* label, value_t& value, value_t minimum, value_t
     shown = active && drag.dragging ? target : approach(shown, target, 0.10f);
 
     auto* draw = ImGui::GetWindowDrawList();
+#if defined(VESTA_ASTRAL_MENU)
+    const auto& palette = astral::widgets::get().pal;
+    draw->AddRectFilled(track_a, track_b, packed(palette.frame), 1.5f);
+    if (shown > 0.0001f)
+    {
+        const ImVec2 fill_max{track_a.x + actual_width * shown, track_b.y};
+        auto glow = palette.accent;
+        glow.w *= g_widget_alpha * ImGui::GetStyle().Alpha;
+        astral::draw::glow(draw, track_a, fill_max, 1.5f, astral::draw::col(glow, 0.20f), 6.0f);
+        astral::draw::rect_gradient(draw, track_a, fill_max, packed(palette.accent), packed(palette.accent_end), 1.5f, ImDrawFlags_None, true);
+    }
+    const auto* translated = render::localization::tr(label);
+    ImGui::RenderTextEllipsis(draw, item_min, {text_x - 12.0f, item_min.y + text_size.y}, text_x - 12.0f,
+                             translated, ImGui::FindRenderedTextEnd(translated), nullptr);
+    if (!editing)
+        draw->AddText({text_x, item_min.y}, packed(palette.text_soft), value_text);
+#else
     draw->AddRectFilled(track_a, track_b, packed(k_outline_dark));
     draw->AddRectFilled(track_a + ImVec2{1.0f, 1.0f}, track_b - ImVec2{1.0f, 1.0f}, packed(k_bg_panel));
     const auto x = track_a.x + track_width * shown;
@@ -601,11 +657,17 @@ void slider_row_impl(const char* label, value_t& value, value_t minimum, value_t
     if (!editing)
         draw->AddText({text_x, item_min.y + 2.0f}, packed(k_text_main), value_text);
 
+#endif
+
     if (editing)
     {
         g_slider_edit.last_seen_frame = GImGui->FrameCount;
         const auto editor_width = std::clamp(text_size.x + 18.0f, 52.0f, actual_width);
+#if defined(VESTA_ASTRAL_MENU)
+        ImGui::SetCursorScreenPos({item_max.x - editor_width, item_min.y});
+#else
         ImGui::SetCursorScreenPos({item_min.x + (actual_width - editor_width) * 0.5f, item_min.y});
+#endif
         ImGui::PushStyleColor(ImGuiCol_FrameBg, k_bg_panel);
         ImGui::PushStyleColor(ImGuiCol_FrameBgHovered, k_bg_hover);
         ImGui::PushStyleColor(ImGuiCol_FrameBgActive, k_bg_hover);

@@ -59,7 +59,7 @@ bool guide_button(const char* label, float width, bool primary)
                                   : ImVec4{1.0f, 1.0f, 1.0f, 0.12f});
     ImGui::PushStyleColor(ImGuiCol_ButtonActive, primary ? k_accent : ImVec4{1.0f, 1.0f, 1.0f, 0.18f});
     ImGui::PushStyleColor(ImGuiCol_Text, k_text_main);
-    const bool pressed = ImGui::Button(label, {width, 34.0f});
+    const bool pressed = detail::styled_button(label, {width, 34.0f}, primary);
     pointer_cursor_if_hovered();
     ImGui::PopStyleColor(4);
     ImGui::PopStyleVar();
@@ -76,7 +76,7 @@ void key_select(const char* label, std::uint16_t current, std::uint16_t& chosen,
 
     ImGui::PushID(label);
     const auto button_id = ImGui::GetID("##key");
-    ImGui::InvisibleButton("##key", {width, control_height});
+    detail::hit_region("##key", {width, control_height});
     const bool opened = ImGui::IsItemClicked();
     if (opened)
         ImGui::OpenPopup("##keys");
@@ -138,7 +138,7 @@ void key_select(const char* label, std::uint16_t current, std::uint16_t& chosen,
             ImGui::PushID(static_cast<int>(i));
             const auto row_min = ImGui::GetCursorScreenPos();
             const auto option_id = ImGui::GetID("##option");
-            ImGui::InvisibleButton("##option",
+            detail::hit_region("##option",
                                    {width - 8.0f - (choices.size() > visible_options ? 4.0f : 0.0f), option_height});
             const bool option_hovered = ImGui::IsItemHovered();
             pointer_cursor_if_hovered();
@@ -286,7 +286,7 @@ void draw_language_step(const guide_content& content, float (&hover)[2], const f
         const ImVec2 max{min.x + card_width, min.y + card_height};
         ImGui::SetCursorScreenPos(min);
         ImGui::PushID(i);
-        const bool clicked = ImGui::InvisibleButton("##language", {card_width, card_height});
+        const bool clicked = detail::hit_region("##language", {card_width, card_height});
         const bool hovered = ImGui::IsItemHovered();
         ImGui::PopID();
         pointer_cursor_if_hovered();
@@ -599,7 +599,7 @@ void menu_t::draw_guide()
         const auto label = loc::tr("Skip");
         const auto size = ImGui::CalcTextSize(label);
         ImGui::SetCursorPos({k_width - k_margin - size.x - 8.0f, 42.0f});
-        ImGui::InvisibleButton("##skip", {size.x + 8.0f, size.y + 8.0f});
+        detail::hit_region("##skip", {size.x + 8.0f, size.y + 8.0f});
         const bool hovered = ImGui::IsItemHovered();
         pointer_cursor_if_hovered();
         draw->AddText({origin.x + k_width - k_margin - size.x - 4.0f, origin.y + 46.0f},
