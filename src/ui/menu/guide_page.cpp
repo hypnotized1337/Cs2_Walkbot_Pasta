@@ -10,10 +10,12 @@
 #include <imgui_internal.h>
 
 #include <ui/menu/internal.hpp>
+#include <ui/menu/library_widgets.hpp>
 
 namespace ui
 {
 using namespace ui::menu::detail;
+namespace detail = ui::menu::detail;
 
 namespace
 {

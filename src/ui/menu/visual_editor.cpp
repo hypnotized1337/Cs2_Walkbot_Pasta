@@ -24,6 +24,7 @@
 namespace ui
 {
 using namespace ui::menu::detail;
+namespace detail = ui::menu::detail;
 
 namespace
 {
