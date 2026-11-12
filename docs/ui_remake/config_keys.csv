@@ -15,7 +15,7 @@ combat_global.aimbot_fov_color.b,number,217,yes,Aimbot / Global / Targeting / FO
 combat_global.aimbot_fov_color.g,number,217,yes,Aimbot / Global / Targeting / FOV / Visualization (toggle + color picker) | Aimbot / Override / Targeting / FOV / Visualization (toggle + color picker) | Aimbot / Global / Targeting / FOV / Saturation / Value area | Aimbot / Global / Targeting / FOV / Hue strip | Aimbot / Global / Targeting / FOV / Alpha strip | Aimbot / Override / Targeting / FOV / Saturation / Value area | Aimbot / Override / Targeting / FOV / Hue strip | Aimbot / Override / Targeting / FOV / Alpha strip
 combat_global.aimbot_fov_color.r,number,217,yes,Aimbot / Global / Targeting / FOV / Visualization (toggle + color picker) | Aimbot / Override / Targeting / FOV / Visualization (toggle + color picker) | Aimbot / Global / Targeting / FOV / Saturation / Value area | Aimbot / Global / Targeting / FOV / Hue strip | Aimbot / Global / Targeting / FOV / Alpha strip | Aimbot / Override / Targeting / FOV / Saturation / Value area | Aimbot / Override / Targeting / FOV / Hue strip | Aimbot / Override / Targeting / FOV / Alpha strip
 combat_global.aimbot_fov_config.distance_curve,number,1.0f,yes,Aimbot / Global / Targeting / FOV / Advanced / Falloff
-combat_global.aimbot_fov_config.draw_target_point,number,2,no,
+combat_global.aimbot_fov_config.draw_target_point,boolean,true,no,
 combat_global.aimbot_fov_config.far_distance_m,number,10.0f,yes,Aimbot / Global / Targeting / FOV / Advanced / Min Size At
 combat_global.aimbot_fov_config.far_fov,number,2.0f,yes,Aimbot / Global / Targeting / FOV / Advanced / Min Radius
 combat_global.aimbot_fov_config.near_distance_m,number,2.5f,yes,Aimbot / Global / Targeting / FOV / Advanced / Full Size At
@@ -114,7 +114,7 @@ combat_overrides[*].aimbot_checks.smoke,boolean,false,yes,"Aimbot / Override / T
 combat_overrides[*].aimbot_checks.walls,number,1,yes,Aimbot / Override / Penetration / Only Visible
 combat_overrides[*].aimbot_fov,number,2,yes,Aimbot / Override / Targeting / FOV / Radius
 combat_overrides[*].aimbot_fov_config.distance_curve,number,1.0f,yes,Aimbot / Override / Targeting / FOV / Advanced / Falloff
-combat_overrides[*].aimbot_fov_config.draw_target_point,number,2,no,
+combat_overrides[*].aimbot_fov_config.draw_target_point,boolean,true,no,
 combat_overrides[*].aimbot_fov_config.far_distance_m,number,10.0f,yes,Aimbot / Override / Targeting / FOV / Advanced / Min Size At
 combat_overrides[*].aimbot_fov_config.far_fov,number,2.0f,yes,Aimbot / Override / Targeting / FOV / Advanced / Min Radius
 combat_overrides[*].aimbot_fov_config.near_distance_m,number,2.5f,yes,Aimbot / Override / Targeting / FOV / Advanced / Full Size At

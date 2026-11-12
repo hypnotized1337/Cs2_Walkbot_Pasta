@@ -1,0 +1,10 @@
+page,section,label,widget_type,config_key,default,min,max,condition,source_file,source_line
+Visuals/Items,Item Ammo,Show Item Ammo,toggle,esp.m_item.m_ammo.enabled,true,,,new control (no old UI); Requested saved setting; preserve existing rendering behavior,,
+Visuals/Items,Item Ammo,Ammo Color,color,esp.m_item.m_ammo.color,"[255,255,255,200]",0,255,new control (no old UI); Requested saved setting; RGBA channels,,
+Visuals/Items,Item Ammo,Empty Ammo Color,color,esp.m_item.m_ammo.empty_color,"[220,80,80,200]",0,255,new control (no old UI); Requested saved setting; RGBA channels,,
+Visuals/Items,Filters,Shotguns,toggle,esp.m_item.m_filters.shotguns,true,,,new control (no old UI); Requested saved filter; preserve existing behavior,,
+Visuals/Items,Filters,Heavy,toggle,esp.m_item.m_filters.heavy,true,,,new control (no old UI); Requested saved filter; preserve existing behavior,,
+Visuals/Projectiles,Colors,Default Color,color,esp.m_projectile.default_color,"[195,200,215,200]",0,255,new control (no old UI); Requested saved setting; RGBA channels,,
+Misc,Spectator List,Show Avatars,toggle,misc.m_spectator_list.show_avatars,true,,,"new control (no old UI); BLOCKED: saved field has no runtime consumer; owner decision required, do not present as functional",,
+Triggerbot,Auto Stop,Physical Fire,toggle,misc.m_auto_stop.physical_fire,true,,,"new control (no old UI); BLOCKED: saved field has no runtime consumer; owner decision required, no gameplay changes authorized",,
+Triggerbot,Auto Stop,Predictive Trigger,toggle,misc.m_auto_stop.predictive_trigger,true,,,"new control (no old UI); BLOCKED: saved field has no runtime consumer; owner decision required, no gameplay changes authorized",,

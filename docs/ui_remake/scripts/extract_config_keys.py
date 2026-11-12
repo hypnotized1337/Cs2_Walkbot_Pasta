@@ -447,6 +447,10 @@ def build_rows(serializers: dict[str, Serializer], structs: dict[str, dict[str, 
             if nested_serializer:
                 field_type = nested_serializer.type_name
             default = field_default(member, field_type)
+            if "==" in expression:
+                target_default = enum_default(expression.split("==", 1)[1])
+                add(path, member_name, "bool", str(int(default) == int(target_default)).lower())
+                continue
             if key == "buy_presets" and "buy_presets_json" in expression:
                 preset = structs.get("buy_preset", {})
                 item = structs.get("buy_item", {})
