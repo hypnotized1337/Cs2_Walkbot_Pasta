@@ -23,6 +23,10 @@ public:
 
 private:
     friend struct menu_render_test_access;
+#if defined(VESTA_ASTRAL_MENU)
+    void draw_astral(float display_width, float display_height);
+    void draw_astral_automation();
+#endif
     void draw_top_bar();
     void draw_content();
     void draw_guide();
@@ -42,7 +46,11 @@ private:
     bool m_menu_hotkey_was_down{};
     bool m_open_pending{};
     HWND m_hwnd{};
+#if defined(VESTA_ASTRAL_MENU)
+    int m_page{4};
+#else
     int m_page{};
+#endif
     int m_weapon_group{-1};
     int m_visual_group{};
     int m_misc_group{};

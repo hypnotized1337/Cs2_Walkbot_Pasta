@@ -25,6 +25,8 @@ endif()
 
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+option(VESTA_ASTRAL_MENU "Use the Astral menu slice (OFF restores the legacy menu)" ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 if(MSVC)
@@ -270,6 +272,18 @@ target_include_directories(${PROJECT_NAME} PRIVATE
     ${VESTA_IMGUI_DIR}
     ${VESTA_IMGUI_DIR}/backends
 )
+
+if(VESTA_ASTRAL_MENU)
+    target_sources(${PROJECT_NAME} PRIVATE
+        src/ui/astral/menu.cpp
+        src/ui/astral/automation.cpp
+        src/ui/astral/widgets.cpp
+        src/ui/astral/draw.cpp
+        src/ui/astral/icons.cpp
+        src/ui/astral/fonts.cpp
+    )
+    target_compile_definitions(${PROJECT_NAME} PRIVATE VESTA_ASTRAL_MENU=1)
+endif()
 
 target_compile_definitions(${PROJECT_NAME} PRIVATE
     # Vesta opens no links or documents, so ImGui's generic ShellExecuteW "open anything" handler is left out of

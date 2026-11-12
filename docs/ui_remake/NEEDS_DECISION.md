@@ -1,5 +1,12 @@
 # Decisions required before porting affected controls
 
+**Stage 2 update (2026-11-12):** The owner approved all 33 proposed UI controls for their
+later page checkpoints, including the three dormant settings. This does not authorize new
+runtime behavior. Keep the existing Walkbot-disabled behavior and all serialized keys.
+The exact remaining internal/legacy paths are listed in `hidden_keys.md`; Astral-only
+showcase exclusions are in `astral_only.md`. Notices now accompany the Automation slice.
+The sections below preserve the Stage 1 rationale, not an outstanding blocker on this slice.
+
 This file distinguishes saved fields that can receive a working UI control from fields
 whose runtime behavior is missing, derived or legacy. It is not permission to omit keys.
 All saved keys remain serialized and keep their existing names.

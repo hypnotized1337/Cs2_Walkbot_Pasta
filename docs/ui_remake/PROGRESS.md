@@ -1,6 +1,93 @@
-# UI remake progress — Stage 1 ready for approval
+# UI remake progress
 
-## Checkpoint
+## Stage 2 approved — Automation vertical slice (2026-11-12)
+
+- Astral is a C++17 standalone Win32/DX11 Dear ImGui 1.92.9b showcase; Vesta uses C++23,
+  its own Win32/DX11 overlay lifecycle, and pinned ImGui 1.92.3. Adapt presentation APIs,
+  not the host/backend or config serialization; retain the pinned library.
+- Structure: separate theme/drawing, Inter SemiBold/Bold fonts, icon atlas, window chrome,
+  horizontal tabs, panel/column layout and animated widgets, adapted to repository naming.
+- Widget set: toggles, integer/float sliders, single/multi-select, color picker, buttons,
+  text inputs, key capture, settings popups, lists, tooltips and disabled states.
+- Theme: graphite panels, accent-aware highlights/gradients and smooth hover/page/popup
+  animations. Existing user accent and live DPI remain authoritative.
+- Tabs: Aimbot, Triggerbot, Visuals, Walkbot, Automation, Misc, Configs; existing subtabs
+  and config binding semantics remain. No reference-only features or invented backend APIs.
+- Slice: Automation's 8 existing controls (accept, rejoin with mode/team, disconnect with
+  score/minutes/randomization), with every top-level tab visible. No other page is ported yet.
+- Fallback: a single compile-time CMake switch selects Astral or the unchanged legacy menu;
+  retain access to functional legacy pages while migrating. Preserve Walkbot disabled rules,
+  overlay input/DPI behavior and Configs isolation/accent behavior.
+- Owner approved all 33 additions for their later page checkpoints, bound to existing keys.
+  Three saved options still lack runtime consumers; UI approval does not add gameplay logic.
+- Keep legacy/internal keys unchanged and list them in `hidden_keys.md`; omit/reference-list
+  showcase-only functionality in `astral_only.md`. Carry license and asset notices with port.
+- Commit this slice and stop for owner Windows compile/screenshots before porting other pages.
+
+## Stage 2 implementation checkpoint — stop for owner compile
+
+The Astral shell and Automation slice are implemented. All seven top-level icon tabs are
+visible (localized tooltips); Automation opens first. Other pages still use their original
+widgets and bindings inside the new shell. No other page has been migrated and none of the
+33 later-page additions is claimed as implemented here.
+
+Automation uses the existing eight values: Auto Accept Match, Auto Rejoin, Game Mode, Team,
+Auto Disconnect, Score (0–2000), Minutes On Server (0–60), Random Extra Time (0–100%).
+Rejoin and disconnect settings open from their gear buttons. The shell adds the reference
+header, ribbons/stars, Inter typography, icon tabs, cards, footer and widget transitions.
+Astral's standalone host, persistence, search, arbitrary binds and showcase overlays are not
+wired in. Existing guide, visual editor, HUD, input ownership and config paths remain.
+Fonts/icons join the existing renderer lifecycle; the new menu and its popups participate
+in the existing menu draw-list transform. The legacy menu is retained behind one switch.
+
+### Build / fallback
+
+Reconfigure the isolated test checkout before building (new source files were added):
+
+```text
+cmake --preset debug-local -DVESTA_ASTRAL_MENU=ON
+cmake --build --preset debug-local --target vesta -- -m
+```
+
+Use the existing Visual Studio CMake path from `AGENTS.md` if `cmake` is not on PATH.
+For the unchanged legacy menu, reconfigure with `-DVESTA_ASTRAL_MENU=OFF` and rebuild.
+Use only the test executable and `%TEMP%\vesta_uitest`; do not replace the production binary.
+
+### Verification and required owner feedback
+
+- All six new translation units pass portable C++23 syntax checks against the pinned
+  ImGui 1.92.3 headers. Windows-only host interfaces are stubbed for this check, not compiled.
+- A temporary headless harness using the actual pinned ImGui implementation exercises
+  shell rendering, all seven tab selections, all three toggles, both settings popups,
+  both combo selections and all three sliders against the Automation value bindings.
+  This is not a Windows renderer, persistence round-trip or in-game test.
+- The hidden-key cross-check finds exactly 70 remaining keys after accounting for all
+  33 approved proposals (54 serialized leaves); the copied Astral license matches the reference.
+- Native MSVC builds (both switch settings), Windows appearance, input/DPI behavior,
+  config save/reload, device recovery and live overlays remain unverified here.
+
+Owner check: compile ON, send Automation and both settings-popup screenshots; check tab
+visibility, header drag, live scale/accent changes, Configs save/load in the test root,
+Walkbot's disabled automation rows, guide/editor/overlays, and OFF fallback compilation.
+Stop at this checkpoint; do not port another page until compile and visual feedback arrives.
+
+### Exact changed / added files
+
+- Build / notices: `CMakeLists.txt`, `THIRD_PARTY_NOTICES.md`.
+- Host integration: `src/ui/menu/menu.hpp`, `src/ui/menu/menu.cpp`,
+  `src/ui/menu/internal.hpp`, `src/ui/menu/layout.cpp`, `src/ui/overlay/overlay.cpp`.
+- New shell / page: `src/ui/astral/menu.cpp`, `src/ui/astral/automation.cpp`.
+- New widget layer: `src/ui/astral/widgets.hpp`, `src/ui/astral/widgets.cpp`,
+  `src/ui/astral/draw.hpp`, `src/ui/astral/draw.cpp`, `src/ui/astral/theme.hpp`,
+  `src/ui/astral/types.hpp`.
+- New assets: `src/ui/astral/fonts.hpp`, `src/ui/astral/fonts.cpp`,
+  `src/ui/astral/fonts/inter.hpp`, `src/ui/astral/icons.hpp`, `src/ui/astral/icons.cpp`.
+- Documentation: `docs/ui_remake/PROGRESS.md`, `docs/ui_remake/NEEDS_DECISION.md`,
+  `docs/ui_remake/hidden_keys.md`, `docs/ui_remake/astral_only.md`.
+- Licenses: `third_party/astral/LICENSE`, `third_party/astral/THIRD_PARTY_NOTICES.md`,
+  `third_party/inter/OFL.txt`.
+
+## Stage 1 checkpoint (historical; superseded by Stage 2 approval above)
 
 Test branch: `ui-remake-test`. Base revision: `83b616b`.
 Stage 0 is accepted; Stage 1 inventory and reference audit are complete for review.
@@ -66,7 +153,7 @@ First vertical slice: **Automation**, plus the reusable Astral chrome/widget lay
 Keep the unported legacy pages reachable until their replacements pass their checkpoints.
 Reference-only Skins/Scripts and showcase behavior do not become fake product features.
 
-## Decisions still required
+## Stage 1 decision record (superseded where approved above)
 
 1. Implement spectator avatars and the two inactive Auto Stop options in a separately
    approved behavior task, or retain their keys without misleading controls?
@@ -78,7 +165,7 @@ Reference-only Skins/Scripts and showcase behavior do not become fake product fe
 5. Preserve reference notices/credit and review Commons Clause restrictions before
    distributing a derived product.
 
-## Verification
+## Stage 1 verification
 
 - Schema extraction and inventory assembly pass: no unmatched saved control bindings,
   duplicate exact control rows or duplicate saved key paths; existing source references
@@ -91,7 +178,7 @@ Reference-only Skins/Scripts and showcase behavior do not become fake product fe
   No Windows build, new-menu screenshot, interaction or config round trip ran here.
   Stage 1 only changes documentation and inventory scripts; no new compile is needed.
 
-## Handoff and publication
+## Stage 1 handoff (historical)
 
 Inventory groups are committed locally on `ui-remake-test`. Only the previously authorized
 isolation commit was pushed; this documentation work has not been pushed or merged.

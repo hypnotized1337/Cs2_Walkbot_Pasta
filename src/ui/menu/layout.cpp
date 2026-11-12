@@ -62,7 +62,7 @@ void synchronize_menu_palette()
 [[nodiscard]] float current_menu_scale(const float display_width, const float display_height)
 {
     const auto requested = std::clamp(config::general_settings.menu_scale, 0.50f, 1.50f);
-    const auto fit = std::min(display_width / k_menu_width, display_height / k_menu_height);
+    const auto fit = std::min(display_width / k_menu_width, display_height / k_menu_surface_height);
     return std::min(requested, std::max(0.35f, fit));
 }
 
@@ -73,16 +73,18 @@ void synchronize_menu_palette()
 
 [[nodiscard]] ImVec2 initial_menu_layout_position(const float display_width, const float display_height)
 {
-    return {(display_width - k_menu_width) * 0.5f, (display_height - k_menu_height) * 0.5f};
+    return {(display_width - k_menu_width) * 0.5f, (display_height - k_menu_surface_height) * 0.5f};
 }
 
 [[nodiscard]] bool belongs_to_menu(ImGuiWindow* window)
 {
-    for (auto* current = window; current; current = current->ParentWindow)
+    for (auto* current = window; current;
+         current = current->ParentWindow ? current->ParentWindow
+                                        : (current->Flags & ImGuiWindowFlags_Tooltip) ? current->ParentWindowInBeginStack : nullptr)
     {
         const auto name = std::string_view{current->Name ? current->Name : ""};
-        if (name == "##vesta_native_menu" || name == "##esp_visual_editor" || name == "##vesta_guide" ||
-            name == "##vesta_guide_dim")
+        if (name == "##vesta_native_menu" || name == "##vesta_astral_menu" || name == "##esp_visual_editor" ||
+            name == "##vesta_guide" || name == "##vesta_guide_dim")
             return true;
     }
     return false;

@@ -92,6 +92,12 @@ inline constexpr float k_menu_width = 800.0f;
 // strip so they end eight pixels above the bottom of the shell.
 inline constexpr float k_menu_height = 630.0f;
 
+#if defined(VESTA_ASTRAL_MENU)
+inline constexpr float k_menu_surface_height = 674.0f;
+#else
+inline constexpr float k_menu_surface_height = k_menu_height;
+#endif
+
 [[nodiscard]] ImVec4 menu_color(const render::draw::rgba color);
 
 void synchronize_menu_palette();
