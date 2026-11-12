@@ -156,8 +156,17 @@ void menu_t::draw()
     const auto menu_scale = current_menu_scale(display.x, display.y);
     const auto transform_origin = menu_transform_origin(display.x, display.y);
     const menu_render_scope render_scope{display, transform_origin, menu_scale};
+#if defined(VESTA_ASTRAL_MENU)
+    const astral_style_scope style_scope;
+#endif
     if (menu_open)
     {
+#if defined(VESTA_ASTRAL_MENU)
+        draw_astral(display.x, display.y);
+        push_menu_font(render::fonts().menu_regular_12);
+        draw_visual_editor();
+        ImGui::PopFont();
+#else
         const auto initial_position = initial_menu_layout_position(display.x, display.y);
         ImGui::SetNextWindowPos(initial_position, ImGuiCond_FirstUseEver);
         ImGui::SetNextWindowSize({k_menu_width, k_menu_height}, ImGuiCond_Always);
@@ -200,6 +209,7 @@ void menu_t::draw()
         ImGui::PopFont();
         ImGui::PopStyleColor(4);
         ImGui::PopStyleVar(5);
+#endif
     }
 
     if (guide_visible)

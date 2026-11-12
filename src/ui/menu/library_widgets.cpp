@@ -1,4 +1,7 @@
 #include <stdafx.hpp>
+#ifdef VESTA_ASTRAL_MENU
+#include "../astral/widgets.hpp"
+#endif
 #include <ui/menu/library_widgets.hpp>
 #include <render/fonts.hpp>
 #include <render/presentation.hpp>
@@ -11,21 +14,62 @@ namespace ui::menu::detail
 {
 namespace
 {
+#ifdef VESTA_ASTRAL_MENU
+constexpr float k_tile_rounding = 6.0f;
+#else
 constexpr float k_tile_rounding = 2.0f;
+#endif
 constexpr float k_small_height = 24.0f;
+#ifdef VESTA_ASTRAL_MENU
+constexpr float k_control_rounding = 4.0f;
+constexpr float k_section_rounding = 6.0f;
+constexpr float k_card_header_height = 32.0f;
+constexpr float k_card_vertical_padding = 11.0f;
+#else
+constexpr float k_control_rounding = 2.0f;
+constexpr float k_card_vertical_padding = 10.0f;
+constexpr float k_section_rounding = 5.0f;
+#endif
+
+struct library_colors_t
+{
+    ImVec4 card;
+    ImVec4 panel;
+    ImVec4 hover;
+    ImVec4 border;
+    ImVec4 border_light;
+    ImVec4 outline;
+    ImVec4 line;
+    ImVec4 accent;
+    ImVec4 text;
+    ImVec4 text_dim;
+};
+
+library_colors_t library_colors()
+{
+#ifdef VESTA_ASTRAL_MENU
+    const auto& palette = ui::astral::widgets::get().pal;
+    return {palette.card, palette.panel, palette.frame_hover, palette.popup_border, palette.frame_active,
+            palette.popup_border, palette.frame_active, palette.accent, palette.text, palette.text_dim};
+#else
+    return {k_bg_card, k_bg_panel, k_bg_hover, k_border, k_border_light, k_outline_dark, k_line, k_accent,
+            k_text_main, k_text_muted};
+#endif
+}
 
 [[nodiscard]] ImVec4 tone_color(const tone kind)
 {
+    const auto colors = library_colors();
     switch (kind)
     {
         case tone::accent:
-            return k_accent;
+            return colors.accent;
         case tone::danger:
             return {0.94f, 0.33f, 0.38f, 1.0f};
         case tone::normal:
             break;
     }
-    return k_text_main;
+    return colors.text;
 }
 
 void stroke(ImDrawList* draw, const ImVec2 center, std::initializer_list<ImVec2> points, const ImU32 color,
@@ -109,33 +153,47 @@ void wide_card(const char* id, const char* title, const callback_ref body, const
     const auto body_min = ImVec2{g_cards_origin.x, g_cards_origin.y + top};
     const auto body_max = body_min + ImVec2{width, height};
     ImGui::SetCursorScreenPos(body_min);
-    ImGui::PushStyleColor(ImGuiCol_ChildBg, k_bg_card);
-    ImGui::PushStyleColor(ImGuiCol_Border, k_outline_dark);
+    ImGui::PushStyleColor(ImGuiCol_ChildBg, library_colors().card);
+    ImGui::PushStyleColor(ImGuiCol_Border, library_colors().outline);
     ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, 6.0f);
     ImGui::PushStyleVar(ImGuiStyleVar_ChildBorderSize, 1.0f);
-    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, {14.0f, 10.0f});
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, {14.0f, k_card_vertical_padding});
     ImGui::BeginChild(id, {width, height}, true, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
     const auto title_pos = ImGui::GetCursorScreenPos();
     const auto right = ImGui::GetWindowPos().x + ImGui::GetWindowContentRegionMax().x;
     auto* title_font = ImGui::GetFont();
     auto* draw = ImGui::GetWindowDrawList();
-    draw->AddRect(body_min + ImVec2{1.0f, 1.0f}, body_max - ImVec2{1.0f, 1.0f}, packed(k_border), 5.0f, 0, 1.0f);
+    draw->AddRect(body_min + ImVec2{1.0f, 1.0f}, body_max - ImVec2{1.0f, 1.0f}, packed(library_colors().border), k_section_rounding, 0, 1.0f);
     const auto title_size = ImGui::GetFontSize();
+#ifdef VESTA_ASTRAL_MENU
+    constexpr auto header_height = k_card_header_height;
+#endif
     auto title_text = std::string{render::localization::tr(title)};
     for (auto& character : title_text)
         if (character >= 'A' && character <= 'Z')
             character = static_cast<char>(character - 'A' + 'a');
     const auto title_width = title_font->CalcTextSizeA(title_size, FLT_MAX, 0.0f, title_text.c_str()).x;
+#ifdef VESTA_ASTRAL_MENU
+    const auto title_y = title_pos.y + (header_height - title_size) * 0.5f;
+    const auto divider_y = title_pos.y + header_height * 0.5f;
+    const auto actions_y = title_pos.y + (header_height - k_small_height) * 0.5f;
+#else
+    const auto title_y = title_pos.y - 4.0f;
+    const auto divider_y = title_pos.y + 18.0f;
+    const auto actions_y = title_pos.y + (title_size - k_small_height) * 0.5f;
+#endif
     draw->AddText(title_font, title_size,
-                  {ImGui::GetWindowPos().x + (width - title_width) * 0.5f, title_pos.y - 4.0f}, packed(k_text_main),
+                  {ImGui::GetWindowPos().x + (width - title_width) * 0.5f, title_y}, packed(library_colors().text),
                   title_text.c_str());
-    draw->AddLine({ImGui::GetWindowPos().x + 3.0f, title_pos.y + 18.0f},
-                  {right - actions_width - 10.0f, title_pos.y + 18.0f}, packed(k_line), 1.0f);
-    ImGui::SetCursorScreenPos({right - actions_width, title_pos.y + (title_size - k_small_height) * 0.5f});
+    draw->AddLine({ImGui::GetWindowPos().x + 3.0f, divider_y}, {right - actions_width - 10.0f, divider_y},
+                  packed(library_colors().line), 1.0f);
+    ImGui::SetCursorScreenPos({right - actions_width, actions_y});
     actions();
     ImGui::SetCursorScreenPos(title_pos);
     ImGui::Dummy({0.0f, title_size});
+#ifndef VESTA_ASTRAL_MENU
     ImGui::Dummy({0.0f, 3.0f});
+#endif
     body();
     ImGui::EndChild();
     ImGui::PopStyleVar(3);
@@ -169,20 +227,20 @@ bool small_button(const char* id, const glyph icon, const char* label, const ton
     auto* draw = ImGui::GetWindowDrawList();
     const auto base = tone_color(kind);
     const auto emphasis = std::max(std::max(hover_t, held_t), focus_t);
-    draw->AddRectFilled(min, max, packed(dimmed(k_outline_dark, dim)), 2.0f);
+    draw->AddRectFilled(min, max, packed(dimmed(library_colors().outline, dim)), k_control_rounding);
     const auto tint = kind == tone::accent ? 0.18f : 0.28f;
-    auto fill = mix(k_bg_panel, ImVec4{base.x, base.y, base.z, tint}, emphasis);
+    auto fill = mix(library_colors().panel, ImVec4{base.x, base.y, base.z, tint}, emphasis);
     draw->AddRectFilled(min + ImVec2{1.0f, 1.0f}, max - ImVec2{1.0f, 1.0f}, packed(dimmed(fill, dim)), 1.0f);
-    auto border = mix(k_border, base, kind == tone::accent ? 0.30f + emphasis * 0.70f : emphasis * 0.70f);
+    auto border = mix(library_colors().border, base, kind == tone::accent ? 0.30f + emphasis * 0.70f : emphasis * 0.70f);
     if (focused)
-        border = mix(border, k_accent, 0.75f);
-    draw->AddRect(min, max, packed(dimmed(border, dim)), 2.0f, 0, 1.0f);
+        border = mix(border, library_colors().accent, 0.75f);
+    draw->AddRect(min, max, packed(dimmed(border, dim)), k_control_rounding, 0, 1.0f);
     if (focus_t > 0.01f)
         draw->AddRect(min - ImVec2{2.0f, 2.0f}, max + ImVec2{2.0f, 2.0f},
-                      packed(dimmed(k_accent, dim * focus_t)), 3.0f, 0, 1.0f);
+                      packed(dimmed(library_colors().accent, dim * focus_t)), 3.0f, 0, 1.0f);
     const auto ink = packed(dimmed(kind == tone::accent
-                                       ? mix(k_text_main, base, 0.55f + emphasis * 0.35f)
-                                       : mix(k_text_muted, k_text_main, emphasis),
+                                       ? mix(library_colors().text, base, 0.55f + emphasis * 0.35f)
+                                       : mix(library_colors().text_dim, library_colors().text, emphasis),
                                   dim));
     auto x = min.x + 8.0f;
     if (icon != glyph::none)
@@ -213,13 +271,13 @@ bool pill_button(const char* id, const char* label, const float width, const ton
     const auto max = ImGui::GetItemRectMax();
     auto* draw = ImGui::GetWindowDrawList();
     const auto base = tone_color(kind);
-    draw->AddRectFilled(min, max, packed(dimmed(k_outline_dark, dim)), 2.0f);
-    ImVec4 fill = k_bg_panel;
-    ImVec4 ink = mix(k_text_muted, k_text_main, std::max(hover_t, held_t));
-    ImVec4 border = mix(k_border, k_border_light, std::max(hover_t, focus_t));
+    draw->AddRectFilled(min, max, packed(dimmed(library_colors().outline, dim)), k_control_rounding);
+    ImVec4 fill = library_colors().panel;
+    ImVec4 ink = mix(library_colors().text_dim, library_colors().text, std::max(hover_t, held_t));
+    ImVec4 border = mix(library_colors().border, library_colors().border_light, std::max(hover_t, focus_t));
     if (kind == tone::accent)
     {
-        const auto normal = ImVec4{k_accent.x, k_accent.y, k_accent.z, 1.0f};
+        const auto normal = ImVec4{library_colors().accent.x, library_colors().accent.y, library_colors().accent.z, 1.0f};
         const auto hover = mix(normal, ImVec4{1.0f, 1.0f, 1.0f, 1.0f}, 0.12f);
         const auto pressed = mix(normal, ImVec4{0.0f, 0.0f, 0.0f, 1.0f}, 0.18f);
         fill = mix(normal, hover, hover_t);
@@ -231,14 +289,14 @@ bool pill_button(const char* id, const char* label, const float width, const ton
     }
     else
     {
-        fill = mix(k_bg_panel, ImVec4{base.x, base.y, base.z, 0.30f}, hover_t);
+        fill = mix(library_colors().panel, ImVec4{base.x, base.y, base.z, 0.30f}, hover_t);
         fill = mix(fill, ImVec4{base.x, base.y, base.z, 0.42f}, held_t);
         draw->AddRectFilled(min + ImVec2{1.0f, 1.0f}, max - ImVec2{1.0f, 1.0f}, packed(dimmed(fill, dim)), 1.0f);
     }
-    draw->AddRect(min, max, packed(dimmed(border, dim)), 2.0f, 0, 1.0f);
+    draw->AddRect(min, max, packed(dimmed(border, dim)), k_control_rounding, 0, 1.0f);
     if (focus_t > 0.01f)
         draw->AddRect(min - ImVec2{2.0f, 2.0f}, max + ImVec2{2.0f, 2.0f},
-                      packed(dimmed(k_accent, dim * focus_t)), 3.0f, 0, 1.0f);
+                      packed(dimmed(library_colors().accent, dim * focus_t)), 3.0f, 0, 1.0f);
     const auto* text = render::localization::tr(label);
     const auto text_size = ImGui::CalcTextSize(text);
     draw->PushClipRect(min, max, true);
@@ -252,13 +310,13 @@ bool pill_button(const char* id, const char* label, const float width, const ton
 bool hint_input(const char* id, const char* hint, char* buffer, const std::size_t size, const float width,
                 const ImGuiInputTextFlags flags)
 {
-    ImGui::PushStyleColor(ImGuiCol_FrameBg, k_bg_panel);
-    ImGui::PushStyleColor(ImGuiCol_FrameBgHovered, k_bg_hover);
-    ImGui::PushStyleColor(ImGuiCol_FrameBgActive, k_bg_hover);
-    ImGui::PushStyleColor(ImGuiCol_Border, k_border_light);
-    ImGui::PushStyleColor(ImGuiCol_Text, k_text_main);
-    ImGui::PushStyleColor(ImGuiCol_TextDisabled, k_text_muted);
-    ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 2.0f);
+    ImGui::PushStyleColor(ImGuiCol_FrameBg, library_colors().panel);
+    ImGui::PushStyleColor(ImGuiCol_FrameBgHovered, library_colors().hover);
+    ImGui::PushStyleColor(ImGuiCol_FrameBgActive, library_colors().hover);
+    ImGui::PushStyleColor(ImGuiCol_Border, library_colors().border_light);
+    ImGui::PushStyleColor(ImGuiCol_Text, library_colors().text);
+    ImGui::PushStyleColor(ImGuiCol_TextDisabled, library_colors().text_dim);
+    ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, k_control_rounding);
     ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 1.0f);
     ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, {6.0f, 3.0f});
     ImGui::SetNextItemWidth(width);
@@ -267,6 +325,31 @@ bool hint_input(const char* id, const char* hint, char* buffer, const std::size_
     ImGui::PopStyleVar(3);
     ImGui::PopStyleColor(6);
     return submitted;
+}
+
+bool styled_button(const char* label, const ImVec2 size, const bool accent)
+{
+#ifdef VESTA_ASTRAL_MENU
+    const auto& palette = ui::astral::widgets::get().pal;
+    const auto fill = accent ? palette.accent : palette.frame;
+    ImGui::PushStyleColor(ImGuiCol_Button, fill);
+    ImGui::PushStyleColor(ImGuiCol_ButtonHovered,
+                          accent ? mix(fill, ImVec4{1.0f, 1.0f, 1.0f, 1.0f}, 0.10f) : palette.frame_hover);
+    ImGui::PushStyleColor(ImGuiCol_ButtonActive, accent ? palette.accent_end : palette.frame_active);
+    ImGui::PushStyleColor(ImGuiCol_Text, accent ? readable_ink(fill) : palette.text_soft);
+    ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 4.0f);
+#endif
+    const bool pressed = ImGui::Button(label, size);
+#ifdef VESTA_ASTRAL_MENU
+    ImGui::PopStyleVar();
+    ImGui::PopStyleColor(4);
+#endif
+    return pressed;
+}
+
+bool hit_region(const char* id, const ImVec2 size)
+{
+    return ImGui::InvisibleButton(id, size);
 }
 
 int action_menu(const char* id, const std::span<const menu_action> actions)
@@ -295,15 +378,15 @@ int action_menu(const char* id, const std::span<const menu_action> actions)
     const auto button_max = ImGui::GetItemRectMax();
     auto* draw = ImGui::GetWindowDrawList();
     const auto emphasis = std::max(std::max(hover_t, held_t), focus_t);
-    draw->AddRectFilled(button_min, button_max, packed(dimmed(k_outline_dark, dim)), 2.0f);
-    auto fill = mix(k_bg_panel, k_bg_hover, hover_t);
-    fill = mix(fill, ImVec4{k_accent.x, k_accent.y, k_accent.z, 0.16f}, std::max(held_t, focus_t));
+    draw->AddRectFilled(button_min, button_max, packed(dimmed(library_colors().outline, dim)), k_control_rounding);
+    auto fill = mix(library_colors().panel, library_colors().hover, hover_t);
+    fill = mix(fill, ImVec4{library_colors().accent.x, library_colors().accent.y, library_colors().accent.z, 0.16f}, std::max(held_t, focus_t));
     draw->AddRectFilled(button_min + ImVec2{1.0f, 1.0f}, button_max - ImVec2{1.0f, 1.0f},
                         packed(dimmed(fill, dim)), 1.0f);
-    draw->AddRect(button_min, button_max, packed(dimmed(mix(k_border, k_accent, 0.30f + emphasis * 0.70f), dim)), 2.0f,
+    draw->AddRect(button_min, button_max, packed(dimmed(mix(library_colors().border, library_colors().accent, 0.30f + emphasis * 0.70f), dim)), k_control_rounding,
                   0, 1.0f);
     draw_glyph(draw, glyph::more, (button_min + button_max) * 0.5f,
-               packed(dimmed(mix(k_text_muted, k_accent, emphasis), dim)));
+               packed(dimmed(mix(library_colors().text_dim, library_colors().accent, emphasis), dim)));
 
     float width = 170.0f;
     for (const auto& action : actions)
@@ -338,7 +421,7 @@ int action_menu(const char* id, const std::span<const menu_action> actions)
             const auto item_max = ImGui::GetItemRectMax();
             const auto item_hover = animate_state(g_hover_animations, ImGui::GetItemID(), hovered, 0.10f);
             const auto waiting = armed == index;
-            const auto color = action.kind == tone::danger ? tone_color(tone::danger) : k_accent;
+            const auto color = action.kind == tone::danger ? tone_color(tone::danger) : library_colors().accent;
             if (item_hover > 0.01f || waiting)
                 popup->AddRectFilled(item_min + ImVec2{0.0f, 1.0f}, item_max - ImVec2{0.0f, 1.0f},
                                      packed(waiting ? ImVec4{color.x, color.y, color.z, 0.16f}
@@ -347,7 +430,7 @@ int action_menu(const char* id, const std::span<const menu_action> actions)
                                      2.0f);
             const auto* text = render::localization::tr(waiting ? "Click again to confirm" : action.label);
             popup->AddText({item_min.x + 12.0f, item_min.y + (row - ImGui::GetTextLineHeight()) * 0.5f},
-                           packed(action.kind == tone::danger ? color : mix(k_text_muted, k_text_main, item_hover)),
+                           packed(action.kind == tone::danger ? color : mix(library_colors().text_dim, library_colors().text, item_hover)),
                            text);
             if (ImGui::IsItemClicked())
             {
@@ -376,11 +459,11 @@ void tile_background(ImDrawList* draw, const ImVec2 min, const ImVec2 max, const
 {
     auto fill = mix(ImVec4{1.0f, 1.0f, 1.0f, 0.025f}, ImVec4{1.0f, 1.0f, 1.0f, 0.06f}, hover);
     if (active)
-        fill = mix(fill, ImVec4{k_accent.x, k_accent.y, k_accent.z, 0.14f}, 0.85f);
+        fill = mix(fill, ImVec4{library_colors().accent.x, library_colors().accent.y, library_colors().accent.z, 0.14f}, 0.85f);
     draw->AddRectFilled(min, max, packed(fill), k_tile_rounding);
-    const auto edge = active ? ImVec4{k_accent.x, k_accent.y, k_accent.z, 0.55f} : mix(k_border, k_border_light, hover);
+    const auto edge = active ? ImVec4{library_colors().accent.x, library_colors().accent.y, library_colors().accent.z, 0.55f} : mix(library_colors().border, library_colors().border_light, hover);
     draw->AddRect(min, max, packed(edge), k_tile_rounding);
     if (active)
-        draw->AddRectFilled({min.x + 1.0f, min.y + 8.0f}, {min.x + 3.0f, max.y - 8.0f}, packed(k_accent));
+        draw->AddRectFilled({min.x + 1.0f, min.y + 8.0f}, {min.x + 3.0f, max.y - 8.0f}, packed(library_colors().accent));
 }
 } // namespace ui::menu::detail

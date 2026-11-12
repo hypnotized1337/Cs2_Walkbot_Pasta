@@ -1,0 +1,194 @@
+page,section,label,widget_type,config_key,default,min,max,condition,source_file,source_line
+Aimbot,Weapon group navigation,Global,tab_button,@ui.combat_group,m_weapon_group=-1,,,Always,src/ui/menu/combat_page.cpp,18; caller src/ui/menu/aimbot_page.cpp:12
+Aimbot,Weapon group navigation,Pistol,tab_button,@ui.combat_group,m_weapon_group=0,,,Always,src/ui/menu/combat_page.cpp,18; caller src/ui/menu/aimbot_page.cpp:12
+Aimbot,Weapon group navigation,SMG,tab_button,@ui.combat_group,m_weapon_group=1,,,Always,src/ui/menu/combat_page.cpp,18; caller src/ui/menu/aimbot_page.cpp:12
+Aimbot,Weapon group navigation,Rifle,tab_button,@ui.combat_group,m_weapon_group=2,,,Always,src/ui/menu/combat_page.cpp,18; caller src/ui/menu/aimbot_page.cpp:12
+Aimbot,Weapon group navigation,Shotgun,tab_button,@ui.combat_group,m_weapon_group=3,,,Always,src/ui/menu/combat_page.cpp,18; caller src/ui/menu/aimbot_page.cpp:12
+Aimbot,Weapon group navigation,Sniper,tab_button,@ui.combat_group,m_weapon_group=4,,,Always,src/ui/menu/combat_page.cpp,18; caller src/ui/menu/aimbot_page.cpp:12
+Aimbot,Weapon group navigation,Heavy,tab_button,@ui.combat_group,m_weapon_group=5,,,Always,src/ui/menu/combat_page.cpp,18; caller src/ui/menu/aimbot_page.cpp:12
+Triggerbot,Weapon group navigation,Global,tab_button,@ui.combat_group,m_weapon_group=-1,,,Always,src/ui/menu/combat_page.cpp,18; caller src/ui/menu/triggerbot_page.cpp:12
+Triggerbot,Weapon group navigation,Pistol,tab_button,@ui.combat_group,m_weapon_group=0,,,Always,src/ui/menu/combat_page.cpp,18; caller src/ui/menu/triggerbot_page.cpp:12
+Triggerbot,Weapon group navigation,SMG,tab_button,@ui.combat_group,m_weapon_group=1,,,Always,src/ui/menu/combat_page.cpp,18; caller src/ui/menu/triggerbot_page.cpp:12
+Triggerbot,Weapon group navigation,Rifle,tab_button,@ui.combat_group,m_weapon_group=2,,,Always,src/ui/menu/combat_page.cpp,18; caller src/ui/menu/triggerbot_page.cpp:12
+Triggerbot,Weapon group navigation,Shotgun,tab_button,@ui.combat_group,m_weapon_group=3,,,Always,src/ui/menu/combat_page.cpp,18; caller src/ui/menu/triggerbot_page.cpp:12
+Triggerbot,Weapon group navigation,Sniper,tab_button,@ui.combat_group,m_weapon_group=4,,,Always,src/ui/menu/combat_page.cpp,18; caller src/ui/menu/triggerbot_page.cpp:12
+Triggerbot,Weapon group navigation,Heavy,tab_button,@ui.combat_group,m_weapon_group=5,,,Always,src/ui/menu/combat_page.cpp,18; caller src/ui/menu/triggerbot_page.cpp:12
+Aimbot,Global / Targeting,Master Switch,toggle_popup,combat_global.aimbot_enabled,false (global_settings) / group use_global=true,,,Global profile,src/ui/menu/aimbot_page.cpp,21; helper combat_widgets.cpp:51-54
+Aimbot,Global / Targeting,Master Switch settings,popup_button,@ui.popup.open.master_switch,— (UI state only),,,Global profile,src/ui/menu/combat_widgets.cpp,53-54
+Aimbot,Global / Targeting,Mode,dropdown,combat_global.aimbot_activation_mode,activation::hold (0),,,Global profile; Master Switch popup,src/ui/menu/combat_widgets.cpp,53
+Aimbot,Global / Targeting,Key,keybind,combat_global.aimbot_key,0x43 (67),,,Global profile; activation mode != Always On,src/ui/menu/aimbot_page.cpp,24-25; helper widgets.cpp:467
+Aimbot,Global / Targeting,"Checks (Jump, Smoke, Flash)",multiselect,combat_global.aimbot_checks.airborne;combat_global.aimbot_checks.smoke;combat_global.aimbot_checks.flashed,false; false; false (legit_checks defaults),,,Global profile,src/ui/menu/combat_widgets.cpp,10-18; caller src/ui/menu/aimbot_page.cpp:26
+Aimbot,Global / Targeting,"Hitboxes (Head, Body, Arms, Legs)",multiselect,combat_global.aimbot_hitbox_parts,aim_part::all (15),,,Global profile,src/ui/menu/aimbot_page.cpp,27; helper widgets.cpp:359
+Aimbot,Global / Targeting,FOV settings,popup_button,@ui.popup.open.fov,— (UI state only),,,Global profile,src/ui/menu/combat_widgets.cpp,78-101
+Aimbot,Global / Targeting / FOV,Mode,dropdown,combat_global.aimbot_fov_config.selection,target_distance (2); options Fixed/Distance/Target,,,Global profile; FOV popup,src/ui/menu/combat_widgets.cpp,81
+Aimbot,Global / Targeting / FOV,Radius,slider,combat_global.aimbot_fov,2 (global_settings),1,360,FOV mode = Fixed; Global profile,src/ui/menu/combat_widgets.cpp,84
+Aimbot,Global / Targeting / FOV,Max Radius (summary),slider,combat_global.aimbot_fov_config.target_near_fov,20.0 (target_near_fov default),2.0,45.0,FOV mode != Fixed; FOV popup,src/ui/menu/combat_widgets.cpp,88
+Aimbot,Global / Targeting / FOV,Advanced settings,popup_button,@ui.popup.open.fov_advanced,— (UI state only),,,Global profile; FOV mode != Fixed,src/ui/menu/combat_widgets.cpp,89-98
+Aimbot,Global / Targeting / FOV / Advanced,Full Size At,slider,combat_global.aimbot_fov_config.target_near_distance_m,2.5 m,0.5,10.0,FOV mode = Target; Advanced popup,src/ui/menu/combat_widgets.cpp,93
+Aimbot,Global / Targeting / FOV / Advanced,Max Radius,slider,combat_global.aimbot_fov_config.target_near_fov,20.0°,2.0,45.0,FOV mode = Target; Advanced popup,src/ui/menu/combat_widgets.cpp,94
+Aimbot,Global / Targeting / FOV / Advanced,Min Size At,slider,combat_global.aimbot_fov_config.target_far_distance_m,10.0 m,10.0,100.0,FOV mode = Target; Advanced popup,src/ui/menu/combat_widgets.cpp,95
+Aimbot,Global / Targeting / FOV / Advanced,Min Radius,slider,combat_global.aimbot_fov_config.target_far_fov,2.0°,0.25,15.0,FOV mode = Target; Advanced popup,src/ui/menu/combat_widgets.cpp,96
+Aimbot,Global / Targeting / FOV / Advanced,Falloff,slider,combat_global.aimbot_fov_config.target_distance_curve,1.0,0.25,4.0,FOV mode = Target; Advanced popup,src/ui/menu/combat_widgets.cpp,97
+Aimbot,Global / Targeting / FOV,Max Radius (summary),slider,combat_global.aimbot_fov_config.near_fov,2.0 (near_fov default),2.0,45.0,FOV mode = Distance; FOV popup,src/ui/menu/combat_widgets.cpp,88
+Aimbot,Global / Targeting / FOV / Advanced,Full Size At,slider,combat_global.aimbot_fov_config.near_distance_m,2.5 m,0.5,10.0,FOV mode = Distance; Advanced popup,src/ui/menu/combat_widgets.cpp,93
+Aimbot,Global / Targeting / FOV / Advanced,Max Radius,slider,combat_global.aimbot_fov_config.near_fov,2.0°,2.0,45.0,FOV mode = Distance; Advanced popup,src/ui/menu/combat_widgets.cpp,94
+Aimbot,Global / Targeting / FOV / Advanced,Min Size At,slider,combat_global.aimbot_fov_config.far_distance_m,10.0 m,10.0,100.0,FOV mode = Distance; Advanced popup,src/ui/menu/combat_widgets.cpp,95
+Aimbot,Global / Targeting / FOV / Advanced,Min Radius,slider,combat_global.aimbot_fov_config.far_fov,2.0°,0.25,15.0,FOV mode = Distance; Advanced popup,src/ui/menu/combat_widgets.cpp,96
+Aimbot,Global / Targeting / FOV / Advanced,Falloff,slider,combat_global.aimbot_fov_config.distance_curve,1.0,0.25,4.0,FOV mode = Distance; Advanced popup,src/ui/menu/combat_widgets.cpp,97
+Aimbot,Global / Targeting / FOV,Visualization (toggle + color picker),toggle_color_picker,combat_global.aimbot_draw_fov;combat_global.aimbot_fov_color,"true; rgba{217,217,217,125}",,,"Global profile; FOV popup; in overrides, draw/color are global",src/ui/menu/combat_widgets.cpp,100; caller src/ui/menu/aimbot_page.cpp:28
+Aimbot,Global / Targeting / Humanizer,Humanizer Profile,settings_popup_button,@ui.popup.open.humanizer_profile,— (UI state only),,,Global profile,src/ui/menu/combat_widgets.cpp,106
+Aimbot,Global / Targeting / Humanizer,Preview,preview,@ui.preview.humanizer,derived from amount/smoothing/profile; no persisted key,,,Humanizer Profile popup,src/ui/menu/combat_widgets.cpp,109
+Aimbot,Global / Targeting / Humanizer,Amount,slider,combat_global.aimbot_humanize,35,0,100,Humanizer Profile popup,src/ui/menu/combat_widgets.cpp,110
+Aimbot,Global / Targeting / Humanizer,Smoothing,slider,combat_global.aimbot_smoothing,5,0,50,Humanizer Profile popup,src/ui/menu/combat_widgets.cpp,111
+Aimbot,Global / Targeting / Humanizer,Motion settings,popup_button,@ui.popup.open.humanizer_motion,— (UI state only),,,Humanizer Profile popup,src/ui/menu/combat_widgets.cpp,112-119
+Aimbot,Global / Targeting / Humanizer / Motion,Gravity,slider,combat_global.aimbot_humanizer.gravity,9.0,0.0,20.0,Motion popup,src/ui/menu/combat_widgets.cpp,115
+Aimbot,Global / Targeting / Humanizer / Motion,Wind,slider,combat_global.aimbot_humanizer.wind,0.8,0.0,20.0,Motion popup,src/ui/menu/combat_widgets.cpp,116
+Aimbot,Global / Targeting / Humanizer / Motion,Max Step,slider,combat_global.aimbot_humanizer.max_step,24.0,1.0,90.0,Motion popup,src/ui/menu/combat_widgets.cpp,117
+Aimbot,Global / Targeting / Humanizer / Motion,Damping,slider,combat_global.aimbot_humanizer.damping,0.85,0.0,1.0,Motion popup,src/ui/menu/combat_widgets.cpp,118
+Aimbot,Global / Targeting / Humanizer,Behavior settings,popup_button,@ui.popup.open.humanizer_behavior,— (UI state only),,,Humanizer Profile popup,src/ui/menu/combat_widgets.cpp,120-131
+Aimbot,Global / Targeting / Humanizer / Behavior,Reaction Min,slider,combat_global.aimbot_humanizer.reaction_min_ms,25 ms,0,500,Behavior popup,src/ui/menu/combat_widgets.cpp,124
+Aimbot,Global / Targeting / Humanizer / Behavior,Reaction Max,slider,combat_global.aimbot_humanizer.reaction_max_ms,60 ms,0,750,Behavior popup,src/ui/menu/combat_widgets.cpp,125
+Aimbot,Global / Targeting / Humanizer / Behavior,Curve,slider,combat_global.aimbot_humanizer.curve,0.40,0.0,1.0,Behavior popup,src/ui/menu/combat_widgets.cpp,126
+Aimbot,Global / Targeting / Humanizer / Behavior,Overshoot Chance,slider,combat_global.aimbot_humanizer.overshoot_chance,5.0%,0.0,100.0,Behavior popup,src/ui/menu/combat_widgets.cpp,127
+Aimbot,Global / Targeting / Humanizer / Behavior,Overshoot Amount,slider,combat_global.aimbot_humanizer.overshoot_amount,0.04,0.0,1.0,Behavior popup,src/ui/menu/combat_widgets.cpp,128
+Aimbot,Global / Targeting / Humanizer / Behavior,Jitter,slider,combat_global.aimbot_humanizer.jitter,0.10,0.0,3.0,Behavior popup,src/ui/menu/combat_widgets.cpp,129
+Aimbot,Global / Targeting / Humanizer / Behavior,Deadzone,slider,combat_global.aimbot_humanizer.deadzone,0.25°,0.0,2.0,Behavior popup,src/ui/menu/combat_widgets.cpp,130
+Aimbot,Global / Targeting / Multi-Point,Multi-Point,toggle_popup,combat_global.aimbot_multipoint,true,,,Global profile,src/ui/menu/combat_widgets.cpp,137; caller src/ui/menu/aimbot_page.cpp:31
+Aimbot,Global / Targeting / Multi-Point,Multi-Point settings,popup_button,@ui.popup.open.multipoint,— (UI state only),,,Global profile,src/ui/menu/combat_widgets.cpp,137-152
+Aimbot,Global / Targeting / Multi-Point,Performance,dropdown,combat_global.aimbot_multipoint_config.performance,high_performance (0); High Performance/Medium/Low,,,Multi-Point popup,src/ui/menu/combat_widgets.cpp,141
+Aimbot,Global / Targeting / Multi-Point,Cap Points,toggle,combat_global.aimbot_multipoint_config.caps,true,,,Multi-Point popup,src/ui/menu/combat_widgets.cpp,146
+Aimbot,Global / Targeting / Multi-Point,Side Points,toggle,combat_global.aimbot_multipoint_config.sides,true,,,Multi-Point popup,src/ui/menu/combat_widgets.cpp,147
+Aimbot,Global / Targeting / Multi-Point,Display Multipoints,toggle,combat_global.aimbot_multipoint_config.display,false,,,Multi-Point popup,src/ui/menu/combat_widgets.cpp,148
+Aimbot,Global / Targeting / Multi-Point,Head Scale,slider,combat_global.aimbot_multipoint_config.head_scale,0.50,0.05,0.95,Multi-Point popup,src/ui/menu/combat_widgets.cpp,149
+Aimbot,Global / Targeting / Multi-Point,Body Scale,slider,combat_global.aimbot_multipoint_config.body_scale,0.50,0.05,0.95,Multi-Point popup,src/ui/menu/combat_widgets.cpp,150
+Aimbot,Global / Targeting / Multi-Point,Limbs Scale,slider,combat_global.aimbot_multipoint_config.limb_scale,0.50,0.05,0.95,Multi-Point popup,src/ui/menu/combat_widgets.cpp,151
+Aimbot,Global / Targeting / Prediction,Prediction,toggle_popup,combat_global.aimbot_prediction.enabled,true,,,Global profile,src/ui/menu/combat_widgets.cpp,43; caller src/ui/menu/aimbot_page.cpp:32
+Aimbot,Global / Targeting / Prediction,Prediction settings,popup_button,@ui.popup.open.prediction,— (UI state only),,,Global profile,src/ui/menu/combat_widgets.cpp,43-48
+Aimbot,Global / Targeting / Prediction,Max Horizon,slider,combat_global.aimbot_prediction.max_horizon_ms,120.0 ms,0.0,120.0,Prediction popup,src/ui/menu/combat_widgets.cpp,46
+Aimbot,Global / Targeting / Prediction,Acceleration,toggle,combat_global.aimbot_prediction.acceleration,false,,,Prediction popup,src/ui/menu/combat_widgets.cpp,47
+Aimbot,Global / Targeting,Lethal Only,toggle,combat_global.aimbot_lethal_only,true,,,Global profile,src/ui/menu/aimbot_page.cpp,33
+Aimbot,Global / Recoil Control,RCS,toggle_popup,combat_global.aimbot_rcs.enabled,false,,,Always (global profile),src/ui/menu/combat_widgets.cpp,157; caller src/ui/menu/aimbot_page.cpp:36
+Aimbot,Global / Recoil Control,RCS settings,popup_button,@ui.popup.open.rcs,— (UI state only),,,Global profile,src/ui/menu/combat_widgets.cpp,157-164
+Aimbot,Global / Recoil Control,Start Bullet,slider,combat_global.aimbot_rcs.start_bullet,2,1,10,RCS popup,src/ui/menu/combat_widgets.cpp,160
+Aimbot,Global / Recoil Control,Pitch Strength,slider,combat_global.aimbot_rcs.pitch,100.0%,0.0,200.0,RCS popup,src/ui/menu/combat_widgets.cpp,161
+Aimbot,Global / Recoil Control,Yaw Strength,slider,combat_global.aimbot_rcs.yaw,100.0%,0.0,200.0,RCS popup,src/ui/menu/combat_widgets.cpp,162
+Aimbot,Global / Recoil Control,Correction Time,slider,combat_global.aimbot_rcs.response_ms,35.0 ms,1.0,150.0,RCS popup,src/ui/menu/combat_widgets.cpp,163
+Aimbot,Global / Penetration,Only Visible,toggle,combat_global.aimbot_checks.walls,penetration (1) => toggle false,,,Aimbot enabled,src/ui/menu/combat_widgets.cpp,20-26; caller src/ui/menu/aimbot_page.cpp:41
+Aimbot,Global / Penetration,Min Damage,slider,combat_global.aimbot_min_damage,65.0,1.0,100.0,Aimbot enabled,src/ui/menu/aimbot_page.cpp,42
+Aimbot,Global / Penetration,Damage Override,toggle_popup,combat_global.aimbot_min_damage_override_enabled,true,,,Aimbot enabled,src/ui/menu/combat_widgets.cpp,59; caller src/ui/menu/aimbot_page.cpp:43-45
+Aimbot,Global / Penetration,Damage Override settings,popup_button,@ui.popup.open.aimbot_damage_override,— (UI state only),,,Aimbot enabled,src/ui/menu/combat_widgets.cpp,59-66
+Aimbot,Global / Penetration / Damage Override,Mode,dropdown,combat_global.aimbot_min_damage_override_mode,activation::hold (0); Hold/Always On/Toggle,,,Damage Override popup,src/ui/menu/combat_widgets.cpp,62
+Aimbot,Global / Penetration / Damage Override,Key,keybind,combat_global.aimbot_min_damage_override_key,0x05 (5),,,Damage Override popup; mode != Always On,src/ui/menu/combat_widgets.cpp,64
+Aimbot,Global / Penetration / Damage Override,Override Damage,slider,combat_global.aimbot_min_damage_override,10.0,1.0,100.0,Damage Override popup,src/ui/menu/combat_widgets.cpp,65
+Aimbot,Override tab,Inherit Global Settings,toggle,combat_overrides[*].use_global,true,,,Weapon group tab selected,src/ui/menu/aimbot_page.cpp,50-52
+Aimbot,Override / Targeting,"Checks (Jump, Smoke, Flash)",multiselect,combat_overrides[*].aimbot_checks.airborne;combat_overrides[*].aimbot_checks.smoke;combat_overrides[*].aimbot_checks.flashed,false; false; false (legit_checks defaults),,,Override tab; Inherit Global Settings is OFF and global aimbot is ON,src/ui/menu/combat_widgets.cpp,10-18; caller src/ui/menu/aimbot_page.cpp:57
+Aimbot,Override / Targeting,"Hitboxes (Head, Body, Arms, Legs)",multiselect,combat_overrides[*].aimbot_hitbox_parts,aim_part::all (15),,,Override tab; Inherit Global Settings is OFF and global aimbot is ON,src/ui/menu/aimbot_page.cpp,58; helper widgets.cpp:359
+Aimbot,Override / Targeting,FOV settings,popup_button,@ui.popup.open.fov,— (UI state only),,,Override tab; Inherit Global Settings is OFF and global aimbot is ON,src/ui/menu/combat_widgets.cpp,78-101
+Aimbot,Override / Targeting / FOV,Mode,dropdown,combat_overrides[*].aimbot_fov_config.selection,target_distance (2); options Fixed/Distance/Target,,,Override tab; Inherit Global Settings is OFF and global aimbot is ON; FOV popup,src/ui/menu/combat_widgets.cpp,81
+Aimbot,Override / Targeting / FOV,Radius,slider,combat_overrides[*].aimbot_fov,2 (global_settings),1,360,FOV mode = Fixed; Override tab; Inherit Global Settings is OFF and global aimbot is ON,src/ui/menu/combat_widgets.cpp,84
+Aimbot,Override / Targeting / FOV,Max Radius (summary),slider,combat_overrides[*].aimbot_fov_config.target_near_fov,20.0 (target_near_fov default),2.0,45.0,FOV mode != Fixed; FOV popup,src/ui/menu/combat_widgets.cpp,88
+Aimbot,Override / Targeting / FOV,Advanced settings,popup_button,@ui.popup.open.fov_advanced,— (UI state only),,,Override tab; Inherit Global Settings is OFF and global aimbot is ON; FOV mode != Fixed,src/ui/menu/combat_widgets.cpp,89-98
+Aimbot,Override / Targeting / FOV / Advanced,Full Size At,slider,combat_overrides[*].aimbot_fov_config.target_near_distance_m,2.5 m,0.5,10.0,FOV mode = Target; Advanced popup,src/ui/menu/combat_widgets.cpp,93
+Aimbot,Override / Targeting / FOV / Advanced,Max Radius,slider,combat_overrides[*].aimbot_fov_config.target_near_fov,20.0°,2.0,45.0,FOV mode = Target; Advanced popup,src/ui/menu/combat_widgets.cpp,94
+Aimbot,Override / Targeting / FOV / Advanced,Min Size At,slider,combat_overrides[*].aimbot_fov_config.target_far_distance_m,10.0 m,10.0,100.0,FOV mode = Target; Advanced popup,src/ui/menu/combat_widgets.cpp,95
+Aimbot,Override / Targeting / FOV / Advanced,Min Radius,slider,combat_overrides[*].aimbot_fov_config.target_far_fov,2.0°,0.25,15.0,FOV mode = Target; Advanced popup,src/ui/menu/combat_widgets.cpp,96
+Aimbot,Override / Targeting / FOV / Advanced,Falloff,slider,combat_overrides[*].aimbot_fov_config.target_distance_curve,1.0,0.25,4.0,FOV mode = Target; Advanced popup,src/ui/menu/combat_widgets.cpp,97
+Aimbot,Override / Targeting / FOV,Max Radius (summary),slider,combat_overrides[*].aimbot_fov_config.near_fov,2.0 (near_fov default),2.0,45.0,FOV mode = Distance; FOV popup,src/ui/menu/combat_widgets.cpp,88
+Aimbot,Override / Targeting / FOV / Advanced,Full Size At,slider,combat_overrides[*].aimbot_fov_config.near_distance_m,2.5 m,0.5,10.0,FOV mode = Distance; Advanced popup,src/ui/menu/combat_widgets.cpp,93
+Aimbot,Override / Targeting / FOV / Advanced,Max Radius,slider,combat_overrides[*].aimbot_fov_config.near_fov,2.0°,2.0,45.0,FOV mode = Distance; Advanced popup,src/ui/menu/combat_widgets.cpp,94
+Aimbot,Override / Targeting / FOV / Advanced,Min Size At,slider,combat_overrides[*].aimbot_fov_config.far_distance_m,10.0 m,10.0,100.0,FOV mode = Distance; Advanced popup,src/ui/menu/combat_widgets.cpp,95
+Aimbot,Override / Targeting / FOV / Advanced,Min Radius,slider,combat_overrides[*].aimbot_fov_config.far_fov,2.0°,0.25,15.0,FOV mode = Distance; Advanced popup,src/ui/menu/combat_widgets.cpp,96
+Aimbot,Override / Targeting / FOV / Advanced,Falloff,slider,combat_overrides[*].aimbot_fov_config.distance_curve,1.0,0.25,4.0,FOV mode = Distance; Advanced popup,src/ui/menu/combat_widgets.cpp,97
+Aimbot,Override / Targeting / FOV,Visualization (toggle + color picker),toggle_color_picker,combat_global.aimbot_draw_fov;combat_global.aimbot_fov_color,"true; rgba{217,217,217,125}",,,"Override tab; Inherit Global Settings is OFF and global aimbot is ON; FOV popup; in overrides, draw/color are global",src/ui/menu/combat_widgets.cpp,100; caller src/ui/menu/aimbot_page.cpp:59
+Aimbot,Override / Targeting / Humanizer,Humanizer Profile,settings_popup_button,@ui.popup.open.humanizer_profile,— (UI state only),,,Override tab; Inherit Global Settings is OFF and global aimbot is ON,src/ui/menu/combat_widgets.cpp,106
+Aimbot,Override / Targeting / Humanizer,Preview,preview,@ui.preview.humanizer,derived from amount/smoothing/profile; no persisted key,,,Humanizer Profile popup,src/ui/menu/combat_widgets.cpp,109
+Aimbot,Override / Targeting / Humanizer,Amount,slider,combat_overrides[*].aimbot_humanize,35,0,100,Humanizer Profile popup,src/ui/menu/combat_widgets.cpp,110
+Aimbot,Override / Targeting / Humanizer,Smoothing,slider,combat_overrides[*].aimbot_smoothing,5,0,50,Humanizer Profile popup,src/ui/menu/combat_widgets.cpp,111
+Aimbot,Override / Targeting / Humanizer,Motion settings,popup_button,@ui.popup.open.humanizer_motion,— (UI state only),,,Humanizer Profile popup,src/ui/menu/combat_widgets.cpp,112-119
+Aimbot,Override / Targeting / Humanizer / Motion,Gravity,slider,combat_overrides[*].aimbot_humanizer.gravity,9.0,0.0,20.0,Motion popup,src/ui/menu/combat_widgets.cpp,115
+Aimbot,Override / Targeting / Humanizer / Motion,Wind,slider,combat_overrides[*].aimbot_humanizer.wind,0.8,0.0,20.0,Motion popup,src/ui/menu/combat_widgets.cpp,116
+Aimbot,Override / Targeting / Humanizer / Motion,Max Step,slider,combat_overrides[*].aimbot_humanizer.max_step,24.0,1.0,90.0,Motion popup,src/ui/menu/combat_widgets.cpp,117
+Aimbot,Override / Targeting / Humanizer / Motion,Damping,slider,combat_overrides[*].aimbot_humanizer.damping,0.85,0.0,1.0,Motion popup,src/ui/menu/combat_widgets.cpp,118
+Aimbot,Override / Targeting / Humanizer,Behavior settings,popup_button,@ui.popup.open.humanizer_behavior,— (UI state only),,,Humanizer Profile popup,src/ui/menu/combat_widgets.cpp,120-131
+Aimbot,Override / Targeting / Humanizer / Behavior,Reaction Min,slider,combat_overrides[*].aimbot_humanizer.reaction_min_ms,25 ms,0,500,Behavior popup,src/ui/menu/combat_widgets.cpp,124
+Aimbot,Override / Targeting / Humanizer / Behavior,Reaction Max,slider,combat_overrides[*].aimbot_humanizer.reaction_max_ms,60 ms,0,750,Behavior popup,src/ui/menu/combat_widgets.cpp,125
+Aimbot,Override / Targeting / Humanizer / Behavior,Curve,slider,combat_overrides[*].aimbot_humanizer.curve,0.40,0.0,1.0,Behavior popup,src/ui/menu/combat_widgets.cpp,126
+Aimbot,Override / Targeting / Humanizer / Behavior,Overshoot Chance,slider,combat_overrides[*].aimbot_humanizer.overshoot_chance,5.0%,0.0,100.0,Behavior popup,src/ui/menu/combat_widgets.cpp,127
+Aimbot,Override / Targeting / Humanizer / Behavior,Overshoot Amount,slider,combat_overrides[*].aimbot_humanizer.overshoot_amount,0.04,0.0,1.0,Behavior popup,src/ui/menu/combat_widgets.cpp,128
+Aimbot,Override / Targeting / Humanizer / Behavior,Jitter,slider,combat_overrides[*].aimbot_humanizer.jitter,0.10,0.0,3.0,Behavior popup,src/ui/menu/combat_widgets.cpp,129
+Aimbot,Override / Targeting / Humanizer / Behavior,Deadzone,slider,combat_overrides[*].aimbot_humanizer.deadzone,0.25°,0.0,2.0,Behavior popup,src/ui/menu/combat_widgets.cpp,130
+Aimbot,Override / Targeting / Multi-Point,Multi-Point,toggle_popup,combat_overrides[*].aimbot_multipoint,true,,,Override tab; Inherit Global Settings is OFF and global aimbot is ON,src/ui/menu/combat_widgets.cpp,137; caller src/ui/menu/aimbot_page.cpp:62
+Aimbot,Override / Targeting / Multi-Point,Multi-Point settings,popup_button,@ui.popup.open.multipoint,— (UI state only),,,Override tab; Inherit Global Settings is OFF and global aimbot is ON,src/ui/menu/combat_widgets.cpp,137-152
+Aimbot,Override / Targeting / Multi-Point,Performance,dropdown,combat_overrides[*].aimbot_multipoint_config.performance,high_performance (0); High Performance/Medium/Low,,,Multi-Point popup,src/ui/menu/combat_widgets.cpp,141
+Aimbot,Override / Targeting / Multi-Point,Cap Points,toggle,combat_overrides[*].aimbot_multipoint_config.caps,true,,,Multi-Point popup,src/ui/menu/combat_widgets.cpp,146
+Aimbot,Override / Targeting / Multi-Point,Side Points,toggle,combat_overrides[*].aimbot_multipoint_config.sides,true,,,Multi-Point popup,src/ui/menu/combat_widgets.cpp,147
+Aimbot,Override / Targeting / Multi-Point,Display Multipoints,toggle,combat_overrides[*].aimbot_multipoint_config.display,false,,,Multi-Point popup,src/ui/menu/combat_widgets.cpp,148
+Aimbot,Override / Targeting / Multi-Point,Head Scale,slider,combat_overrides[*].aimbot_multipoint_config.head_scale,0.50,0.05,0.95,Multi-Point popup,src/ui/menu/combat_widgets.cpp,149
+Aimbot,Override / Targeting / Multi-Point,Body Scale,slider,combat_overrides[*].aimbot_multipoint_config.body_scale,0.50,0.05,0.95,Multi-Point popup,src/ui/menu/combat_widgets.cpp,150
+Aimbot,Override / Targeting / Multi-Point,Limbs Scale,slider,combat_overrides[*].aimbot_multipoint_config.limb_scale,0.50,0.05,0.95,Multi-Point popup,src/ui/menu/combat_widgets.cpp,151
+Aimbot,Override / Targeting / Prediction,Prediction,toggle_popup,combat_overrides[*].aimbot_prediction.enabled,true,,,Override tab; Inherit Global Settings is OFF and global aimbot is ON,src/ui/menu/combat_widgets.cpp,43; caller src/ui/menu/aimbot_page.cpp:63
+Aimbot,Override / Targeting / Prediction,Prediction settings,popup_button,@ui.popup.open.prediction,— (UI state only),,,Override tab; Inherit Global Settings is OFF and global aimbot is ON,src/ui/menu/combat_widgets.cpp,43-48
+Aimbot,Override / Targeting / Prediction,Max Horizon,slider,combat_overrides[*].aimbot_prediction.max_horizon_ms,120.0 ms,0.0,120.0,Prediction popup,src/ui/menu/combat_widgets.cpp,46
+Aimbot,Override / Targeting / Prediction,Acceleration,toggle,combat_overrides[*].aimbot_prediction.acceleration,false,,,Prediction popup,src/ui/menu/combat_widgets.cpp,47
+Aimbot,Override / Targeting,Lethal Only,toggle,combat_overrides[*].aimbot_lethal_only,true,,,Override tab; Inherit Global Settings is OFF and global aimbot is ON,src/ui/menu/aimbot_page.cpp,64
+Aimbot,Override / Recoil Control,RCS,toggle_popup,combat_overrides[*].aimbot_rcs.enabled,false,,,Override tab; Inherit Global Settings is OFF and global aimbot is ON,src/ui/menu/combat_widgets.cpp,157; caller src/ui/menu/aimbot_page.cpp:66
+Aimbot,Override / Recoil Control,RCS settings,popup_button,@ui.popup.open.rcs,— (UI state only),,,Override tab; Inherit Global Settings is OFF and global aimbot is ON,src/ui/menu/combat_widgets.cpp,157-164
+Aimbot,Override / Recoil Control,Start Bullet,slider,combat_overrides[*].aimbot_rcs.start_bullet,2,1,10,RCS popup,src/ui/menu/combat_widgets.cpp,160
+Aimbot,Override / Recoil Control,Pitch Strength,slider,combat_overrides[*].aimbot_rcs.pitch,100.0%,0.0,200.0,RCS popup,src/ui/menu/combat_widgets.cpp,161
+Aimbot,Override / Recoil Control,Yaw Strength,slider,combat_overrides[*].aimbot_rcs.yaw,100.0%,0.0,200.0,RCS popup,src/ui/menu/combat_widgets.cpp,162
+Aimbot,Override / Recoil Control,Correction Time,slider,combat_overrides[*].aimbot_rcs.response_ms,35.0 ms,1.0,150.0,RCS popup,src/ui/menu/combat_widgets.cpp,163
+Aimbot,Override / Penetration,Only Visible,toggle,combat_overrides[*].aimbot_checks.walls,penetration (1) => toggle false,,,Override tab; Inherit Global Settings OFF and global aimbot ON,src/ui/menu/combat_widgets.cpp,20-26; caller src/ui/menu/aimbot_page.cpp:70
+Aimbot,Override / Penetration,Min Damage,slider,combat_overrides[*].aimbot_min_damage,65.0,1.0,100.0,Override tab; Inherit Global Settings OFF and global aimbot ON,src/ui/menu/aimbot_page.cpp,71
+Triggerbot,Global / Triggerbot Core,Master Switch,toggle_popup,combat_global.triggerbot_enabled,true,,,Global profile,src/ui/menu/triggerbot_page.cpp,23; helper combat_widgets.cpp:51-54
+Triggerbot,Global / Triggerbot Core,Master Switch settings,popup_button,@ui.popup.open.trigger_master_switch,— (UI state only),,,Global profile,src/ui/menu/combat_widgets.cpp,53-54
+Triggerbot,Global / Triggerbot Core,Mode,dropdown,combat_global.triggerbot_activation_mode,activation::hold (0); Hold/Always On/Toggle,,,Master Switch popup,src/ui/menu/combat_widgets.cpp,53
+Triggerbot,Global / Triggerbot Core,Key,keybind,combat_global.triggerbot_key,0x43 (67),,,Triggerbot enabled; activation mode != Always On,src/ui/menu/triggerbot_page.cpp,26-27; helper widgets.cpp:467
+Triggerbot,Global / Triggerbot Core,"Checks (Jump, Smoke, Flash)",multiselect,combat_global.triggerbot_checks.airborne;combat_global.triggerbot_checks.smoke;combat_global.triggerbot_checks.flashed,false; false; false (legit_checks defaults),,,Triggerbot enabled,src/ui/menu/combat_widgets.cpp,10-18; caller src/ui/menu/triggerbot_page.cpp:28
+Triggerbot,Global / Triggerbot Core,Seed Type,dropdown,combat_global.triggerbot_seed_type,seed_mode::none (0); None/Restricted/Unrestricted,,,Triggerbot enabled,src/ui/menu/triggerbot_page.cpp,29
+Triggerbot,Global / Triggerbot Core,"Hitboxes (Head, Body, Arms, Legs)",multiselect,combat_global.triggerbot_hitbox_parts,aim_part::head (1),,,Triggerbot enabled,src/ui/menu/triggerbot_page.cpp,30; helper widgets.cpp:359
+Triggerbot,Global / Triggerbot Core,Reaction Time (ms),slider,combat_global.triggerbot_reaction_time,0 ms,0,400,Triggerbot enabled; seed type != None,src/ui/menu/triggerbot_page.cpp,32
+Triggerbot,Global / Triggerbot Core,Hitchance,slider,combat_global.triggerbot_hitchance,75.0%,0.0,100.0,Triggerbot enabled; seed type = None,src/ui/menu/triggerbot_page.cpp,35
+Triggerbot,Global / Triggerbot Core / Auto Stop,Auto Stop,toggle_popup,misc.m_auto_stop.enabled,false (misc::auto_stop),,,Triggerbot enabled; seed type = None,src/ui/menu/triggerbot_page.cpp,39-45
+Triggerbot,Global / Triggerbot Core / Auto Stop,Auto Stop settings,popup_button,@ui.popup.open.auto_stop,— (UI state only),,,Triggerbot enabled; seed type = None,src/ui/menu/popups.cpp,356-378
+Triggerbot,Global / Triggerbot Core / Auto Stop,Stop Speed,slider,misc.m_auto_stop.stop_speed,8.0 u/s,0.0,150.0,Auto Stop popup,src/ui/menu/triggerbot_page.cpp,43
+Triggerbot,Global / Triggerbot Core / Auto Stop,Shoot Speed,slider,misc.m_auto_stop.required_shoot_speed,34.0%,0.0,60.0,Auto Stop popup,src/ui/menu/triggerbot_page.cpp,44
+Triggerbot,Global / Triggerbot Core / Shot Timing,Shot Timing settings,popup_button,@ui.popup.open.trigger_shot_timing,— (UI state only),,,Triggerbot enabled; seed type = None,src/ui/menu/combat_widgets.cpp,30-38
+Triggerbot,Global / Triggerbot Core / Shot Timing,Delay Before,slider,combat_global.triggerbot_delay,10 ms,0,500,Shot Timing popup; Triggerbot enabled; seed type = None,src/ui/menu/combat_widgets.cpp,33
+Triggerbot,Global / Triggerbot Core / Shot Timing,Randomize,slider,combat_global.triggerbot_randomize_ms,5 ms,0,100,Shot Timing popup; Triggerbot enabled; seed type = None,src/ui/menu/combat_widgets.cpp,34
+Triggerbot,Global / Triggerbot Core / Shot Timing,Outlier Chance,slider,combat_global.triggerbot_outlier_chance,3.0%,0.0,25.0,Shot Timing popup; Triggerbot enabled; seed type = None,src/ui/menu/combat_widgets.cpp,35
+Triggerbot,Global / Triggerbot Core / Shot Timing,Outlier Delay,slider,combat_global.triggerbot_outlier_delay_ms,20 ms,0,500,Shot Timing popup; Triggerbot enabled; seed type = None,src/ui/menu/combat_widgets.cpp,36
+Triggerbot,Global / Triggerbot Core / Shot Timing,Delay After,slider,combat_global.triggerbot_delay_after_ms,100 ms,0,1000,Shot Timing popup; Triggerbot enabled; seed type = None,src/ui/menu/combat_widgets.cpp,37
+Triggerbot,Global / Triggerbot Core,Predictive,toggle,combat_global.triggerbot_predictive,true,,,Triggerbot enabled,src/ui/menu/triggerbot_page.cpp,51
+Triggerbot,Global / Triggerbot Core,Lethal Only,toggle,combat_global.triggerbot_lethal_only,false,,,Triggerbot enabled,src/ui/menu/triggerbot_page.cpp,52
+Triggerbot,Global / Triggerbot Core,Show Decision Debug,toggle,misc.trigger_debug_overlay,false,,,Triggerbot enabled,src/ui/menu/triggerbot_page.cpp,53
+Triggerbot,Global / Penetration,Only Visible,toggle,combat_global.triggerbot_checks.walls,penetration (1) => toggle false,,,Triggerbot enabled,src/ui/menu/combat_widgets.cpp,20-26; caller src/ui/menu/triggerbot_page.cpp:60
+Triggerbot,Global / Penetration,Min Damage,slider,combat_global.triggerbot_min_damage,90.0,1.0,100.0,Triggerbot enabled,src/ui/menu/triggerbot_page.cpp,61
+Triggerbot,Global / Penetration,Damage Override,toggle_popup,combat_global.triggerbot_min_damage_override_enabled,false,,,Triggerbot enabled,src/ui/menu/combat_widgets.cpp,59; caller src/ui/menu/triggerbot_page.cpp:62-65
+Triggerbot,Global / Penetration,Damage Override settings,popup_button,@ui.popup.open.triggerbot_damage_override,— (UI state only),,,Triggerbot enabled,src/ui/menu/combat_widgets.cpp,59-66
+Triggerbot,Global / Penetration / Damage Override,Mode,dropdown,combat_global.triggerbot_min_damage_override_mode,activation::hold (0); Hold/Always On/Toggle,,,Damage Override popup,src/ui/menu/combat_widgets.cpp,62
+Triggerbot,Global / Penetration / Damage Override,Key,keybind,combat_global.triggerbot_min_damage_override_key,0 (VK 0),,,Damage Override popup; mode != Always On,src/ui/menu/combat_widgets.cpp,64
+Triggerbot,Global / Penetration / Damage Override,Override Damage,slider,combat_global.triggerbot_min_damage_override,1.0,1.0,100.0,Damage Override popup,src/ui/menu/combat_widgets.cpp,65
+Triggerbot,Override tab,Inherit Global Settings,toggle,combat_overrides[*].use_global,true,,,Weapon group tab selected,src/ui/menu/triggerbot_page.cpp,70-72
+Triggerbot,Override / Triggerbot Core,"Checks (Jump, Smoke, Flash)",multiselect,combat_overrides[*].triggerbot_checks.airborne;combat_overrides[*].triggerbot_checks.smoke;combat_overrides[*].triggerbot_checks.flashed,false; false; false (legit_checks defaults),,,Override tab; Inherit Global Settings is OFF and global triggerbot is ON,src/ui/menu/combat_widgets.cpp,10-18; caller src/ui/menu/triggerbot_page.cpp:79
+Triggerbot,Override / Triggerbot Core,Seed Type,dropdown,combat_overrides[*].triggerbot_seed_type,seed_mode::none (0); None/Restricted/Unrestricted,,,Override tab; Inherit Global Settings is OFF and global triggerbot is ON,src/ui/menu/triggerbot_page.cpp,80
+Triggerbot,Override / Triggerbot Core,"Hitboxes (Head, Body, Arms, Legs)",multiselect,combat_overrides[*].triggerbot_hitbox_parts,aim_part::head (1),,,Override tab; Inherit Global Settings is OFF and global triggerbot is ON,src/ui/menu/triggerbot_page.cpp,81; helper widgets.cpp:359
+Triggerbot,Override / Triggerbot Core,Reaction Time (ms),slider,combat_overrides[*].triggerbot_reaction_time,0 ms,0,400,Override tab; Inherit Global Settings is OFF and global triggerbot is ON; seed type != None,src/ui/menu/triggerbot_page.cpp,84
+Triggerbot,Override / Triggerbot Core,Hitchance,slider,combat_overrides[*].triggerbot_hitchance,75.0%,0.0,100.0,Override tab; Inherit Global Settings is OFF and global triggerbot is ON; seed type = None,src/ui/menu/triggerbot_page.cpp,88
+Triggerbot,Override / Triggerbot Core / Shot Timing,Shot Timing settings,popup_button,@ui.popup.open.trigger_shot_timing,— (UI state only),,,Override tab; Inherit Global Settings is OFF and global triggerbot is ON; seed type = None,src/ui/menu/combat_widgets.cpp,30-38
+Triggerbot,Override / Triggerbot Core / Shot Timing,Delay Before,slider,combat_overrides[*].triggerbot_delay,10 ms,0,500,Shot Timing popup; Override tab; Inherit Global Settings is OFF and global triggerbot is ON; seed type = None,src/ui/menu/combat_widgets.cpp,33
+Triggerbot,Override / Triggerbot Core / Shot Timing,Randomize,slider,combat_overrides[*].triggerbot_randomize_ms,5 ms,0,100,Shot Timing popup; Override tab; Inherit Global Settings is OFF and global triggerbot is ON; seed type = None,src/ui/menu/combat_widgets.cpp,34
+Triggerbot,Override / Triggerbot Core / Shot Timing,Outlier Chance,slider,combat_overrides[*].triggerbot_outlier_chance,3.0%,0.0,25.0,Shot Timing popup; Override tab; Inherit Global Settings is OFF and global triggerbot is ON; seed type = None,src/ui/menu/combat_widgets.cpp,35
+Triggerbot,Override / Triggerbot Core / Shot Timing,Outlier Delay,slider,combat_overrides[*].triggerbot_outlier_delay_ms,20 ms,0,500,Shot Timing popup; Override tab; Inherit Global Settings is OFF and global triggerbot is ON; seed type = None,src/ui/menu/combat_widgets.cpp,36
+Triggerbot,Override / Triggerbot Core / Shot Timing,Delay After,slider,combat_overrides[*].triggerbot_delay_after_ms,100 ms,0,1000,Shot Timing popup; Override tab; Inherit Global Settings is OFF and global triggerbot is ON; seed type = None,src/ui/menu/combat_widgets.cpp,37
+Triggerbot,Override / Triggerbot Core,Predictive,toggle,combat_overrides[*].triggerbot_predictive,true,,,Override tab; Inherit Global Settings is OFF and global triggerbot is ON,src/ui/menu/triggerbot_page.cpp,94
+Triggerbot,Override / Triggerbot Core,Lethal Only,toggle,combat_overrides[*].triggerbot_lethal_only,false,,,Override tab; Inherit Global Settings is OFF and global triggerbot is ON,src/ui/menu/triggerbot_page.cpp,95
+Triggerbot,Override / Penetration,Only Visible,toggle,combat_overrides[*].triggerbot_checks.walls,penetration (1) => toggle false,,,Override tab; Inherit Global Settings is OFF and global triggerbot is ON,src/ui/menu/combat_widgets.cpp,20-26; caller src/ui/menu/triggerbot_page.cpp:100
+Triggerbot,Override / Penetration,Min Damage,slider,combat_overrides[*].triggerbot_min_damage,90.0,1.0,100.0,Override tab; Inherit Global Settings is OFF and global triggerbot is ON,src/ui/menu/triggerbot_page.cpp,101
+Aimbot,Global / Targeting / FOV,Saturation / Value area,color_picker_area,combat_global.aimbot_fov_color,rgba color default in paired Visualization row,0,1,Aimbot enabled; FOV popup; color swatch clicked,src/ui/menu/popups.cpp,157-165; caller src/ui/menu/aimbot_page.cpp:28
+Aimbot,Global / Targeting / FOV,Hue strip,color_picker_area,combat_global.aimbot_fov_color,rgba color default in paired Visualization row,0,1,Aimbot enabled; FOV popup; color swatch clicked,src/ui/menu/popups.cpp,188-197; caller src/ui/menu/aimbot_page.cpp:28
+Aimbot,Global / Targeting / FOV,Alpha strip,color_picker_area,combat_global.aimbot_fov_color,rgba color default in paired Visualization row,0,1,Aimbot enabled; FOV popup; color swatch clicked,src/ui/menu/popups.cpp,204-222; caller src/ui/menu/aimbot_page.cpp:28
+Aimbot,Override / Targeting / FOV,Saturation / Value area,color_picker_area,combat_global.aimbot_fov_color,rgba color default in paired Visualization row,0,1,Override tab; Inherit Global Settings OFF and global aimbot ON; FOV popup; color swatch clicked,src/ui/menu/popups.cpp,157-165; caller src/ui/menu/aimbot_page.cpp:59
+Aimbot,Override / Targeting / FOV,Hue strip,color_picker_area,combat_global.aimbot_fov_color,rgba color default in paired Visualization row,0,1,Override tab; Inherit Global Settings OFF and global aimbot ON; FOV popup; color swatch clicked,src/ui/menu/popups.cpp,188-197; caller src/ui/menu/aimbot_page.cpp:59
+Aimbot,Override / Targeting / FOV,Alpha strip,color_picker_area,combat_global.aimbot_fov_color,rgba color default in paired Visualization row,0,1,Override tab; Inherit Global Settings OFF and global aimbot ON; FOV popup; color swatch clicked,src/ui/menu/popups.cpp,204-222; caller src/ui/menu/aimbot_page.cpp:59
+Aimbot,Global / Targeting / FOV,Open color picker,color_picker_button,@ui.popup.open.aimbot_fov_color,— (UI state only),,,Aimbot enabled; FOV popup,src/ui/menu/widgets.cpp,82-91; caller src/ui/menu/aimbot_page.cpp:28
+Aimbot,Override / Targeting / FOV,Open color picker,color_picker_button,@ui.popup.open.aimbot_fov_color,— (UI state only),,,Override tab; Inherit Global Settings OFF and global aimbot ON; FOV popup,src/ui/menu/widgets.cpp,82-91; caller src/ui/menu/aimbot_page.cpp:59

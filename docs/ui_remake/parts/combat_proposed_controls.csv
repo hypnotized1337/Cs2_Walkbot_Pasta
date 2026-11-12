@@ -1,0 +1,12 @@
+page,section,label,widget_type,config_key,default,min,max,condition,source_file,source_line
+Aimbot,Checks,Flash Threshold,slider,combat_global.aimbot_checks.flash_threshold_percent,85.0f,0,100,new control (no old UI); Global profile; flash check enabled; blindness percentage,,
+Aimbot,Checks,Flash Threshold,slider,combat_overrides[*].aimbot_checks.flash_threshold_percent,85.0f,0,100,new control (no old UI); Override profile; Inherit Global Settings OFF; flash check enabled; blindness percentage,,
+Triggerbot,Checks,Flash Threshold,slider,combat_global.triggerbot_checks.flash_threshold_percent,85.0f,0,100,new control (no old UI); Global profile; flash check enabled; blindness percentage,,
+Triggerbot,Checks,Flash Threshold,slider,combat_overrides[*].triggerbot_checks.flash_threshold_percent,85.0f,0,100,new control (no old UI); Override profile; Inherit Global Settings OFF; flash check enabled; blindness percentage,,
+Triggerbot,Revolver,Pre-Cock,toggle,combat_global.triggerbot_revolver_pre_cock,false,,,new control (no old UI); Global profile; revolver path; release margin is milliseconds,,
+Triggerbot,Revolver,Release Margin,slider,combat_global.triggerbot_revolver_release_margin_ms,16,1,60,new control (no old UI); Global profile; revolver path; release margin is milliseconds,,
+Triggerbot,Revolver,Pre-Cock,toggle,combat_overrides[*].triggerbot_revolver_pre_cock,false,,,new control (no old UI); Override profile; Inherit Global Settings OFF; revolver path; release margin is milliseconds,,
+Triggerbot,Revolver,Release Margin,slider,combat_overrides[*].triggerbot_revolver_release_margin_ms,16,1,60,new control (no old UI); Override profile; Inherit Global Settings OFF; revolver path; release margin is milliseconds,,
+Aimbot,Penetration Crosshair,Enable,toggle,combat_global.penetration_crosshair,false,,,new control (no old UI); Global profile,,
+Aimbot,Penetration Crosshair,Can Penetrate,color_picker,combat_global.penetration_color_yes,"[0,255,0,255]",,,new control (no old UI); Global profile,,
+Aimbot,Penetration Crosshair,Cannot Penetrate,color_picker,combat_global.penetration_color_no,"[255,0,0,255]",,,new control (no old UI); Global profile,,

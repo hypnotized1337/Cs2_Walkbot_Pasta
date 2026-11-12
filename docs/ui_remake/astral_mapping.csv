@@ -1,0 +1,38 @@
+fork_page,fork_control,this_project_key,status
+Legit (7-group template),Group selector,combat_overrides[*] (profile group; group taxonomy differs),needs my decision
+Legit (7-group template),Weapon selector,—,no matching feature
+Legit (7-group template),Main / Override weapon,combat_overrides[*].use_global (inverse/inheritance and per-group scope differ),needs my decision
+Legit (7-group template),Main / Ignore if,"combat_global.aimbot_checks.{airborne,flashed,smoke} / combat_overrides[*].aimbot_checks.* (Astral also has High speed and Jumping)",needs my decision
+Legit (7-group template),Main / Wall penetration,combat_global.aimbot_checks.walls / combat_overrides[*].aimbot_checks.walls (Vesta supports block/penetration/ignore),needs my decision
+Legit (7-group template),Main / Minimum damage,combat_global.aimbot_min_damage / combat_overrides[*].aimbot_min_damage,bound
+Legit (7-group template),Main / Backtrack,—,no matching feature
+Legit (7-group template),Main / Backtrack / Maximum time,—,no matching feature
+Legit (7-group template),Main / Max aim time,—,no matching feature
+Legit (7-group template),Main / Target swap delay,—,no matching feature
+Legit (7-group template),Trigger bot / Enable,combat_global.triggerbot_enabled (global only; Vesta has no per-group enable key),needs my decision
+Legit (7-group template),Trigger bot / Hitboxes,"combat_global.triggerbot_hitbox_parts / combat_overrides[*].triggerbot_hitbox_parts (Astral includes Feet; Vesta supports Head, Body, Arms, Legs)",needs my decision
+Legit (7-group template),Trigger bot / Overshoot,—,no matching feature
+Legit (7-group template),Trigger bot / Overshoot / Amount,—,no matching feature
+Legit (7-group template),Trigger bot / Spread adjustment,—,no matching feature
+Legit (7-group template),Trigger bot / Spread adjustment / Mode,—,no matching feature
+Legit (7-group template),Trigger bot / Spread adjustment / Limited,—,no matching feature
+Legit (7-group template),Trigger bot / Wall penetration,combat_global.triggerbot_checks.walls / combat_overrides[*].triggerbot_checks.walls (Vesta supports block/penetration/ignore),needs my decision
+Legit (7-group template),Trigger bot / Minimum damage,combat_global.triggerbot_min_damage / combat_overrides[*].triggerbot_min_damage,bound
+Legit (7-group template),Trigger bot / Hit chance,combat_global.triggerbot_hitchance / combat_overrides[*].triggerbot_hitchance,bound
+Legit (7-group template),Trigger bot / Reaction time,combat_global.triggerbot_reaction_time / combat_overrides[*].triggerbot_reaction_time (Astral 0–500 ms; Vesta 0–400 ms),needs my decision
+Legit (7-group template),Trigger bot / Hitbox extension,—,no matching feature
+Legit (7-group template),Aim assist / Assist mode,—,no matching feature
+Legit (7-group template),Aim assist / Enable,combat_global.aimbot_enabled (global only; Vesta has no per-group enable key),needs my decision
+Legit (7-group template),Aim assist / Hitboxes,"combat_global.aimbot_hitbox_parts / combat_overrides[*].aimbot_hitbox_parts (Astral includes Feet; Vesta supports Head, Body, Arms, Legs)",needs my decision
+Legit (7-group template),Aim assist / FOV style,combat_global.aimbot_fov_config.selection / combat_overrides[*].aimbot_fov_config.selection (Astral 2D/3D/Dynamic differs from Vesta Fixed/Distance/Target),needs my decision
+Legit (7-group template),Aim assist / Maximum distance,combat_global.aimbot_fov_config.*_distance_m / combat_overrides[*].aimbot_fov_config.*_distance_m (Astral uses inches; Vesta uses meters),needs my decision
+Legit (7-group template),Aim assist / Maximum FOV,combat_global.aimbot_fov_config.*_fov / combat_overrides[*].aimbot_fov_config.*_fov (Astral 0–30 degrees; Vesta controls have different ranges and mode-dependent meanings),needs my decision
+Legit (7-group template),Aim assist / Mouse redirection,—,no matching feature
+Legit (7-group template),Aim assist / Mouse redirection / Strength,—,no matching feature
+Legit (7-group template),Aim assist / Smoothing,combat_global.aimbot_smoothing / combat_overrides[*].aimbot_smoothing (no matching enable key),needs my decision
+Legit (7-group template),Aim assist / Smoothing / Amount,combat_global.aimbot_smoothing / combat_overrides[*].aimbot_smoothing (Astral 0–100; Vesta 0–50),needs my decision
+Legit (7-group template),Aim assist / Smoothing / Curve,combat_global.aimbot_humanizer.curve / combat_overrides[*].aimbot_humanizer.curve (Astral named curves do not match Vesta numeric curve),needs my decision
+Legit (7-group template),Aim assist / Recoil control,combat_global.aimbot_rcs.enabled / combat_overrides[*].aimbot_rcs.enabled,bound
+Legit (7-group template),Aim assist / Recoil control / Vertical,combat_global.aimbot_rcs.pitch / combat_overrides[*].aimbot_rcs.pitch (Astral 0–100%; Vesta 0–200%),needs my decision
+Legit (7-group template),Aim assist / Recoil control / Horizontal,combat_global.aimbot_rcs.yaw / combat_overrides[*].aimbot_rcs.yaw (Astral 0–100%; Vesta 0–200%),needs my decision
+Legit (7-group template),Aim assist / Quick stop,—,no matching feature

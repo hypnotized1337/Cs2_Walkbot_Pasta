@@ -29,6 +29,11 @@
 #include <features/chams/texture.hpp>
 #include <render/text/localization.hpp>
 #include <ui/overlay/overlay.hpp>
+#if defined(VESTA_ASTRAL_MENU)
+#include <ui/astral/fonts.hpp>
+#include <ui/astral/widgets.hpp>
+#include <ui/menu/internal.hpp>
+#endif
 #include <ui/overlay/imgui_frame.hpp>
 #include <render/text/esp_text.hpp>
 #include <resources/fonts/notosans_medium.hpp>
@@ -583,6 +588,13 @@ void overlay_t::build_frame()
 
     ImGui_ImplDX11_NewFrame();
     ui::imgui_frame::begin(static_cast<float>(m_render_width), static_cast<float>(m_render_height));
+#if defined(VESTA_ASTRAL_MENU)
+    auto& astral_widgets = ui::astral::widgets::get();
+    astral_widgets.scale = 1.0f;
+    astral_widgets.icons.collect();
+    const auto display_size = ImGui::GetIO().DisplaySize;
+    astral_widgets.icons.build(ui::menu::detail::current_menu_scale(display_size.x, display_size.y));
+#endif
     route_overlay_input();
 
     ImGui::NewFrame();
@@ -879,6 +891,9 @@ void overlay_t::shutdown() noexcept
         render::esp_text::release();
         ImGui_ImplDX11_Shutdown();
         m_imgui_dx11_active = false;
+#if defined(VESTA_ASTRAL_MENU)
+        ui::astral::widgets::shutdown();
+#endif
     }
     if (m_imgui_win32_active)
     {
@@ -1948,6 +1963,17 @@ bool overlay_t::initialize_graphics()
         const auto dpi_window = m_window_tracker.target() ? m_window_tracker.target() : m_hwnd;
         m_ui_dpi_scale = std::clamp(static_cast<float>(::GetDpiForWindow(dpi_window)) / 96.0f, 1.0f, 1.5f);
         const auto menu_dpi_scale = m_ui_dpi_scale;
+#if defined(VESTA_ASTRAL_MENU)
+        auto& astral_widgets = ui::astral::widgets::get();
+        astral_widgets.scale = 1.0f;
+        astral_widgets.fonts.regular = ui::astral::add_inter_semibold(*atlas, astral_widgets.m.font_body);
+        astral_widgets.fonts.bold = ui::astral::add_inter_bold(*atlas, astral_widgets.m.font_header);
+        if (!astral_widgets.fonts.regular || !astral_widgets.fonts.bold)
+        {
+            game::bound_memory().log.warning("failed to load embedded Astral Inter fonts.");
+            return false;
+        }
+#endif
         m_fonts.menu_regular_12 =
             render::draw::add_font_from_file("C:/Windows/Fonts/segoeui.ttf", 16.0f * menu_dpi_scale);
         // The source menu is DejaVuSans 13 at 524x412. This shell is 1.5x that size, so 18px keeps the source's

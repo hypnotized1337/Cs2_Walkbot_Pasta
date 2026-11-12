@@ -14,9 +14,45 @@
 #include <d3dcompiler.h>
 
 #include <ui/menu/internal.hpp>
+#if defined(VESTA_ASTRAL_MENU)
+#include <ui/astral/draw.hpp>
+#include <ui/astral/widgets.hpp>
+#endif
 
 namespace ui::menu::detail
 {
+#if defined(VESTA_ASTRAL_MENU)
+namespace
+{
+bool widget_disabled()
+{
+    const auto* context = ImGui::GetCurrentContext();
+    return context && (context->CurrentItemFlags & ImGuiItemFlags_Disabled) != 0;
+}
+
+const ui::astral::palette_t& astral_palette()
+{
+    return ui::astral::widgets::get().pal;
+}
+
+float astral_animation(ImGuiID id, const char* salt, float target, float initial = 0.0f)
+{
+    return ui::astral::widgets::animate(id, salt, target, 12.0f, initial);
+}
+
+void draw_astral_frame(ImDrawList* draw, ImVec2 min, ImVec2 max, ImGuiID id, bool hovered, bool held)
+{
+    const auto& palette = astral_palette();
+    const auto hover = astral_animation(id, "legacy_hover", hovered ? 1.0f : 0.0f);
+    const auto press = astral_animation(id, "legacy_press", held ? 1.0f : 0.0f);
+    auto fill = ui::astral::draw::mix(palette.frame, palette.frame_hover, hover);
+    fill = ui::astral::draw::mix(fill, palette.frame_active, press);
+    draw->AddRectFilled(min, max, packed(fill), 4.0f);
+    draw->AddRect(min, max, packed(ui::astral::draw::fade(palette.popup_border, 0.8f + hover * 0.2f)), 4.0f, 0, 1.0f);
+}
+}
+#endif
+
 void from_imvec(const ImVec4& value, render::draw::rgba& color)
 {
     color.r = static_cast<std::uint8_t>(std::clamp(value.x, 0.0f, 1.0f) * 255.0f + 0.5f);
@@ -30,17 +66,50 @@ void toggle_control(bool& value)
     // Source checkbox: a square with a one-pixel black ring, no travel or thumb. The hit target stays 24px high
     // so it lines up with the neighbouring fields.
     constexpr auto hit_size = ImVec2{20.0f, 24.0f};
+#if !defined(VESTA_ASTRAL_MENU)
     constexpr auto box_size = 20.0f;
+#endif
     if (ImGui::InvisibleButton("##toggle", hit_size))
         value = !value;
 
     const auto raw_min = ImGui::GetItemRectMin();
+#if defined(VESTA_ASTRAL_MENU)
+    constexpr auto astral_box_size = 16.0f;
+    const auto box_min = ImVec2{raw_min.x + 2.0f, raw_min.y + 4.0f};
+    const auto box_max = box_min + ImVec2{astral_box_size, astral_box_size};
+#else
     const auto box_min = ImVec2{raw_min.x, raw_min.y + 2.0f};
     const auto box_max = box_min + ImVec2{box_size, box_size};
+#endif
     const auto hovered = ImGui::IsItemHovered();
     pointer_cursor_if_hovered();
     auto* draw = ImGui::GetWindowDrawList();
 
+#if defined(VESTA_ASTRAL_MENU)
+    const auto id = ImGui::GetItemID();
+    const auto& palette = astral_palette();
+    const auto hover = astral_animation(id, "toggle_hover", hovered ? 1.0f : 0.0f);
+    const auto checked = astral_animation(id, "toggle_checked", value ? 1.0f : 0.0f);
+    const auto rounding = ui::astral::widgets::get().m.checkbox_rounding;
+    const auto fill = ui::astral::draw::mix(palette.frame, palette.frame_hover, hover);
+    if (checked > 0.01f)
+    {
+        const auto glow_color = packed(ui::astral::draw::fade(palette.accent, checked * 0.22f));
+        ui::astral::draw::glow(draw, box_min, box_max, rounding, glow_color, ui::astral::widgets::px(9.0f));
+        draw->AddRectFilled(box_min, box_max, IM_COL32_WHITE, rounding);
+        const auto accent_top = packed(ui::astral::draw::fade(palette.accent_top, checked));
+        const auto accent_bottom = packed(ui::astral::draw::fade(palette.accent_bottom, checked));
+        ui::astral::draw::rect_gradient(draw, box_min, box_max, accent_top, accent_bottom, rounding,
+                                        ImDrawFlags_RoundCornersAll, false);
+        const auto check_color = packed(ui::astral::draw::fade(palette.text, checked));
+        ui::astral::draw::check(draw, box_min, 16.0f, check_color, 1.6f, checked);
+    }
+    else
+    {
+        draw->AddRectFilled(box_min, box_max, packed(fill), rounding);
+        draw->AddRect(box_min, box_max, packed(palette.popup_border), rounding, 0, 1.0f);
+    }
+#else
     draw->AddRectFilled(box_min, box_max, packed(k_outline_dark));
     const auto inner_min = box_min + ImVec2{1.0f, 1.0f};
     const auto inner_max = box_max - ImVec2{1.0f, 1.0f};
@@ -57,6 +126,7 @@ void toggle_control(bool& value)
                       1.0f);
     }
     draw->AddRect(box_min, box_max, hovered ? packed(k_border_light) : packed(k_outline_dark), 0.0f, 0, 1.0f);
+#endif
 }
 
 void toggle_row(const char* label, bool& value)
@@ -78,13 +148,26 @@ void toggle_color_row(const char* label, bool& value, render::draw::rgba& color)
     const auto options_min = ImGui::GetItemRectMin();
     const auto options_max = ImGui::GetItemRectMax();
     pointer_cursor_if_hovered();
+#if defined(VESTA_ASTRAL_MENU)
+    const auto disabled = widget_disabled();
+    if (!disabled && ImGui::IsItemClicked())
+#else
     if (ImGui::IsItemClicked())
+#endif
         ImGui::OpenPopup("##picker");
 
     auto* draw = ImGui::GetWindowDrawList();
     const auto dot_y = (options_min.y + options_max.y) * 0.5f;
+#if defined(VESTA_ASTRAL_MENU)
+    const auto& palette = astral_palette();
+    const auto hover = astral_animation(ImGui::GetItemID(), "color_options_hover",
+                                        ImGui::IsItemHovered() ? 1.0f : 0.0f);
+    const auto dot_color = packed(ui::astral::draw::mix(palette.text_dim, palette.accent, hover));
+#else
+    const auto dot_color = IM_COL32_WHITE;
+#endif
     for (int dot = 0; dot < 3; ++dot)
-        draw->AddCircleFilled({options_min.x + 4.0f + dot * 6.0f, dot_y}, 1.0f, IM_COL32_WHITE, 10);
+        draw->AddCircleFilled({options_min.x + 4.0f + dot * 6.0f, dot_y}, 1.0f, dot_color, 10);
 
     ImGui::SetCursorScreenPos({options_max.x + spacing, options_min.y});
     toggle_control(value);
@@ -157,7 +240,12 @@ void select_row(const char* label, int& value, std::span<const char* const> opti
     begin_row(label, control_width);
     const auto index = std::clamp(value, 0, static_cast<int>(options.size()) - 1);
     ImGui::InvisibleButton("##select_button", {control_width, control_height});
+#if defined(VESTA_ASTRAL_MENU)
+    const auto disabled = widget_disabled();
+    if (!disabled && ImGui::IsItemClicked())
+#else
     if (ImGui::IsItemClicked())
+#endif
     {
         ImGui::OpenPopup("##options");
     }
@@ -168,11 +256,17 @@ void select_row(const char* label, int& value, std::span<const char* const> opti
     const auto button_max = ImGui::GetItemRectMax();
 
     auto* button_draw = ImGui::GetWindowDrawList();
+#if defined(VESTA_ASTRAL_MENU)
+    const auto button_id = ImGui::GetItemID();
+    draw_astral_frame(button_draw, button_min, button_max, button_id, button_hovered || popup_open,
+                      ImGui::IsItemActive());
+#else
     button_draw->AddRectFilled(button_min, button_max, packed(k_outline_dark), 2.0f);
     button_draw->AddRectFilled(button_min + ImVec2{1.0f, 1.0f}, button_max - ImVec2{1.0f, 1.0f},
                                packed(button_hovered ? k_bg_hover : k_bg_panel), 1.0f);
     button_draw->AddRect(button_min, button_max,
                          packed(button_hovered || popup_open ? k_border_light : k_border), 2.0f, 0, 1.0f);
+#endif
     const auto* selected_text = render::localization::tr(options[index]);
     const auto label_size = ImGui::CalcTextSize(selected_text);
     // Clipped short of the arrow so an over-long value cannot spill past the
@@ -202,6 +296,9 @@ void select_row(const char* label, int& value, std::span<const char* const> opti
     if (ImGui::BeginPopup("##options", ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse |
                                            ImGuiWindowFlags_NoBackground))
     {
+#if defined(VESTA_ASTRAL_MENU)
+        ImGui::BeginDisabled(disabled);
+#endif
         const auto popup_min = ImGui::GetWindowPos();
         const auto popup_max = ImVec2{popup_min.x + ImGui::GetWindowSize().x, popup_min.y + ImGui::GetWindowSize().y};
         auto* popup_draw = ImGui::GetWindowDrawList();
@@ -219,6 +316,25 @@ void select_row(const char* label, int& value, std::span<const char* const> opti
             const auto option_min = ImGui::GetItemRectMin();
             const auto option_max = ImGui::GetItemRectMax();
             const auto selected = value == i;
+#if defined(VESTA_ASTRAL_MENU)
+            const auto& palette = astral_palette();
+            const auto row_hover = astral_animation(ImGui::GetItemID(), "option_hover", option_hovered ? 1.0f : 0.0f);
+            if (selected)
+            {
+                popup_draw->AddRectFilled(option_min, option_max, IM_COL32_WHITE, 3.0f);
+                ui::astral::draw::rect_gradient(popup_draw, option_min, option_max, packed(palette.accent_top),
+                                                packed(palette.accent_bottom), 3.0f, ImDrawFlags_RoundCornersAll, true);
+            }
+            else if (row_hover > 0.01f)
+            {
+                popup_draw->AddRectFilled(option_min, option_max,
+                                          packed(ui::astral::draw::fade(palette.frame_hover, row_hover)), 3.0f);
+            }
+            const auto text_pos = ImVec2{option_min.x + 8.0f,
+                                         option_min.y + (option_height - ImGui::GetTextLineHeight()) * 0.5f};
+            popup_draw->AddText(text_pos, packed(selected ? palette.text : palette.text_soft),
+                                render::localization::tr(options[i]));
+#else
             if (selected)
             {
                 const auto top = IM_COL32(184, 184, 210, 255);
@@ -232,6 +348,7 @@ void select_row(const char* label, int& value, std::span<const char* const> opti
             popup_draw->AddText({option_min.x + 7.0f, option_min.y + (option_height - ImGui::GetTextLineHeight()) * 0.5f},
                                 selected ? IM_COL32(12, 12, 14, 255) : packed(k_text_main),
                                 render::localization::tr(options[i]));
+#endif
             if (ImGui::IsItemClicked())
             {
                 value = i;
@@ -239,6 +356,9 @@ void select_row(const char* label, int& value, std::span<const char* const> opti
             }
             ImGui::PopID();
         }
+#if defined(VESTA_ASTRAL_MENU)
+        ImGui::EndDisabled();
+#endif
         ImGui::EndPopup();
     }
     ImGui::PopStyleVar(4);
@@ -269,7 +389,12 @@ void multiselect_row(const char* label, int& mask, std::span<const std::pair<con
     }
 
     ImGui::InvisibleButton("##multiselect_button", {control_width, control_height});
+#if defined(VESTA_ASTRAL_MENU)
+    const auto disabled = widget_disabled();
+    if (!disabled && ImGui::IsItemClicked())
+#else
     if (ImGui::IsItemClicked())
+#endif
         ImGui::OpenPopup("##multi_options");
     pointer_cursor_if_hovered();
     const auto button_hovered = ImGui::IsItemHovered();
@@ -278,11 +403,17 @@ void multiselect_row(const char* label, int& mask, std::span<const std::pair<con
     const auto button_max = ImGui::GetItemRectMax();
 
     auto* button_draw = ImGui::GetWindowDrawList();
+#if defined(VESTA_ASTRAL_MENU)
+    const auto button_id = ImGui::GetItemID();
+    draw_astral_frame(button_draw, button_min, button_max, button_id, button_hovered || popup_open,
+                      ImGui::IsItemActive());
+#else
     button_draw->AddRectFilled(button_min, button_max, packed(k_outline_dark), 2.0f);
     button_draw->AddRectFilled(button_min + ImVec2{1.0f, 1.0f}, button_max - ImVec2{1.0f, 1.0f},
                                packed(button_hovered ? k_bg_hover : k_bg_panel), 1.0f);
     button_draw->AddRect(button_min, button_max,
                          packed(button_hovered || popup_open ? k_border_light : k_border), 2.0f, 0, 1.0f);
+#endif
     const auto label_size = ImGui::CalcTextSize(summary.c_str());
     button_draw->PushClipRect(button_min, {button_max.x - 20.0f, button_max.y}, true);
     button_draw->AddText({button_min.x + 7.0f, button_min.y + (control_height - label_size.y) * 0.5f},
@@ -312,6 +443,9 @@ void multiselect_row(const char* label, int& mask, std::span<const std::pair<con
     if (ImGui::BeginPopup("##multi_options", ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse |
                                                  ImGuiWindowFlags_NoBackground))
     {
+#if defined(VESTA_ASTRAL_MENU)
+        ImGui::BeginDisabled(disabled);
+#endif
         const auto popup_min = ImGui::GetWindowPos();
         const auto popup_max = ImVec2{popup_min.x + ImGui::GetWindowSize().x, popup_min.y + ImGui::GetWindowSize().y};
         auto* popup_draw = ImGui::GetWindowDrawList();
@@ -329,6 +463,42 @@ void multiselect_row(const char* label, int& mask, std::span<const std::pair<con
             const auto option_max = ImGui::GetItemRectMax();
             const auto bit = options[i].second;
             const auto selected = (mask & bit) != 0;
+#if defined(VESTA_ASTRAL_MENU)
+            const auto& palette = astral_palette();
+            const auto hover = astral_animation(ImGui::GetItemID(), "multi_hover", option_hovered ? 1.0f : 0.0f);
+            if (hover > 0.01f)
+                popup_draw->AddRectFilled(option_min, option_max,
+                                          packed(ui::astral::draw::fade(palette.frame_hover, hover)), 3.0f);
+
+            const auto check_min = ImVec2{option_min.x + 6.0f, option_min.y + 4.0f};
+            constexpr auto check_size = 16.0f;
+            const auto rounding = ui::astral::widgets::get().m.checkbox_rounding;
+            const auto check_id = ImGui::GetItemID();
+            const auto check_progress = astral_animation(check_id, "multi_checked", selected ? 1.0f : 0.0f);
+            const auto check_end = check_min + ImVec2{check_size, check_size};
+            const auto check_fill = ui::astral::draw::mix(palette.frame, palette.accent, check_progress);
+            if (check_progress > 0.01f)
+            {
+                ui::astral::draw::glow(popup_draw, check_min, check_end, rounding,
+                                       packed(ui::astral::draw::fade(palette.accent, check_progress * 0.2f)), 6.0f);
+                popup_draw->AddRectFilled(check_min, check_end, IM_COL32_WHITE, rounding);
+                ui::astral::draw::rect_gradient(popup_draw, check_min, check_end,
+                                                packed(ui::astral::draw::fade(palette.accent_top, check_progress)),
+                                                packed(ui::astral::draw::fade(palette.accent_bottom, check_progress)),
+                                                rounding, ImDrawFlags_RoundCornersAll, false);
+            }
+            else
+            {
+                popup_draw->AddRectFilled(check_min, check_end, packed(check_fill), rounding);
+            }
+            popup_draw->AddRect(check_min, check_end, packed(palette.popup_border), rounding, 0, 1.0f);
+            ui::astral::draw::check(popup_draw, check_min, check_size,
+                                    packed(ui::astral::draw::fade(palette.text, check_progress)), 1.5f, check_progress);
+            popup_draw->AddText({option_min.x + 29.0f,
+                                 option_min.y + (option_height - ImGui::GetTextLineHeight()) * 0.5f},
+                                packed(selected ? palette.text : palette.text_soft),
+                                render::localization::tr(options[i].first));
+#else
             if (option_hovered)
                 popup_draw->AddRectFilled(option_min, option_max, packed(k_bg_hover));
 
@@ -345,10 +515,14 @@ void multiselect_row(const char* label, int& mask, std::span<const std::pair<con
                                  option_min.y + (option_height - ImGui::GetTextLineHeight()) * 0.5f},
                                 packed(selected ? k_text_main : k_text_muted),
                                 render::localization::tr(options[i].first));
+#endif
             if (ImGui::IsItemClicked())
                 mask ^= bit; // toggle, keep popup open
             ImGui::PopID();
         }
+#if defined(VESTA_ASTRAL_MENU)
+        ImGui::EndDisabled();
+#endif
         ImGui::EndPopup();
     }
     ImGui::PopStyleVar(4);
@@ -410,10 +584,14 @@ bool button_row(const char* label, const char* text, row_action_icon icon)
     const auto bmax = ImGui::GetItemRectMax();
 
     auto* dl = ImGui::GetWindowDrawList();
+#if defined(VESTA_ASTRAL_MENU)
+    draw_astral_frame(dl, bmin, bmax, ImGui::GetItemID(), hovered, held);
+#else
     dl->AddRectFilled(bmin, bmax, packed(k_outline_dark), 2.0f);
     dl->AddRectFilled(bmin + ImVec2{1.0f, 1.0f}, bmax - ImVec2{1.0f, 1.0f},
                       packed(held ? k_accent : hovered ? k_bg_hover : k_bg_panel), 1.0f);
     dl->AddRect(bmin, bmax, packed(hovered ? k_border_light : k_border), 2.0f, 0, 1.0f);
+#endif
 
     const auto* button_text = render::localization::tr(text);
     const auto ts = ImGui::CalcTextSize(button_text);
@@ -421,8 +599,12 @@ bool button_row(const char* label, const char* text, row_action_icon icon)
     const auto content_width = ts.x + (has_icon ? 18.0f : 0.0f);
     const auto content_x = bmin.x + (control_width - content_width) * 0.5f;
     const auto press_offset = ImVec2{0.0f, held ? 1.0f : 0.0f};
+#if defined(VESTA_ASTRAL_MENU)
+    const auto content_color = packed(astral_palette().text);
+#else
     const auto content_color = packed(held ? ImVec4{20.0f / 255.0f, 20.0f / 255.0f, 22.0f / 255.0f, 1.0f}
                                            : k_text_main);
+#endif
     if (has_icon)
     {
         const auto icon_center = ImVec2{content_x + 6.0f, bmin.y + control_height * 0.5f} + press_offset;
@@ -449,6 +631,22 @@ void text_input_row(const char* label, char* buffer, std::size_t size)
 {
     constexpr auto control_width = 170.0f;
     begin_row(label, control_width);
+#if defined(VESTA_ASTRAL_MENU)
+    const auto& palette = astral_palette();
+    ImGui::PushStyleColor(ImGuiCol_FrameBg, palette.frame);
+    ImGui::PushStyleColor(ImGuiCol_FrameBgHovered, palette.frame_hover);
+    ImGui::PushStyleColor(ImGuiCol_FrameBgActive, palette.frame_active);
+    ImGui::PushStyleColor(ImGuiCol_Border, palette.popup_border);
+    ImGui::PushStyleColor(ImGuiCol_Text, palette.text);
+    ImGui::PushStyleColor(ImGuiCol_TextSelectedBg, palette.accent);
+    ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, ui::astral::widgets::get().m.frame_rounding);
+    ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 1.0f);
+    ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, {8.0f, 4.0f});
+    ImGui::SetNextItemWidth(control_width);
+    ImGui::InputText("##text_input", buffer, size, ImGuiInputTextFlags_CallbackCharFilter, filter_filename_char);
+    ImGui::PopStyleVar(3);
+    ImGui::PopStyleColor(6);
+#else
     ImGui::PushStyleColor(ImGuiCol_FrameBg, k_bg_panel);
     ImGui::PushStyleColor(ImGuiCol_FrameBgHovered, k_bg_hover);
     ImGui::PushStyleColor(ImGuiCol_FrameBgActive, k_bg_hover);
@@ -461,6 +659,7 @@ void text_input_row(const char* label, char* buffer, std::size_t size)
     ImGui::InputText("##text_input", buffer, size, ImGuiInputTextFlags_CallbackCharFilter, filter_filename_char);
     ImGui::PopStyleVar(3);
     ImGui::PopStyleColor(5);
+#endif
     end_row();
 }
 
@@ -470,12 +669,25 @@ void keybind_row(const char* label, int& value, bool keyboard_only, bool game_co
     begin_row(label, control_width);
     const auto listening = g_listening_key == &value;
     const auto pulse = listening ? 0.8f + std::sin(static_cast<float>(ImGui::GetTime()) * 6.28318f) * 0.2f : 1.0f;
+#if defined(VESTA_ASTRAL_MENU)
+    const auto& palette = astral_palette();
+    const auto listening_fill = ui::astral::draw::mix(palette.frame, palette.accent, 0.26f);
+    const auto listening_color = ImVec4{listening_fill.x, listening_fill.y, listening_fill.z, pulse};
+    ImGui::PushStyleColor(ImGuiCol_Button, listening ? listening_color : palette.frame);
+    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, listening ? palette.accent : palette.frame_hover);
+    ImGui::PushStyleColor(ImGuiCol_ButtonActive, palette.frame_active);
+    ImGui::PushStyleColor(ImGuiCol_Border, palette.popup_border);
+    ImGui::PushStyleColor(ImGuiCol_Text, palette.text);
+    ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, ui::astral::widgets::get().m.frame_rounding);
+    ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 1.0f);
+#else
     ImGui::PushStyleColor(ImGuiCol_Button, listening ? ImVec4{k_accent.x, k_accent.y, k_accent.z, pulse} : k_bg_panel);
     ImGui::PushStyleColor(ImGuiCol_ButtonHovered, listening ? k_accent : k_bg_hover);
     ImGui::PushStyleColor(ImGuiCol_ButtonActive, k_bg_hover);
     ImGui::PushStyleColor(ImGuiCol_Border, k_border);
     ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 2.0f);
     ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 1.0f);
+#endif
     const auto text = listening ? std::string("...") : std::format("[ {} ]", key_name(value));
 
     if (ImGui::Button(text.c_str(), {control_width, 24.0f}) && !listening)
@@ -485,10 +697,21 @@ void keybind_row(const char* label, int& value, bool keyboard_only, bool game_co
         g_listening_armed = false;
     }
     pointer_cursor_if_hovered();
+#if defined(VESTA_ASTRAL_MENU)
+    const auto disabled = widget_disabled();
+#endif
     ImGui::PopStyleVar(2);
+#if defined(VESTA_ASTRAL_MENU)
+    ImGui::PopStyleColor(5);
+#else
     ImGui::PopStyleColor(4);
+#endif
 
+#if defined(VESTA_ASTRAL_MENU)
+    if (!disabled && g_listening_key == &value && ImGui::GetFrameCount() > g_listening_start_frame)
+#else
     if (g_listening_key == &value && ImGui::GetFrameCount() > g_listening_start_frame)
+#endif
     {
         if (!g_listening_armed)
         {
@@ -524,7 +747,12 @@ void color_row(const char* label, render::draw::rgba& color)
     const auto picker_id = ImGui::GetID("##picker");
     ImGui::InvisibleButton("##preview", {32.0f, 24.0f});
     pointer_cursor_if_hovered();
+#if defined(VESTA_ASTRAL_MENU)
+    const auto disabled = widget_disabled();
+    if (!disabled && ImGui::IsItemClicked())
+#else
     if (ImGui::IsItemClicked())
+#endif
         ImGui::OpenPopup("##picker");
 
     const auto hovered = ImGui::IsItemHovered();
@@ -533,6 +761,15 @@ void color_row(const char* label, render::draw::rgba& color)
     const auto preview_min = ImVec2{item_min.x + 1.0f, item_min.y + 4.0f};
     const auto preview_max = ImVec2{item_max.x - 1.0f, item_max.y - 4.0f};
     auto* draw = ImGui::GetWindowDrawList();
+#if defined(VESTA_ASTRAL_MENU)
+    const auto& palette = astral_palette();
+    const auto rounding = ui::astral::widgets::get().m.checkbox_rounding;
+    ui::astral::draw::checkerboard(draw, preview_min, preview_max, 5.0f, packed(palette.frame), packed(palette.panel));
+    draw->AddRectFilled(preview_min, preview_max, packed(to_imvec(color)), rounding);
+    const auto hover = astral_animation(ImGui::GetItemID(), "color_hover", hovered ? 1.0f : 0.0f);
+    draw->AddRect(preview_min, preview_max, packed(hover > 0.01f ? palette.accent : palette.popup_border), rounding, 0,
+                  1.0f + hover * 0.5f);
+#else
     draw->AddRectFilled(preview_min, preview_max, IM_COL32(150, 150, 150, 255));
     for (int y = 0; y < 2; ++y)
     {
@@ -545,6 +782,7 @@ void color_row(const char* label, render::draw::rgba& color)
     }
     draw->AddRectFilled(preview_min, preview_max, packed(to_imvec(color)));
     draw->AddRect(preview_min, preview_max, hovered ? IM_COL32_WHITE : packed(k_outline_dark), 0.0f, 0, 1.0f);
+#endif
 
     color_picker_popup(color, item_min, item_max, picker_id);
     end_row();

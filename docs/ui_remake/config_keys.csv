@@ -1,0 +1,983 @@
+key,type,default,has_menu_control,control_label
+combat_global.aimbot_activation_mode,number,1,yes,Aimbot / Global / Targeting / Mode
+combat_global.aimbot_autowall,boolean,true,no,
+combat_global.aimbot_checks.airborne,boolean,false,yes,"Aimbot / Global / Targeting / Checks (Jump, Smoke, Flash)"
+combat_global.aimbot_checks.flash_threshold,number,85.0f,no,
+combat_global.aimbot_checks.flash_threshold_percent,number,85.0f,no,
+combat_global.aimbot_checks.flashed,boolean,false,yes,"Aimbot / Global / Targeting / Checks (Jump, Smoke, Flash)"
+combat_global.aimbot_checks.smoke,boolean,false,yes,"Aimbot / Global / Targeting / Checks (Jump, Smoke, Flash)"
+combat_global.aimbot_checks.walls,number,1,yes,Aimbot / Global / Penetration / Only Visible
+combat_global.aimbot_draw_fov,boolean,true,yes,Aimbot / Global / Targeting / FOV / Visualization (toggle + color picker) | Aimbot / Override / Targeting / FOV / Visualization (toggle + color picker)
+combat_global.aimbot_enabled,boolean,false,yes,Aimbot / Global / Targeting / Master Switch
+combat_global.aimbot_fov,number,2,yes,Aimbot / Global / Targeting / FOV / Radius
+combat_global.aimbot_fov_color.a,number,125,yes,Aimbot / Global / Targeting / FOV / Visualization (toggle + color picker) | Aimbot / Override / Targeting / FOV / Visualization (toggle + color picker) | Aimbot / Global / Targeting / FOV / Saturation / Value area | Aimbot / Global / Targeting / FOV / Hue strip | Aimbot / Global / Targeting / FOV / Alpha strip | Aimbot / Override / Targeting / FOV / Saturation / Value area | Aimbot / Override / Targeting / FOV / Hue strip | Aimbot / Override / Targeting / FOV / Alpha strip
+combat_global.aimbot_fov_color.b,number,217,yes,Aimbot / Global / Targeting / FOV / Visualization (toggle + color picker) | Aimbot / Override / Targeting / FOV / Visualization (toggle + color picker) | Aimbot / Global / Targeting / FOV / Saturation / Value area | Aimbot / Global / Targeting / FOV / Hue strip | Aimbot / Global / Targeting / FOV / Alpha strip | Aimbot / Override / Targeting / FOV / Saturation / Value area | Aimbot / Override / Targeting / FOV / Hue strip | Aimbot / Override / Targeting / FOV / Alpha strip
+combat_global.aimbot_fov_color.g,number,217,yes,Aimbot / Global / Targeting / FOV / Visualization (toggle + color picker) | Aimbot / Override / Targeting / FOV / Visualization (toggle + color picker) | Aimbot / Global / Targeting / FOV / Saturation / Value area | Aimbot / Global / Targeting / FOV / Hue strip | Aimbot / Global / Targeting / FOV / Alpha strip | Aimbot / Override / Targeting / FOV / Saturation / Value area | Aimbot / Override / Targeting / FOV / Hue strip | Aimbot / Override / Targeting / FOV / Alpha strip
+combat_global.aimbot_fov_color.r,number,217,yes,Aimbot / Global / Targeting / FOV / Visualization (toggle + color picker) | Aimbot / Override / Targeting / FOV / Visualization (toggle + color picker) | Aimbot / Global / Targeting / FOV / Saturation / Value area | Aimbot / Global / Targeting / FOV / Hue strip | Aimbot / Global / Targeting / FOV / Alpha strip | Aimbot / Override / Targeting / FOV / Saturation / Value area | Aimbot / Override / Targeting / FOV / Hue strip | Aimbot / Override / Targeting / FOV / Alpha strip
+combat_global.aimbot_fov_config.distance_curve,number,1.0f,yes,Aimbot / Global / Targeting / FOV / Advanced / Falloff
+combat_global.aimbot_fov_config.draw_target_point,boolean,true,no,
+combat_global.aimbot_fov_config.far_distance_m,number,10.0f,yes,Aimbot / Global / Targeting / FOV / Advanced / Min Size At
+combat_global.aimbot_fov_config.far_fov,number,2.0f,yes,Aimbot / Global / Targeting / FOV / Advanced / Min Radius
+combat_global.aimbot_fov_config.near_distance_m,number,2.5f,yes,Aimbot / Global / Targeting / FOV / Advanced / Full Size At
+combat_global.aimbot_fov_config.near_fov,number,2.0f,yes,Aimbot / Global / Targeting / FOV / Max Radius (summary) | Aimbot / Global / Targeting / FOV / Advanced / Max Radius
+combat_global.aimbot_fov_config.selection,number,2,yes,Aimbot / Global / Targeting / FOV / Mode
+combat_global.aimbot_fov_config.target_distance_curve,number,1.0f,yes,Aimbot / Global / Targeting / FOV / Advanced / Falloff
+combat_global.aimbot_fov_config.target_far_distance_m,number,10.0f,yes,Aimbot / Global / Targeting / FOV / Advanced / Min Size At
+combat_global.aimbot_fov_config.target_far_fov,number,2.0f,yes,Aimbot / Global / Targeting / FOV / Advanced / Min Radius
+combat_global.aimbot_fov_config.target_near_distance_m,number,2.5f,yes,Aimbot / Global / Targeting / FOV / Advanced / Full Size At
+combat_global.aimbot_fov_config.target_near_fov,number,20.0f,yes,Aimbot / Global / Targeting / FOV / Max Radius (summary) | Aimbot / Global / Targeting / FOV / Advanced / Max Radius
+combat_global.aimbot_fov_config.visualization,number,0,no,
+combat_global.aimbot_hitbox_parts,number,15,yes,"Aimbot / Global / Targeting / Hitboxes (Head, Body, Arms, Legs)"
+combat_global.aimbot_humanize,number,35,yes,Aimbot / Global / Targeting / Humanizer / Amount
+combat_global.aimbot_humanizer.curve,number,0.40f,yes,Aimbot / Global / Targeting / Humanizer / Behavior / Curve
+combat_global.aimbot_humanizer.damping,number,0.85f,yes,Aimbot / Global / Targeting / Humanizer / Motion / Damping
+combat_global.aimbot_humanizer.deadzone,number,0.25f,yes,Aimbot / Global / Targeting / Humanizer / Behavior / Deadzone
+combat_global.aimbot_humanizer.gravity,number,9.0f,yes,Aimbot / Global / Targeting / Humanizer / Motion / Gravity
+combat_global.aimbot_humanizer.jitter,number,0.10f,yes,Aimbot / Global / Targeting / Humanizer / Behavior / Jitter
+combat_global.aimbot_humanizer.max_step,number,24.0f,yes,Aimbot / Global / Targeting / Humanizer / Motion / Max Step
+combat_global.aimbot_humanizer.overshoot_amount,number,0.04f,yes,Aimbot / Global / Targeting / Humanizer / Behavior / Overshoot Amount
+combat_global.aimbot_humanizer.overshoot_chance,number,5.0f,yes,Aimbot / Global / Targeting / Humanizer / Behavior / Overshoot Chance
+combat_global.aimbot_humanizer.reaction_max_ms,number,60,yes,Aimbot / Global / Targeting / Humanizer / Behavior / Reaction Max
+combat_global.aimbot_humanizer.reaction_min_ms,number,25,yes,Aimbot / Global / Targeting / Humanizer / Behavior / Reaction Min
+combat_global.aimbot_humanizer.wind,number,0.8f,yes,Aimbot / Global / Targeting / Humanizer / Motion / Wind
+combat_global.aimbot_key,number,67,yes,Aimbot / Global / Targeting / Key
+combat_global.aimbot_lethal_only,boolean,true,yes,Aimbot / Global / Targeting / Lethal Only
+combat_global.aimbot_min_damage,number,65.0f,yes,Aimbot / Global / Penetration / Min Damage
+combat_global.aimbot_min_damage_override,number,10.0f,yes,Aimbot / Global / Penetration / Damage Override / Override Damage
+combat_global.aimbot_min_damage_override_enabled,boolean,true,yes,Aimbot / Global / Penetration / Damage Override
+combat_global.aimbot_min_damage_override_key,number,5,yes,Aimbot / Global / Penetration / Damage Override / Key
+combat_global.aimbot_min_damage_override_mode,number,1,yes,Aimbot / Global / Penetration / Damage Override / Mode
+combat_global.aimbot_multipoint,boolean,true,yes,Aimbot / Global / Targeting / Multi-Point / Multi-Point
+combat_global.aimbot_multipoint_config.body_scale,number,0.50f,yes,Aimbot / Global / Targeting / Multi-Point / Body Scale
+combat_global.aimbot_multipoint_config.caps,boolean,true,yes,Aimbot / Global / Targeting / Multi-Point / Cap Points
+combat_global.aimbot_multipoint_config.display,boolean,false,yes,Aimbot / Global / Targeting / Multi-Point / Display Multipoints
+combat_global.aimbot_multipoint_config.head_scale,number,0.50f,yes,Aimbot / Global / Targeting / Multi-Point / Head Scale
+combat_global.aimbot_multipoint_config.limb_scale,number,0.50f,yes,Aimbot / Global / Targeting / Multi-Point / Limbs Scale
+combat_global.aimbot_multipoint_config.performance,number,0,yes,Aimbot / Global / Targeting / Multi-Point / Performance
+combat_global.aimbot_multipoint_config.sides,boolean,true,yes,Aimbot / Global / Targeting / Multi-Point / Side Points
+combat_global.aimbot_prediction.acceleration,boolean,false,yes,Aimbot / Global / Targeting / Prediction / Acceleration
+combat_global.aimbot_prediction.enabled,boolean,true,yes,Aimbot / Global / Targeting / Prediction / Prediction
+combat_global.aimbot_prediction.max_horizon_ms,number,120.0f,yes,Aimbot / Global / Targeting / Prediction / Max Horizon
+combat_global.aimbot_predictive,boolean,false,no,
+combat_global.aimbot_rcs.enabled,boolean,false,yes,Aimbot / Global / Recoil Control / RCS
+combat_global.aimbot_rcs.pitch,number,100.0f,yes,Aimbot / Global / Recoil Control / Pitch Strength
+combat_global.aimbot_rcs.response_ms,number,35.0f,yes,Aimbot / Global / Recoil Control / Correction Time
+combat_global.aimbot_rcs.start_bullet,number,2,yes,Aimbot / Global / Recoil Control / Start Bullet
+combat_global.aimbot_rcs.yaw,number,100.0f,yes,Aimbot / Global / Recoil Control / Yaw Strength
+combat_global.aimbot_recoil_sync,boolean,false,no,
+combat_global.aimbot_smoothing,number,5,yes,Aimbot / Global / Targeting / Humanizer / Smoothing
+combat_global.aimbot_visible_only,boolean,true,no,
+combat_global.penetration_color_no.a,number,255,no,
+combat_global.penetration_color_no.b,number,0,no,
+combat_global.penetration_color_no.g,number,0,no,
+combat_global.penetration_color_no.r,number,255,no,
+combat_global.penetration_color_yes.a,number,255,no,
+combat_global.penetration_color_yes.b,number,0,no,
+combat_global.penetration_color_yes.g,number,255,no,
+combat_global.penetration_color_yes.r,number,0,no,
+combat_global.penetration_crosshair,boolean,false,no,
+combat_global.triggerbot_activation_mode,number,1,yes,Triggerbot / Global / Triggerbot Core / Mode
+combat_global.triggerbot_autostop,boolean,false,no,
+combat_global.triggerbot_autowall,boolean,true,no,
+combat_global.triggerbot_checks.airborne,boolean,false,yes,"Triggerbot / Global / Triggerbot Core / Checks (Jump, Smoke, Flash)"
+combat_global.triggerbot_checks.flash_threshold,number,85.0f,no,
+combat_global.triggerbot_checks.flash_threshold_percent,number,85.0f,no,
+combat_global.triggerbot_checks.flashed,boolean,false,yes,"Triggerbot / Global / Triggerbot Core / Checks (Jump, Smoke, Flash)"
+combat_global.triggerbot_checks.smoke,boolean,false,yes,"Triggerbot / Global / Triggerbot Core / Checks (Jump, Smoke, Flash)"
+combat_global.triggerbot_checks.walls,number,1,yes,Triggerbot / Global / Penetration / Only Visible
+combat_global.triggerbot_delay,number,10,yes,Triggerbot / Global / Triggerbot Core / Shot Timing / Delay Before
+combat_global.triggerbot_delay_after_ms,number,100,yes,Triggerbot / Global / Triggerbot Core / Shot Timing / Delay After
+combat_global.triggerbot_enabled,boolean,true,yes,Triggerbot / Global / Triggerbot Core / Master Switch
+combat_global.triggerbot_hitbox_parts,number,1,yes,"Triggerbot / Global / Triggerbot Core / Hitboxes (Head, Body, Arms, Legs)"
+combat_global.triggerbot_hitchance,number,75.0f,yes,Triggerbot / Global / Triggerbot Core / Hitchance
+combat_global.triggerbot_key,number,67,yes,Triggerbot / Global / Triggerbot Core / Key
+combat_global.triggerbot_lethal_only,boolean,false,yes,Triggerbot / Global / Triggerbot Core / Lethal Only
+combat_global.triggerbot_min_damage,number,90.0f,yes,Triggerbot / Global / Penetration / Min Damage
+combat_global.triggerbot_min_damage_override,number,1.0f,yes,Triggerbot / Global / Penetration / Damage Override / Override Damage
+combat_global.triggerbot_min_damage_override_enabled,boolean,false,yes,Triggerbot / Global / Penetration / Damage Override
+combat_global.triggerbot_min_damage_override_key,number,0,yes,Triggerbot / Global / Penetration / Damage Override / Key
+combat_global.triggerbot_min_damage_override_mode,number,1,yes,Triggerbot / Global / Penetration / Damage Override / Mode
+combat_global.triggerbot_outlier_chance,number,3.0f,yes,Triggerbot / Global / Triggerbot Core / Shot Timing / Outlier Chance
+combat_global.triggerbot_outlier_delay_ms,number,20,yes,Triggerbot / Global / Triggerbot Core / Shot Timing / Outlier Delay
+combat_global.triggerbot_predictive,boolean,true,yes,Triggerbot / Global / Triggerbot Core / Predictive
+combat_global.triggerbot_randomize_ms,number,5,yes,Triggerbot / Global / Triggerbot Core / Shot Timing / Randomize
+combat_global.triggerbot_reaction_time,number,0,yes,Triggerbot / Global / Triggerbot Core / Reaction Time (ms)
+combat_global.triggerbot_revolver_pre_cock,boolean,false,no,
+combat_global.triggerbot_revolver_release_margin_ms,number,16,no,
+combat_global.triggerbot_seed_type,number,0,yes,Triggerbot / Global / Triggerbot Core / Seed Type
+combat_overrides[*].aimbot_autowall,boolean,true,no,
+combat_overrides[*].aimbot_checks.airborne,boolean,false,yes,"Aimbot / Override / Targeting / Checks (Jump, Smoke, Flash)"
+combat_overrides[*].aimbot_checks.flash_threshold,number,85.0f,no,
+combat_overrides[*].aimbot_checks.flash_threshold_percent,number,85.0f,no,
+combat_overrides[*].aimbot_checks.flashed,boolean,false,yes,"Aimbot / Override / Targeting / Checks (Jump, Smoke, Flash)"
+combat_overrides[*].aimbot_checks.smoke,boolean,false,yes,"Aimbot / Override / Targeting / Checks (Jump, Smoke, Flash)"
+combat_overrides[*].aimbot_checks.walls,number,1,yes,Aimbot / Override / Penetration / Only Visible
+combat_overrides[*].aimbot_fov,number,2,yes,Aimbot / Override / Targeting / FOV / Radius
+combat_overrides[*].aimbot_fov_config.distance_curve,number,1.0f,yes,Aimbot / Override / Targeting / FOV / Advanced / Falloff
+combat_overrides[*].aimbot_fov_config.draw_target_point,boolean,true,no,
+combat_overrides[*].aimbot_fov_config.far_distance_m,number,10.0f,yes,Aimbot / Override / Targeting / FOV / Advanced / Min Size At
+combat_overrides[*].aimbot_fov_config.far_fov,number,2.0f,yes,Aimbot / Override / Targeting / FOV / Advanced / Min Radius
+combat_overrides[*].aimbot_fov_config.near_distance_m,number,2.5f,yes,Aimbot / Override / Targeting / FOV / Advanced / Full Size At
+combat_overrides[*].aimbot_fov_config.near_fov,number,2.0f,yes,Aimbot / Override / Targeting / FOV / Max Radius (summary) | Aimbot / Override / Targeting / FOV / Advanced / Max Radius
+combat_overrides[*].aimbot_fov_config.selection,number,2,yes,Aimbot / Override / Targeting / FOV / Mode
+combat_overrides[*].aimbot_fov_config.target_distance_curve,number,1.0f,yes,Aimbot / Override / Targeting / FOV / Advanced / Falloff
+combat_overrides[*].aimbot_fov_config.target_far_distance_m,number,10.0f,yes,Aimbot / Override / Targeting / FOV / Advanced / Min Size At
+combat_overrides[*].aimbot_fov_config.target_far_fov,number,2.0f,yes,Aimbot / Override / Targeting / FOV / Advanced / Min Radius
+combat_overrides[*].aimbot_fov_config.target_near_distance_m,number,2.5f,yes,Aimbot / Override / Targeting / FOV / Advanced / Full Size At
+combat_overrides[*].aimbot_fov_config.target_near_fov,number,20.0f,yes,Aimbot / Override / Targeting / FOV / Max Radius (summary) | Aimbot / Override / Targeting / FOV / Advanced / Max Radius
+combat_overrides[*].aimbot_fov_config.visualization,number,0,no,
+combat_overrides[*].aimbot_hitbox_parts,number,15,yes,"Aimbot / Override / Targeting / Hitboxes (Head, Body, Arms, Legs)"
+combat_overrides[*].aimbot_humanize,number,35,yes,Aimbot / Override / Targeting / Humanizer / Amount
+combat_overrides[*].aimbot_humanizer.curve,number,0.40f,yes,Aimbot / Override / Targeting / Humanizer / Behavior / Curve
+combat_overrides[*].aimbot_humanizer.damping,number,0.85f,yes,Aimbot / Override / Targeting / Humanizer / Motion / Damping
+combat_overrides[*].aimbot_humanizer.deadzone,number,0.25f,yes,Aimbot / Override / Targeting / Humanizer / Behavior / Deadzone
+combat_overrides[*].aimbot_humanizer.gravity,number,9.0f,yes,Aimbot / Override / Targeting / Humanizer / Motion / Gravity
+combat_overrides[*].aimbot_humanizer.jitter,number,0.10f,yes,Aimbot / Override / Targeting / Humanizer / Behavior / Jitter
+combat_overrides[*].aimbot_humanizer.max_step,number,24.0f,yes,Aimbot / Override / Targeting / Humanizer / Motion / Max Step
+combat_overrides[*].aimbot_humanizer.overshoot_amount,number,0.04f,yes,Aimbot / Override / Targeting / Humanizer / Behavior / Overshoot Amount
+combat_overrides[*].aimbot_humanizer.overshoot_chance,number,5.0f,yes,Aimbot / Override / Targeting / Humanizer / Behavior / Overshoot Chance
+combat_overrides[*].aimbot_humanizer.reaction_max_ms,number,60,yes,Aimbot / Override / Targeting / Humanizer / Behavior / Reaction Max
+combat_overrides[*].aimbot_humanizer.reaction_min_ms,number,25,yes,Aimbot / Override / Targeting / Humanizer / Behavior / Reaction Min
+combat_overrides[*].aimbot_humanizer.wind,number,0.8f,yes,Aimbot / Override / Targeting / Humanizer / Motion / Wind
+combat_overrides[*].aimbot_lethal_only,boolean,true,yes,Aimbot / Override / Targeting / Lethal Only
+combat_overrides[*].aimbot_min_damage,number,65.0f,yes,Aimbot / Override / Penetration / Min Damage
+combat_overrides[*].aimbot_multipoint,boolean,true,yes,Aimbot / Override / Targeting / Multi-Point / Multi-Point
+combat_overrides[*].aimbot_multipoint_config.body_scale,number,0.50f,yes,Aimbot / Override / Targeting / Multi-Point / Body Scale
+combat_overrides[*].aimbot_multipoint_config.caps,boolean,true,yes,Aimbot / Override / Targeting / Multi-Point / Cap Points
+combat_overrides[*].aimbot_multipoint_config.display,boolean,false,yes,Aimbot / Override / Targeting / Multi-Point / Display Multipoints
+combat_overrides[*].aimbot_multipoint_config.head_scale,number,0.50f,yes,Aimbot / Override / Targeting / Multi-Point / Head Scale
+combat_overrides[*].aimbot_multipoint_config.limb_scale,number,0.50f,yes,Aimbot / Override / Targeting / Multi-Point / Limbs Scale
+combat_overrides[*].aimbot_multipoint_config.performance,number,0,yes,Aimbot / Override / Targeting / Multi-Point / Performance
+combat_overrides[*].aimbot_multipoint_config.sides,boolean,true,yes,Aimbot / Override / Targeting / Multi-Point / Side Points
+combat_overrides[*].aimbot_prediction.acceleration,boolean,false,yes,Aimbot / Override / Targeting / Prediction / Acceleration
+combat_overrides[*].aimbot_prediction.enabled,boolean,true,yes,Aimbot / Override / Targeting / Prediction / Prediction
+combat_overrides[*].aimbot_prediction.max_horizon_ms,number,120.0f,yes,Aimbot / Override / Targeting / Prediction / Max Horizon
+combat_overrides[*].aimbot_predictive,boolean,false,no,
+combat_overrides[*].aimbot_rcs.enabled,boolean,false,yes,Aimbot / Override / Recoil Control / RCS
+combat_overrides[*].aimbot_rcs.pitch,number,100.0f,yes,Aimbot / Override / Recoil Control / Pitch Strength
+combat_overrides[*].aimbot_rcs.response_ms,number,35.0f,yes,Aimbot / Override / Recoil Control / Correction Time
+combat_overrides[*].aimbot_rcs.start_bullet,number,2,yes,Aimbot / Override / Recoil Control / Start Bullet
+combat_overrides[*].aimbot_rcs.yaw,number,100.0f,yes,Aimbot / Override / Recoil Control / Yaw Strength
+combat_overrides[*].aimbot_recoil_sync,boolean,false,no,
+combat_overrides[*].aimbot_smoothing,number,5,yes,Aimbot / Override / Targeting / Humanizer / Smoothing
+combat_overrides[*].aimbot_visible_only,boolean,true,no,
+combat_overrides[*].triggerbot_autostop,boolean,false,no,
+combat_overrides[*].triggerbot_autowall,boolean,true,no,
+combat_overrides[*].triggerbot_checks.airborne,boolean,false,yes,"Triggerbot / Override / Triggerbot Core / Checks (Jump, Smoke, Flash)"
+combat_overrides[*].triggerbot_checks.flash_threshold,number,85.0f,no,
+combat_overrides[*].triggerbot_checks.flash_threshold_percent,number,85.0f,no,
+combat_overrides[*].triggerbot_checks.flashed,boolean,false,yes,"Triggerbot / Override / Triggerbot Core / Checks (Jump, Smoke, Flash)"
+combat_overrides[*].triggerbot_checks.smoke,boolean,false,yes,"Triggerbot / Override / Triggerbot Core / Checks (Jump, Smoke, Flash)"
+combat_overrides[*].triggerbot_checks.walls,number,1,yes,Triggerbot / Override / Penetration / Only Visible
+combat_overrides[*].triggerbot_delay,number,10,yes,Triggerbot / Override / Triggerbot Core / Shot Timing / Delay Before
+combat_overrides[*].triggerbot_delay_after_ms,number,100,yes,Triggerbot / Override / Triggerbot Core / Shot Timing / Delay After
+combat_overrides[*].triggerbot_hitbox_parts,number,1,yes,"Triggerbot / Override / Triggerbot Core / Hitboxes (Head, Body, Arms, Legs)"
+combat_overrides[*].triggerbot_hitchance,number,75.0f,yes,Triggerbot / Override / Triggerbot Core / Hitchance
+combat_overrides[*].triggerbot_lethal_only,boolean,false,yes,Triggerbot / Override / Triggerbot Core / Lethal Only
+combat_overrides[*].triggerbot_min_damage,number,90.0f,yes,Triggerbot / Override / Penetration / Min Damage
+combat_overrides[*].triggerbot_outlier_chance,number,3.0f,yes,Triggerbot / Override / Triggerbot Core / Shot Timing / Outlier Chance
+combat_overrides[*].triggerbot_outlier_delay_ms,number,20,yes,Triggerbot / Override / Triggerbot Core / Shot Timing / Outlier Delay
+combat_overrides[*].triggerbot_predictive,boolean,true,yes,Triggerbot / Override / Triggerbot Core / Predictive
+combat_overrides[*].triggerbot_randomize_ms,number,5,yes,Triggerbot / Override / Triggerbot Core / Shot Timing / Randomize
+combat_overrides[*].triggerbot_reaction_time,number,0,yes,Triggerbot / Override / Triggerbot Core / Reaction Time (ms)
+combat_overrides[*].triggerbot_revolver_pre_cock,boolean,false,no,
+combat_overrides[*].triggerbot_revolver_release_margin_ms,number,16,no,
+combat_overrides[*].triggerbot_seed_type,number,0,yes,Triggerbot / Override / Triggerbot Core / Seed Type
+combat_overrides[*].use_global,boolean,true,yes,Aimbot / Override tab / Inherit Global Settings | Triggerbot / Override tab / Inherit Global Settings
+esp.m_bomb.active_bomb_color.a,number,255,yes,Visuals/Bomb / States / Show Carrier
+esp.m_bomb.active_bomb_color.b,number,50,yes,Visuals/Bomb / States / Show Carrier
+esp.m_bomb.active_bomb_color.g,number,200,yes,Visuals/Bomb / States / Show Carrier
+esp.m_bomb.active_bomb_color.r,number,255,yes,Visuals/Bomb / States / Show Carrier
+esp.m_bomb.bomb_color_ct.a,number,255,yes,Visuals/Bomb / Planted Bomb / Defusing Color
+esp.m_bomb.bomb_color_ct.b,number,255,yes,Visuals/Bomb / Planted Bomb / Defusing Color
+esp.m_bomb.bomb_color_ct.g,number,180,yes,Visuals/Bomb / Planted Bomb / Defusing Color
+esp.m_bomb.bomb_color_ct.r,number,50,yes,Visuals/Bomb / Planted Bomb / Defusing Color
+esp.m_bomb.bomb_color_t.a,number,255,yes,Visuals/Bomb / Planted Bomb / Planted Color
+esp.m_bomb.bomb_color_t.b,number,50,yes,Visuals/Bomb / Planted Bomb / Planted Color
+esp.m_bomb.bomb_color_t.g,number,180,yes,Visuals/Bomb / Planted Bomb / Planted Color
+esp.m_bomb.bomb_color_t.r,number,255,yes,Visuals/Bomb / Planted Bomb / Planted Color
+esp.m_bomb.display_mode,number,0,yes,Visuals/Bomb / States / Display Mode
+esp.m_bomb.enabled,boolean,true,yes,Visuals/Bomb / States / Enable Bomb ESP
+esp.m_bomb.panel_background.a,number,225,yes,Visuals/Bomb / Bomb Info Panel / Panel Background
+esp.m_bomb.panel_background.b,number,18,yes,Visuals/Bomb / Bomb Info Panel / Panel Background
+esp.m_bomb.panel_background.g,number,13,yes,Visuals/Bomb / Bomb Info Panel / Panel Background
+esp.m_bomb.panel_background.r,number,12,yes,Visuals/Bomb / Bomb Info Panel / Panel Background
+esp.m_bomb.safe_zone_band_step,number,4.0f,yes,Visuals/Bomb / Safe Zone / Band Step
+esp.m_bomb.safe_zone_bands,number,1,yes,Visuals/Bomb / Safe Zone / Gradient Bands
+esp.m_bomb.safe_zone_color.a,number,240,yes,Visuals/Bomb / Safe Zone / Zone Color
+esp.m_bomb.safe_zone_color.b,number,105,yes,Visuals/Bomb / Safe Zone / Zone Color
+esp.m_bomb.safe_zone_color.g,number,235,yes,Visuals/Bomb / Safe Zone / Zone Color
+esp.m_bomb.safe_zone_color.r,number,70,yes,Visuals/Bomb / Safe Zone / Zone Color
+esp.m_bomb.safe_zone_draw_radius,number,1200.0f,yes,Visuals/Bomb / Safe Zone / Render Radius
+esp.m_bomb.show_active_bomb,boolean,true,yes,Visuals/Bomb / States / Show Carrier
+esp.m_bomb.show_info_panel,boolean,true,yes,Misc/Overlay / Overlay / Show Bomb Info | Visuals/Bomb / States / Bomb Info Panel
+esp.m_bomb.show_planted_bomb,boolean,true,yes,Visuals/Bomb / States / Show Planted
+esp.m_bomb.show_safe_zone,boolean,true,yes,Visuals/Bomb / Safe Zone / Safe Zone Contour
+esp.m_bomb.show_timer,boolean,true,yes,Visuals/Bomb / States / World Timer / World Timer Ring
+esp.m_bomb.timer_text_color.a,number,255,yes,Visuals/Bomb / Bomb Info Panel / Timer Color
+esp.m_bomb.timer_text_color.b,number,100,yes,Visuals/Bomb / Bomb Info Panel / Timer Color
+esp.m_bomb.timer_text_color.g,number,220,yes,Visuals/Bomb / Bomb Info Panel / Timer Color
+esp.m_bomb.timer_text_color.r,number,255,yes,Visuals/Bomb / Bomb Info Panel / Timer Color
+esp.m_chams.antialiasing,boolean,true,yes,Visuals/Players / Chams Settings / Antialiasing
+esp.m_chams.enabled,boolean,true,yes,Visuals/Players / Details / Chams
+esp.m_chams.glow_effect.color.a,number,150,yes,Visuals/Players / Chams Model Glow / Glow Color
+esp.m_chams.glow_effect.color.b,number,255,yes,Visuals/Players / Chams Model Glow / Glow Color
+esp.m_chams.glow_effect.color.g,number,85,yes,Visuals/Players / Chams Model Glow / Glow Color
+esp.m_chams.glow_effect.color.r,number,125,yes,Visuals/Players / Chams Model Glow / Glow Color
+esp.m_chams.glow_effect.enabled,boolean,true,yes,Visuals/Players / Chams Settings / Model Glow
+esp.m_chams.glow_effect.layers,number,3,no,
+esp.m_chams.glow_effect.radius,number,4.0f,yes,Visuals/Players / Chams Model Glow / Glow Radius
+esp.m_chams.glow_effect.strength,number,0.65f,yes,Visuals/Players / Chams Model Glow / Glow Strength
+esp.m_chams.invisible.color.a,number,220,yes,Visuals/Players / Chams Occluded Material / Color
+esp.m_chams.invisible.color.b,number,60,yes,Visuals/Players / Chams Occluded Material / Color
+esp.m_chams.invisible.color.g,number,60,yes,Visuals/Players / Chams Occluded Material / Color
+esp.m_chams.invisible.color.r,number,255,yes,Visuals/Players / Chams Occluded Material / Color
+esp.m_chams.invisible.enabled,boolean,true,yes,Visuals/Players / Details / Chams Occluded
+esp.m_chams.invisible.exponent,number,2.0f,yes,Visuals/Players / Chams Occluded Material / Exponent
+esp.m_chams.invisible.falloff,number,0.5f,yes,Visuals/Players / Chams Occluded Material / Falloff
+esp.m_chams.invisible.fresnel_fill,number,0.25f,yes,Visuals/Players / Chams Occluded Material / Fresnel Filling
+esp.m_chams.invisible.metalness,number,0.0f,yes,Visuals/Players / Chams Occluded Material / Metalness
+esp.m_chams.invisible.roughness,number,0.35f,yes,Visuals/Players / Chams Occluded Material / Roughness
+esp.m_chams.invisible.speed,number,1.0f,yes,Visuals/Players / Chams Occluded Material / Speed
+esp.m_chams.invisible.strength,number,1.0f,yes,Visuals/Players / Chams Occluded Material / Strength
+esp.m_chams.invisible.tint.a,number,255,yes,Visuals/Players / Chams Occluded Material / Tint
+esp.m_chams.invisible.tint.b,number,255,yes,Visuals/Players / Chams Occluded Material / Tint
+esp.m_chams.invisible.tint.g,number,200,yes,Visuals/Players / Chams Occluded Material / Tint
+esp.m_chams.invisible.tint.r,number,120,yes,Visuals/Players / Chams Occluded Material / Tint
+esp.m_chams.invisible.type,number,0,yes,Visuals/Players / Chams Occluded Material / Material
+esp.m_chams.invisible.wireframe,boolean,false,yes,Visuals/Players / Chams Occluded Material / Wireframe
+esp.m_chams.kill_effect.color.a,number,220,yes,Visuals/Players / Chams Death Shatter / Particle Color
+esp.m_chams.kill_effect.color.b,number,255,yes,Visuals/Players / Chams Death Shatter / Particle Color
+esp.m_chams.kill_effect.color.g,number,125,yes,Visuals/Players / Chams Death Shatter / Particle Color
+esp.m_chams.kill_effect.color.r,number,170,yes,Visuals/Players / Chams Death Shatter / Particle Color
+esp.m_chams.kill_effect.count,number,14,yes,Visuals/Players / Chams Death Shatter / Particle Count
+esp.m_chams.kill_effect.duration,number,0.9f,yes,Visuals/Players / Chams Death Shatter / Particle Duration
+esp.m_chams.kill_effect.enabled,boolean,true,yes,Visuals/Players / Chams Settings / Death Shatter
+esp.m_chams.kill_effect.size,number,3.0f,yes,Visuals/Players / Chams Death Shatter / Particle Size
+esp.m_chams.occlude_dynamic_doors,boolean,true,yes,Visuals/Players / Chams Occlusion / Dynamic Doors
+esp.m_chams.occlude_smoke,boolean,true,yes,Visuals/Players / Chams Occlusion / Smoke Occlusion
+esp.m_chams.on_shot.appearance.color.a,number,220,yes,Visuals/Players / Chams On Hit Appearance / Color
+esp.m_chams.on_shot.appearance.color.b,number,60,yes,Visuals/Players / Chams On Hit Appearance / Color
+esp.m_chams.on_shot.appearance.color.g,number,60,yes,Visuals/Players / Chams On Hit Appearance / Color
+esp.m_chams.on_shot.appearance.color.r,number,255,yes,Visuals/Players / Chams On Hit Appearance / Color
+esp.m_chams.on_shot.appearance.enabled,boolean,true,no,
+esp.m_chams.on_shot.appearance.exponent,number,2.0f,yes,Visuals/Players / Chams On Hit Appearance / Exponent
+esp.m_chams.on_shot.appearance.falloff,number,0.5f,yes,Visuals/Players / Chams On Hit Appearance / Falloff
+esp.m_chams.on_shot.appearance.fresnel_fill,number,0.25f,yes,Visuals/Players / Chams On Hit Appearance / Fresnel Filling
+esp.m_chams.on_shot.appearance.metalness,number,0.0f,yes,Visuals/Players / Chams On Hit Appearance / Metalness
+esp.m_chams.on_shot.appearance.roughness,number,0.35f,yes,Visuals/Players / Chams On Hit Appearance / Roughness
+esp.m_chams.on_shot.appearance.speed,number,1.0f,yes,Visuals/Players / Chams On Hit Appearance / Speed
+esp.m_chams.on_shot.appearance.strength,number,1.0f,yes,Visuals/Players / Chams On Hit Appearance / Strength
+esp.m_chams.on_shot.appearance.tint.a,number,255,yes,Visuals/Players / Chams On Hit Appearance / Tint
+esp.m_chams.on_shot.appearance.tint.b,number,255,yes,Visuals/Players / Chams On Hit Appearance / Tint
+esp.m_chams.on_shot.appearance.tint.g,number,200,yes,Visuals/Players / Chams On Hit Appearance / Tint
+esp.m_chams.on_shot.appearance.tint.r,number,120,yes,Visuals/Players / Chams On Hit Appearance / Tint
+esp.m_chams.on_shot.appearance.type,number,0,yes,Visuals/Players / Chams On Hit Appearance / Material
+esp.m_chams.on_shot.appearance.wireframe,boolean,false,yes,Visuals/Players / Chams On Hit Appearance / Wireframe
+esp.m_chams.on_shot.duration,number,0.55f,yes,Visuals/Players / Chams On Hit / Ghost Duration
+esp.m_chams.on_shot.enabled,boolean,true,yes,Visuals/Players / Chams Settings / On Hit Chams
+esp.m_chams.visible.color.a,number,220,yes,Visuals/Players / Chams Visible Material / Color
+esp.m_chams.visible.color.b,number,60,yes,Visuals/Players / Chams Visible Material / Color
+esp.m_chams.visible.color.g,number,60,yes,Visuals/Players / Chams Visible Material / Color
+esp.m_chams.visible.color.r,number,255,yes,Visuals/Players / Chams Visible Material / Color
+esp.m_chams.visible.enabled,boolean,true,yes,Visuals/Players / Details / Chams Visible
+esp.m_chams.visible.exponent,number,2.0f,yes,Visuals/Players / Chams Visible Material / Exponent
+esp.m_chams.visible.falloff,number,0.5f,yes,Visuals/Players / Chams Visible Material / Falloff
+esp.m_chams.visible.fresnel_fill,number,0.25f,yes,Visuals/Players / Chams Visible Material / Fresnel Filling
+esp.m_chams.visible.metalness,number,0.0f,yes,Visuals/Players / Chams Visible Material / Metalness
+esp.m_chams.visible.roughness,number,0.35f,yes,Visuals/Players / Chams Visible Material / Roughness
+esp.m_chams.visible.speed,number,1.0f,yes,Visuals/Players / Chams Visible Material / Speed
+esp.m_chams.visible.strength,number,1.0f,yes,Visuals/Players / Chams Visible Material / Strength
+esp.m_chams.visible.tint.a,number,255,yes,Visuals/Players / Chams Visible Material / Tint
+esp.m_chams.visible.tint.b,number,255,yes,Visuals/Players / Chams Visible Material / Tint
+esp.m_chams.visible.tint.g,number,200,yes,Visuals/Players / Chams Visible Material / Tint
+esp.m_chams.visible.tint.r,number,120,yes,Visuals/Players / Chams Visible Material / Tint
+esp.m_chams.visible.type,number,0,yes,Visuals/Players / Chams Visible Material / Material
+esp.m_chams.visible.wireframe,boolean,false,yes,Visuals/Players / Chams Visible Material / Wireframe
+esp.m_crosshair.color.a,number,255,yes,Visuals/Crosshair / Colors / Primary Color
+esp.m_crosshair.color.b,number,255,yes,Visuals/Crosshair / Colors / Primary Color
+esp.m_crosshair.color.g,number,255,yes,Visuals/Crosshair / Colors / Primary Color
+esp.m_crosshair.color.r,number,255,yes,Visuals/Crosshair / Colors / Primary Color
+esp.m_crosshair.dot,boolean,true,yes,Visuals/Crosshair / Crosshair Settings / Draw Dot
+esp.m_crosshair.enabled,boolean,false,yes,Visuals/Crosshair / Crosshair Settings / Enable Crosshair
+esp.m_crosshair.gap,number,3.0f,yes,Visuals/Crosshair / Crosshair Lines / Gap
+esp.m_crosshair.length,number,5.0f,yes,Visuals/Crosshair / Crosshair Lines / Length
+esp.m_crosshair.lines,boolean,true,yes,Visuals/Crosshair / Crosshair Settings / Draw Lines
+esp.m_crosshair.outline,boolean,true,yes,Visuals/Crosshair / Colors / Draw Outline
+esp.m_crosshair.outline_color.a,number,255,yes,Visuals/Crosshair / Crosshair Outline / Outline Color
+esp.m_crosshair.outline_color.b,number,0,yes,Visuals/Crosshair / Crosshair Outline / Outline Color
+esp.m_crosshair.outline_color.g,number,0,yes,Visuals/Crosshair / Crosshair Outline / Outline Color
+esp.m_crosshair.outline_color.r,number,0,yes,Visuals/Crosshair / Crosshair Outline / Outline Color
+esp.m_crosshair.outline_thickness,number,1.0f,yes,Visuals/Crosshair / Crosshair Outline / Outline Thickness
+esp.m_crosshair.penetration_color_no.a,number,255,yes,Visuals/Crosshair / Penetration Indicator / Cannot Penetrate
+esp.m_crosshair.penetration_color_no.b,number,0,yes,Visuals/Crosshair / Penetration Indicator / Cannot Penetrate
+esp.m_crosshair.penetration_color_no.g,number,0,yes,Visuals/Crosshair / Penetration Indicator / Cannot Penetrate
+esp.m_crosshair.penetration_color_no.r,number,255,yes,Visuals/Crosshair / Penetration Indicator / Cannot Penetrate
+esp.m_crosshair.penetration_color_yes.a,number,255,yes,Visuals/Crosshair / Penetration Indicator / Can Penetrate
+esp.m_crosshair.penetration_color_yes.b,number,0,yes,Visuals/Crosshair / Penetration Indicator / Can Penetrate
+esp.m_crosshair.penetration_color_yes.g,number,255,yes,Visuals/Crosshair / Penetration Indicator / Can Penetrate
+esp.m_crosshair.penetration_color_yes.r,number,0,yes,Visuals/Crosshair / Penetration Indicator / Can Penetrate
+esp.m_crosshair.penetration_enabled,boolean,false,yes,Visuals/Crosshair / Colors / Penetration Indicator
+esp.m_crosshair.penetration_min_damage,number,90.0f,yes,Visuals/Crosshair / Penetration Indicator / Min Damage
+esp.m_crosshair.t_style,boolean,false,yes,Visuals/Crosshair / Crosshair Lines / T-Style
+esp.m_crosshair.thickness,number,1.0f,yes,Visuals/Crosshair / Crosshair Settings / Thickness
+esp.m_item.enabled,boolean,true,yes,Visuals/Items / Settings / Enable Item ESP
+esp.m_item.m_ammo.color.a,number,200,no,
+esp.m_item.m_ammo.color.b,number,255,no,
+esp.m_item.m_ammo.color.g,number,255,no,
+esp.m_item.m_ammo.color.r,number,255,no,
+esp.m_item.m_ammo.empty_color.a,number,200,no,
+esp.m_item.m_ammo.empty_color.b,number,80,no,
+esp.m_item.m_ammo.empty_color.g,number,80,no,
+esp.m_item.m_ammo.empty_color.r,number,220,no,
+esp.m_item.m_ammo.enabled,boolean,true,no,
+esp.m_item.m_filters.grenades,boolean,true,yes,Visuals/Items / Filters / Grenades
+esp.m_item.m_filters.heavy,boolean,true,no,
+esp.m_item.m_filters.pistols,boolean,true,yes,Visuals/Items / Filters / Pistols
+esp.m_item.m_filters.rifles,boolean,true,yes,Visuals/Items / Filters / Rifles
+esp.m_item.m_filters.shotguns,boolean,true,no,
+esp.m_item.m_filters.smgs,boolean,true,yes,Visuals/Items / Filters / SMGs
+esp.m_item.m_filters.snipers,boolean,true,yes,Visuals/Items / Filters / Snipers
+esp.m_item.m_filters.utility,boolean,true,yes,Visuals/Items / Filters / Utility
+esp.m_item.m_icon.color.a,number,220,yes,Visuals/Items / Settings / Show Icon
+esp.m_item.m_icon.color.b,number,255,yes,Visuals/Items / Settings / Show Icon
+esp.m_item.m_icon.color.g,number,255,yes,Visuals/Items / Settings / Show Icon
+esp.m_item.m_icon.color.r,number,255,yes,Visuals/Items / Settings / Show Icon
+esp.m_item.m_icon.enabled,boolean,true,yes,Visuals/Items / Settings / Show Icon
+esp.m_item.m_name.color.a,number,180,no,
+esp.m_item.m_name.color.b,number,200,no,
+esp.m_item.m_name.color.g,number,200,no,
+esp.m_item.m_name.color.r,number,200,no,
+esp.m_item.m_name.enabled,boolean,false,yes,Visuals/Items / Settings / Show Item Name
+esp.m_item.max_distance,number,40.0f,yes,Visuals/Items / Settings / Max Distance
+esp.m_no_flash.background_color.a,number,255,yes,Visuals/Effects / No Flash / Dimming Overlay Color
+esp.m_no_flash.background_color.b,number,0,yes,Visuals/Effects / No Flash / Dimming Overlay Color
+esp.m_no_flash.background_color.g,number,0,yes,Visuals/Effects / No Flash / Dimming Overlay Color
+esp.m_no_flash.background_color.r,number,0,yes,Visuals/Effects / No Flash / Dimming Overlay Color
+esp.m_no_flash.enabled,boolean,true,yes,Visuals/Effects / No Flash / Enable Visual No Flash
+esp.m_no_flash.line_color.a,number,70,yes,Visuals/Effects / No Flash / Line Color
+esp.m_no_flash.line_color.b,number,225,yes,Visuals/Effects / No Flash / Line Color
+esp.m_no_flash.line_color.g,number,215,yes,Visuals/Effects / No Flash / Line Color
+esp.m_no_flash.line_color.r,number,210,yes,Visuals/Effects / No Flash / Line Color
+esp.m_no_flash.line_width,number,1.0f,yes,Visuals/Effects / No Flash / Line Width
+esp.m_no_flash.max_distance,number,1000.0f,yes,Visuals/Effects / No Flash / Render Distance
+esp.m_no_flash.shadows,boolean,true,yes,Visuals/Effects / No Flash / Shadows
+esp.m_no_flash.style,number,0,yes,Visuals/Effects / No Flash / Style
+esp.m_no_flash.surface_color.a,number,255,yes,Visuals/Effects / No Flash / Surface Color
+esp.m_no_flash.surface_color.b,number,198,yes,Visuals/Effects / No Flash / Surface Color
+esp.m_no_flash.surface_color.g,number,186,yes,Visuals/Effects / No Flash / Surface Color
+esp.m_no_flash.surface_color.r,number,178,yes,Visuals/Effects / No Flash / Surface Color
+esp.m_no_smoke.enabled,boolean,false,yes,Visuals/Effects / No Smoke / Enable Visual No Smoke
+esp.m_no_smoke.line_color.a,number,70,yes,Visuals/Effects / No Smoke / Line Color
+esp.m_no_smoke.line_color.b,number,230,yes,Visuals/Effects / No Smoke / Line Color
+esp.m_no_smoke.line_color.g,number,215,yes,Visuals/Effects / No Smoke / Line Color
+esp.m_no_smoke.line_color.r,number,200,yes,Visuals/Effects / No Smoke / Line Color
+esp.m_no_smoke.line_width,number,1.0f,yes,Visuals/Effects / No Smoke / Line Width
+esp.m_no_smoke.max_distance,number,4000.0f,yes,Visuals/Effects / No Smoke / Render Distance
+esp.m_no_smoke.shadows,boolean,true,yes,Visuals/Effects / No Smoke / Shadows
+esp.m_no_smoke.style,number,0,yes,Visuals/Effects / No Smoke / Style
+esp.m_no_smoke.surface_color.a,number,215,yes,Visuals/Effects / No Smoke / Surface Color
+esp.m_no_smoke.surface_color.b,number,204,yes,Visuals/Effects / No Smoke / Surface Color
+esp.m_no_smoke.surface_color.g,number,186,yes,Visuals/Effects / No Smoke / Surface Color
+esp.m_no_smoke.surface_color.r,number,172,yes,Visuals/Effects / No Smoke / Surface Color
+esp.m_player.activation_key,number,0,yes,Visuals/Players / Master / Key
+esp.m_player.activation_mode,number,0,yes,Visuals/Players / Master / Mode
+esp.m_player.enabled,boolean,true,yes,Visuals/Players / Master / Enable Player ESP
+esp.m_player.m_armor_bar.background_color.a,number,220,yes,Visuals/Players / Armor Bar Settings / Background Color | Visuals/Players / Editor Armor Bar Settings / Background Color
+esp.m_player.m_armor_bar.background_color.b,number,14,yes,Visuals/Players / Armor Bar Settings / Background Color | Visuals/Players / Editor Armor Bar Settings / Background Color
+esp.m_player.m_armor_bar.background_color.g,number,10,yes,Visuals/Players / Armor Bar Settings / Background Color | Visuals/Players / Editor Armor Bar Settings / Background Color
+esp.m_player.m_armor_bar.background_color.r,number,10,yes,Visuals/Players / Armor Bar Settings / Background Color | Visuals/Players / Editor Armor Bar Settings / Background Color
+esp.m_player.m_armor_bar.enabled,boolean,true,yes,Visuals/Players / Details / Armor Bar
+esp.m_player.m_armor_bar.full_color.a,number,255,yes,Visuals/Players / Armor Bar Settings / Full Color | Visuals/Players / Editor Armor Bar Settings / Full Color
+esp.m_player.m_armor_bar.full_color.b,number,220,yes,Visuals/Players / Armor Bar Settings / Full Color | Visuals/Players / Editor Armor Bar Settings / Full Color
+esp.m_player.m_armor_bar.full_color.g,number,80,yes,Visuals/Players / Armor Bar Settings / Full Color | Visuals/Players / Editor Armor Bar Settings / Full Color
+esp.m_player.m_armor_bar.full_color.r,number,50,yes,Visuals/Players / Armor Bar Settings / Full Color | Visuals/Players / Editor Armor Bar Settings / Full Color
+esp.m_player.m_armor_bar.gradient,boolean,false,yes,Visuals/Players / Armor Bar Settings / Gradient | Visuals/Players / Editor Armor Bar Settings / Gradient
+esp.m_player.m_armor_bar.low_color.a,number,255,yes,Visuals/Players / Armor Bar Settings / Low Color | Visuals/Players / Editor Armor Bar Settings / Low Color
+esp.m_player.m_armor_bar.low_color.b,number,220,yes,Visuals/Players / Armor Bar Settings / Low Color | Visuals/Players / Editor Armor Bar Settings / Low Color
+esp.m_player.m_armor_bar.low_color.g,number,80,yes,Visuals/Players / Armor Bar Settings / Low Color | Visuals/Players / Editor Armor Bar Settings / Low Color
+esp.m_player.m_armor_bar.low_color.r,number,50,yes,Visuals/Players / Armor Bar Settings / Low Color | Visuals/Players / Editor Armor Bar Settings / Low Color
+esp.m_player.m_armor_bar.outline,boolean,true,yes,Visuals/Players / Armor Bar Settings / Outline | Visuals/Players / Editor Armor Bar Settings / Outline
+esp.m_player.m_armor_bar.outline_color.a,number,255,yes,Visuals/Players / Armor Bar Settings / Outline Color | Visuals/Players / Editor Armor Bar Settings / Outline Color
+esp.m_player.m_armor_bar.outline_color.b,number,0,yes,Visuals/Players / Armor Bar Settings / Outline Color | Visuals/Players / Editor Armor Bar Settings / Outline Color
+esp.m_player.m_armor_bar.outline_color.g,number,0,yes,Visuals/Players / Armor Bar Settings / Outline Color | Visuals/Players / Editor Armor Bar Settings / Outline Color
+esp.m_player.m_armor_bar.outline_color.r,number,0,yes,Visuals/Players / Armor Bar Settings / Outline Color | Visuals/Players / Editor Armor Bar Settings / Outline Color
+esp.m_player.m_armor_bar.outline_thickness,number,1.0f,yes,Visuals/Players / Armor Bar Settings / Outline Thickness | Visuals/Players / Editor Armor Bar Settings / Outline Thickness
+esp.m_player.m_armor_bar.position,number,2,yes,Visuals/Players / Armor Bar Settings / Position | Visuals/Players / Editor Armor Bar Settings / Position
+esp.m_player.m_armor_bar.segment_gap,number,1.0f,yes,Visuals/Players / Armor Bar Settings / Gap | Visuals/Players / Editor Armor Bar Settings / Gap
+esp.m_player.m_armor_bar.segments,number,1,yes,Visuals/Players / Armor Bar Settings / Segments | Visuals/Players / Armor Bar Settings / Count | Visuals/Players / Editor Armor Bar Settings / Segments | Visuals/Players / Editor Armor Bar Settings / Count
+esp.m_player.m_armor_bar.show_value,boolean,false,yes,Visuals/Players / Armor Bar Settings / Show Value | Visuals/Players / Editor Armor Bar Settings / Show Value
+esp.m_player.m_armor_bar.text_color.a,number,255,yes,Visuals/Players / Armor Bar Settings / Text Color | Visuals/Players / Editor Armor Bar Settings / Text Color
+esp.m_player.m_armor_bar.text_color.b,number,250,yes,Visuals/Players / Armor Bar Settings / Text Color | Visuals/Players / Editor Armor Bar Settings / Text Color
+esp.m_player.m_armor_bar.text_color.g,number,245,yes,Visuals/Players / Armor Bar Settings / Text Color | Visuals/Players / Editor Armor Bar Settings / Text Color
+esp.m_player.m_armor_bar.text_color.r,number,245,yes,Visuals/Players / Armor Bar Settings / Text Color | Visuals/Players / Editor Armor Bar Settings / Text Color
+esp.m_player.m_armor_bar.thickness,number,3.5f,yes,Visuals/Players / Armor Bar Settings / Thickness | Visuals/Players / Editor Armor Bar Settings / Thickness
+esp.m_player.m_box.corner_length,number,10.0f,yes,Visuals/Players / Bounding Box / Corner Length
+esp.m_player.m_box.enabled,boolean,true,yes,Visuals/Players / Bounding Box / Show Box
+esp.m_player.m_box.fill,boolean,false,yes,Visuals/Players / Bounding Box / Background Fill
+esp.m_player.m_box.fill_occluded_color.a,number,80,yes,Visuals/Players / Bounding Box / Fill Occluded Color
+esp.m_player.m_box.fill_occluded_color.b,number,110,yes,Visuals/Players / Bounding Box / Fill Occluded Color
+esp.m_player.m_box.fill_occluded_color.g,number,100,yes,Visuals/Players / Bounding Box / Fill Occluded Color
+esp.m_player.m_box.fill_occluded_color.r,number,100,yes,Visuals/Players / Bounding Box / Fill Occluded Color
+esp.m_player.m_box.fill_visible_color.a,number,80,yes,Visuals/Players / Bounding Box / Fill Visible Color
+esp.m_player.m_box.fill_visible_color.b,number,100,yes,Visuals/Players / Bounding Box / Fill Visible Color
+esp.m_player.m_box.fill_visible_color.g,number,200,yes,Visuals/Players / Bounding Box / Fill Visible Color
+esp.m_player.m_box.fill_visible_color.r,number,60,yes,Visuals/Players / Bounding Box / Fill Visible Color
+esp.m_player.m_box.occluded_color.a,number,180,yes,Visuals/Players / Bounding Box / Box Occluded Color
+esp.m_player.m_box.occluded_color.b,number,50,yes,Visuals/Players / Bounding Box / Box Occluded Color
+esp.m_player.m_box.occluded_color.g,number,50,yes,Visuals/Players / Bounding Box / Box Occluded Color
+esp.m_player.m_box.occluded_color.r,number,160,yes,Visuals/Players / Bounding Box / Box Occluded Color
+esp.m_player.m_box.outline,boolean,false,no,
+esp.m_player.m_box.style,number,1,yes,Visuals/Players / Bounding Box / Style
+esp.m_player.m_box.visible_color.a,number,255,yes,Visuals/Players / Bounding Box / Box Visible Color
+esp.m_player.m_box.visible_color.b,number,60,yes,Visuals/Players / Bounding Box / Box Visible Color
+esp.m_player.m_box.visible_color.g,number,60,yes,Visuals/Players / Bounding Box / Box Visible Color
+esp.m_player.m_box.visible_color.r,number,220,yes,Visuals/Players / Bounding Box / Box Visible Color
+esp.m_player.m_head_circle.color.a,number,255,yes,Visuals/Players / Skeleton & Hitboxes / Show Head Circle
+esp.m_player.m_head_circle.color.b,number,255,yes,Visuals/Players / Skeleton & Hitboxes / Show Head Circle
+esp.m_player.m_head_circle.color.g,number,255,yes,Visuals/Players / Skeleton & Hitboxes / Show Head Circle
+esp.m_player.m_head_circle.color.r,number,255,yes,Visuals/Players / Skeleton & Hitboxes / Show Head Circle
+esp.m_player.m_head_circle.enabled,boolean,true,yes,Visuals/Players / Skeleton & Hitboxes / Show Head Circle
+esp.m_player.m_head_circle.thickness,number,1.0f,no,
+esp.m_player.m_health_bar.background_color.a,number,220,yes,Visuals/Players / Health Bar Settings / Background Color | Visuals/Players / Editor Health Bar Settings / Background Color
+esp.m_player.m_health_bar.background_color.b,number,28,yes,Visuals/Players / Health Bar Settings / Background Color | Visuals/Players / Editor Health Bar Settings / Background Color
+esp.m_player.m_health_bar.background_color.g,number,17,yes,Visuals/Players / Health Bar Settings / Background Color | Visuals/Players / Editor Health Bar Settings / Background Color
+esp.m_player.m_health_bar.background_color.r,number,0,yes,Visuals/Players / Health Bar Settings / Background Color | Visuals/Players / Editor Health Bar Settings / Background Color
+esp.m_player.m_health_bar.enabled,boolean,true,yes,Visuals/Players / Details / Health Bar
+esp.m_player.m_health_bar.full_color.a,number,255,yes,Visuals/Players / Health Bar Settings / Full Color | Visuals/Players / Editor Health Bar Settings / Full Color
+esp.m_player.m_health_bar.full_color.b,number,220,yes,Visuals/Players / Health Bar Settings / Full Color | Visuals/Players / Editor Health Bar Settings / Full Color
+esp.m_player.m_health_bar.full_color.g,number,50,yes,Visuals/Players / Health Bar Settings / Full Color | Visuals/Players / Editor Health Bar Settings / Full Color
+esp.m_player.m_health_bar.full_color.r,number,215,yes,Visuals/Players / Health Bar Settings / Full Color | Visuals/Players / Editor Health Bar Settings / Full Color
+esp.m_player.m_health_bar.gradient,boolean,true,yes,Visuals/Players / Health Bar Settings / Gradient | Visuals/Players / Editor Health Bar Settings / Gradient
+esp.m_player.m_health_bar.low_color.a,number,255,yes,Visuals/Players / Health Bar Settings / Low Color | Visuals/Players / Editor Health Bar Settings / Low Color
+esp.m_player.m_health_bar.low_color.b,number,50,yes,Visuals/Players / Health Bar Settings / Low Color | Visuals/Players / Editor Health Bar Settings / Low Color
+esp.m_player.m_health_bar.low_color.g,number,50,yes,Visuals/Players / Health Bar Settings / Low Color | Visuals/Players / Editor Health Bar Settings / Low Color
+esp.m_player.m_health_bar.low_color.r,number,220,yes,Visuals/Players / Health Bar Settings / Low Color | Visuals/Players / Editor Health Bar Settings / Low Color
+esp.m_player.m_health_bar.outline,boolean,true,yes,Visuals/Players / Health Bar Settings / Outline | Visuals/Players / Editor Health Bar Settings / Outline
+esp.m_player.m_health_bar.outline_color.a,number,255,yes,Visuals/Players / Health Bar Settings / Outline Color | Visuals/Players / Editor Health Bar Settings / Outline Color
+esp.m_player.m_health_bar.outline_color.b,number,0,yes,Visuals/Players / Health Bar Settings / Outline Color | Visuals/Players / Editor Health Bar Settings / Outline Color
+esp.m_player.m_health_bar.outline_color.g,number,0,yes,Visuals/Players / Health Bar Settings / Outline Color | Visuals/Players / Editor Health Bar Settings / Outline Color
+esp.m_player.m_health_bar.outline_color.r,number,0,yes,Visuals/Players / Health Bar Settings / Outline Color | Visuals/Players / Editor Health Bar Settings / Outline Color
+esp.m_player.m_health_bar.outline_thickness,number,1.0f,yes,Visuals/Players / Health Bar Settings / Outline Thickness | Visuals/Players / Editor Health Bar Settings / Outline Thickness
+esp.m_player.m_health_bar.position,number,0,yes,Visuals/Players / Health Bar Settings / Position | Visuals/Players / Editor Health Bar Settings / Position
+esp.m_player.m_health_bar.segment_gap,number,2.5f,yes,Visuals/Players / Health Bar Settings / Gap | Visuals/Players / Editor Health Bar Settings / Gap
+esp.m_player.m_health_bar.segments,number,1,yes,Visuals/Players / Health Bar Settings / Segments | Visuals/Players / Health Bar Settings / Count | Visuals/Players / Editor Health Bar Settings / Segments | Visuals/Players / Editor Health Bar Settings / Count
+esp.m_player.m_health_bar.show_value,boolean,true,yes,Visuals/Players / Health Bar Settings / Show Value | Visuals/Players / Editor Health Bar Settings / Show Value
+esp.m_player.m_health_bar.text_color.a,number,255,yes,Visuals/Players / Health Bar Settings / Text Color | Visuals/Players / Editor Health Bar Settings / Text Color
+esp.m_player.m_health_bar.text_color.b,number,250,yes,Visuals/Players / Health Bar Settings / Text Color | Visuals/Players / Editor Health Bar Settings / Text Color
+esp.m_player.m_health_bar.text_color.g,number,245,yes,Visuals/Players / Health Bar Settings / Text Color | Visuals/Players / Editor Health Bar Settings / Text Color
+esp.m_player.m_health_bar.text_color.r,number,245,yes,Visuals/Players / Health Bar Settings / Text Color | Visuals/Players / Editor Health Bar Settings / Text Color
+esp.m_player.m_health_bar.thickness,number,3.0f,yes,Visuals/Players / Health Bar Settings / Thickness | Visuals/Players / Editor Health Bar Settings / Thickness
+esp.m_player.m_hitboxes.enabled,boolean,false,no,
+esp.m_player.m_hitboxes.fill,boolean,true,no,
+esp.m_player.m_hitboxes.occluded_color.a,number,12,no,
+esp.m_player.m_hitboxes.occluded_color.b,number,80,no,
+esp.m_player.m_hitboxes.occluded_color.g,number,70,no,
+esp.m_player.m_hitboxes.occluded_color.r,number,70,no,
+esp.m_player.m_hitboxes.outline,boolean,true,no,
+esp.m_player.m_hitboxes.visible_color.a,number,15,no,
+esp.m_player.m_hitboxes.visible_color.b,number,245,no,
+esp.m_player.m_hitboxes.visible_color.g,number,240,no,
+esp.m_player.m_hitboxes.visible_color.r,number,240,no,
+esp.m_player.m_info_flags.armor.color.a,number,0,yes,Visuals/Players / Info Flags Settings / Armor Color | Visuals/Players / Editor Info Flags Settings / Armor Color
+esp.m_player.m_info_flags.armor.color.b,number,0,yes,Visuals/Players / Info Flags Settings / Armor Color | Visuals/Players / Editor Info Flags Settings / Armor Color
+esp.m_player.m_info_flags.armor.color.g,number,0,yes,Visuals/Players / Info Flags Settings / Armor Color | Visuals/Players / Editor Info Flags Settings / Armor Color
+esp.m_player.m_info_flags.armor.color.r,number,0,yes,Visuals/Players / Info Flags Settings / Armor Color | Visuals/Players / Editor Info Flags Settings / Armor Color
+esp.m_player.m_info_flags.armor.scale,number,1.0f,yes,Visuals/Players / Info Flags Settings / Armor Scale | Visuals/Players / Editor Info Flags Settings / Armor Scale
+esp.m_player.m_info_flags.bomb_damage.color.a,number,0,yes,Visuals/Players / Info Flags Settings / Bomb Damage Color | Visuals/Players / Editor Info Flags Settings / Bomb Damage Color
+esp.m_player.m_info_flags.bomb_damage.color.b,number,0,yes,Visuals/Players / Info Flags Settings / Bomb Damage Color | Visuals/Players / Editor Info Flags Settings / Bomb Damage Color
+esp.m_player.m_info_flags.bomb_damage.color.g,number,0,yes,Visuals/Players / Info Flags Settings / Bomb Damage Color | Visuals/Players / Editor Info Flags Settings / Bomb Damage Color
+esp.m_player.m_info_flags.bomb_damage.color.r,number,0,yes,Visuals/Players / Info Flags Settings / Bomb Damage Color | Visuals/Players / Editor Info Flags Settings / Bomb Damage Color
+esp.m_player.m_info_flags.bomb_damage.scale,number,1.0f,yes,Visuals/Players / Info Flags Settings / Bomb Damage Scale | Visuals/Players / Editor Info Flags Settings / Bomb Damage Scale
+esp.m_player.m_info_flags.defusing.color.a,number,0,yes,Visuals/Players / Info Flags Settings / Defusing Color | Visuals/Players / Editor Info Flags Settings / Defusing Color
+esp.m_player.m_info_flags.defusing.color.b,number,0,yes,Visuals/Players / Info Flags Settings / Defusing Color | Visuals/Players / Editor Info Flags Settings / Defusing Color
+esp.m_player.m_info_flags.defusing.color.g,number,0,yes,Visuals/Players / Info Flags Settings / Defusing Color | Visuals/Players / Editor Info Flags Settings / Defusing Color
+esp.m_player.m_info_flags.defusing.color.r,number,0,yes,Visuals/Players / Info Flags Settings / Defusing Color | Visuals/Players / Editor Info Flags Settings / Defusing Color
+esp.m_player.m_info_flags.defusing.scale,number,1.0f,yes,Visuals/Players / Info Flags Settings / Defusing Scale | Visuals/Players / Editor Info Flags Settings / Defusing Scale
+esp.m_player.m_info_flags.distance.color.a,number,0,yes,Visuals/Players / Info Flags Settings / Distance Color | Visuals/Players / Editor Info Flags Settings / Distance Color
+esp.m_player.m_info_flags.distance.color.b,number,0,yes,Visuals/Players / Info Flags Settings / Distance Color | Visuals/Players / Editor Info Flags Settings / Distance Color
+esp.m_player.m_info_flags.distance.color.g,number,0,yes,Visuals/Players / Info Flags Settings / Distance Color | Visuals/Players / Editor Info Flags Settings / Distance Color
+esp.m_player.m_info_flags.distance.color.r,number,0,yes,Visuals/Players / Info Flags Settings / Distance Color | Visuals/Players / Editor Info Flags Settings / Distance Color
+esp.m_player.m_info_flags.distance.scale,number,1.0f,yes,Visuals/Players / Info Flags Settings / Distance Scale | Visuals/Players / Editor Info Flags Settings / Distance Scale
+esp.m_player.m_info_flags.enabled,boolean,true,yes,Visuals/Players / Details / Info Flags
+esp.m_player.m_info_flags.flags,number,383,yes,Visuals/Players / Info Flags Settings / Active Flags | Visuals/Players / Editor Info Flags Settings / Active Flags
+esp.m_player.m_info_flags.flashed.color.a,number,0,yes,Visuals/Players / Info Flags Settings / Flashed Color | Visuals/Players / Editor Info Flags Settings / Flashed Color
+esp.m_player.m_info_flags.flashed.color.b,number,0,yes,Visuals/Players / Info Flags Settings / Flashed Color | Visuals/Players / Editor Info Flags Settings / Flashed Color
+esp.m_player.m_info_flags.flashed.color.g,number,0,yes,Visuals/Players / Info Flags Settings / Flashed Color | Visuals/Players / Editor Info Flags Settings / Flashed Color
+esp.m_player.m_info_flags.flashed.color.r,number,0,yes,Visuals/Players / Info Flags Settings / Flashed Color | Visuals/Players / Editor Info Flags Settings / Flashed Color
+esp.m_player.m_info_flags.flashed.scale,number,1.0f,yes,Visuals/Players / Info Flags Settings / Flashed Scale | Visuals/Players / Editor Info Flags Settings / Flashed Scale
+esp.m_player.m_info_flags.kit.color.a,number,0,yes,Visuals/Players / Info Flags Settings / Defuse Kit Color | Visuals/Players / Editor Info Flags Settings / Defuse Kit Color
+esp.m_player.m_info_flags.kit.color.b,number,0,yes,Visuals/Players / Info Flags Settings / Defuse Kit Color | Visuals/Players / Editor Info Flags Settings / Defuse Kit Color
+esp.m_player.m_info_flags.kit.color.g,number,0,yes,Visuals/Players / Info Flags Settings / Defuse Kit Color | Visuals/Players / Editor Info Flags Settings / Defuse Kit Color
+esp.m_player.m_info_flags.kit.color.r,number,0,yes,Visuals/Players / Info Flags Settings / Defuse Kit Color | Visuals/Players / Editor Info Flags Settings / Defuse Kit Color
+esp.m_player.m_info_flags.kit.scale,number,1.0f,yes,Visuals/Players / Info Flags Settings / Defuse Kit Scale | Visuals/Players / Editor Info Flags Settings / Defuse Kit Scale
+esp.m_player.m_info_flags.money.color.a,number,0,yes,Visuals/Players / Info Flags Settings / Money Color | Visuals/Players / Editor Info Flags Settings / Money Color
+esp.m_player.m_info_flags.money.color.b,number,0,yes,Visuals/Players / Info Flags Settings / Money Color | Visuals/Players / Editor Info Flags Settings / Money Color
+esp.m_player.m_info_flags.money.color.g,number,0,yes,Visuals/Players / Info Flags Settings / Money Color | Visuals/Players / Editor Info Flags Settings / Money Color
+esp.m_player.m_info_flags.money.color.r,number,0,yes,Visuals/Players / Info Flags Settings / Money Color | Visuals/Players / Editor Info Flags Settings / Money Color
+esp.m_player.m_info_flags.money.scale,number,1.0f,yes,Visuals/Players / Info Flags Settings / Money Scale | Visuals/Players / Editor Info Flags Settings / Money Scale
+esp.m_player.m_info_flags.ping.color.a,number,0,yes,Visuals/Players / Info Flags Settings / Ping Color | Visuals/Players / Editor Info Flags Settings / Ping Color
+esp.m_player.m_info_flags.ping.color.b,number,0,yes,Visuals/Players / Info Flags Settings / Ping Color | Visuals/Players / Editor Info Flags Settings / Ping Color
+esp.m_player.m_info_flags.ping.color.g,number,0,yes,Visuals/Players / Info Flags Settings / Ping Color | Visuals/Players / Editor Info Flags Settings / Ping Color
+esp.m_player.m_info_flags.ping.color.r,number,0,yes,Visuals/Players / Info Flags Settings / Ping Color | Visuals/Players / Editor Info Flags Settings / Ping Color
+esp.m_player.m_info_flags.ping.scale,number,1.0f,yes,Visuals/Players / Info Flags Settings / Ping Scale | Visuals/Players / Editor Info Flags Settings / Ping Scale
+esp.m_player.m_info_flags.scoped.color.a,number,0,yes,Visuals/Players / Info Flags Settings / Scoped Color | Visuals/Players / Editor Info Flags Settings / Scoped Color
+esp.m_player.m_info_flags.scoped.color.b,number,0,yes,Visuals/Players / Info Flags Settings / Scoped Color | Visuals/Players / Editor Info Flags Settings / Scoped Color
+esp.m_player.m_info_flags.scoped.color.g,number,0,yes,Visuals/Players / Info Flags Settings / Scoped Color | Visuals/Players / Editor Info Flags Settings / Scoped Color
+esp.m_player.m_info_flags.scoped.color.r,number,0,yes,Visuals/Players / Info Flags Settings / Scoped Color | Visuals/Players / Editor Info Flags Settings / Scoped Color
+esp.m_player.m_info_flags.scoped.scale,number,1.0f,yes,Visuals/Players / Info Flags Settings / Scoped Scale | Visuals/Players / Editor Info Flags Settings / Scoped Scale
+esp.m_player.m_layout.armor.scale,number,1.0f,yes,Visuals/Players / Visual Editor / Armor Bar Scale
+esp.m_player.m_layout.armor.x,number,0.0,yes,Visuals/Players / Visual Editor / Armor Bar Drag
+esp.m_player.m_layout.armor.y,number,0.0,yes,Visuals/Players / Visual Editor / Armor Bar Drag
+esp.m_player.m_layout.flags.scale,number,1.0f,yes,Visuals/Players / Visual Editor / Info Flags Scale
+esp.m_player.m_layout.flags.x,number,0.0,yes,Visuals/Players / Visual Editor / Info Flags Drag
+esp.m_player.m_layout.flags.y,number,0.0,yes,Visuals/Players / Visual Editor / Info Flags Drag
+esp.m_player.m_layout.health.scale,number,1.0f,yes,Visuals/Players / Visual Editor / Health Bar Scale
+esp.m_player.m_layout.health.x,number,0.0,yes,Visuals/Players / Visual Editor / Health Bar Drag
+esp.m_player.m_layout.health.y,number,0.0,yes,Visuals/Players / Visual Editor / Health Bar Drag
+esp.m_player.m_layout.name.scale,number,1.0f,yes,Visuals/Players / Visual Editor / Name Scale
+esp.m_player.m_layout.name.x,number,0.0,yes,Visuals/Players / Visual Editor / Name Drag
+esp.m_player.m_layout.name.y,number,0.0,yes,Visuals/Players / Visual Editor / Name Drag
+esp.m_player.m_layout.weapon.scale,number,1.0f,yes,Visuals/Players / Visual Editor / Weapon Scale
+esp.m_player.m_layout.weapon.x,number,0.0,yes,Visuals/Players / Visual Editor / Weapon Drag
+esp.m_player.m_layout.weapon.y,number,0.0,yes,Visuals/Players / Visual Editor / Weapon Drag
+esp.m_player.m_legit_sync.direct_visible,boolean,true,yes,Visuals/Players / Legit Sync / Direct Visibility
+esp.m_player.m_legit_sync.enabled,boolean,false,yes,Visuals/Players / Master / Legit Sync
+esp.m_player.m_legit_sync.pulse_max_opacity,number,1.00f,yes,Visuals/Players / Legit Sync / Pulse Maximum
+esp.m_player.m_legit_sync.pulse_min_opacity,number,0.20f,yes,Visuals/Players / Legit Sync / Pulse Minimum
+esp.m_player.m_legit_sync.pulse_period,number,1.8f,yes,Visuals/Players / Legit Sync / Pulse Period
+esp.m_player.m_legit_sync.radar,boolean,true,yes,Visuals/Players / Legit Sync / Radar Spotted
+esp.m_player.m_legit_sync.radar_hold,number,2.0f,yes,Visuals/Players / Legit Sync / Radar Hold
+esp.m_player.m_legit_sync.sound,boolean,true,yes,Visuals/Players / Legit Sync / Audible Sounds
+esp.m_player.m_legit_sync.sound_distance,number,1100.0f,yes,Visuals/Players / Legit Sync / Hearing Distance
+esp.m_player.m_legit_sync.sound_hold,number,1.6f,yes,Visuals/Players / Legit Sync / Sound Hold
+esp.m_player.m_name.color.a,number,180,yes,Visuals/Players / Details / Show Name | Visuals/Players / Editor Name Settings / Color
+esp.m_player.m_name.color.b,number,200,yes,Visuals/Players / Details / Show Name | Visuals/Players / Editor Name Settings / Color
+esp.m_player.m_name.color.g,number,200,yes,Visuals/Players / Details / Show Name | Visuals/Players / Editor Name Settings / Color
+esp.m_player.m_name.color.r,number,200,yes,Visuals/Players / Details / Show Name | Visuals/Players / Editor Name Settings / Color
+esp.m_player.m_name.enabled,boolean,false,yes,Visuals/Players / Details / Show Name
+esp.m_player.m_offscreen_arrows.bloom,boolean,true,yes,Visuals/Players / Offscreen Arrows / Bloom
+esp.m_player.m_offscreen_arrows.bloom_color.a,number,210,yes,Visuals/Players / Arrow Bloom / Bloom Color
+esp.m_player.m_offscreen_arrows.bloom_color.b,number,255,yes,Visuals/Players / Arrow Bloom / Bloom Color
+esp.m_player.m_offscreen_arrows.bloom_color.g,number,190,yes,Visuals/Players / Arrow Bloom / Bloom Color
+esp.m_player.m_offscreen_arrows.bloom_color.r,number,120,yes,Visuals/Players / Arrow Bloom / Bloom Color
+esp.m_player.m_offscreen_arrows.bloom_max_alpha,number,0.68f,yes,Visuals/Players / Arrow Bloom / Maximum Glow
+esp.m_player.m_offscreen_arrows.bloom_min_alpha,number,0.12f,yes,Visuals/Players / Arrow Bloom / Minimum Glow
+esp.m_player.m_offscreen_arrows.bloom_radius,number,6.0f,yes,Visuals/Players / Arrow Bloom / Bloom Radius
+esp.m_player.m_offscreen_arrows.bloom_speed,number,0.50f,yes,Visuals/Players / Arrow Bloom / Bloom Speed
+esp.m_player.m_offscreen_arrows.color.a,number,255,yes,Visuals/Players / Offscreen Arrows / Arrow Color
+esp.m_player.m_offscreen_arrows.color.b,number,241,yes,Visuals/Players / Offscreen Arrows / Arrow Color
+esp.m_player.m_offscreen_arrows.color.g,number,230,yes,Visuals/Players / Offscreen Arrows / Arrow Color
+esp.m_player.m_offscreen_arrows.color.r,number,204,yes,Visuals/Players / Offscreen Arrows / Arrow Color
+esp.m_player.m_offscreen_arrows.enabled,boolean,true,yes,Visuals/Players / Skeleton & Hitboxes / Offscreen Arrows
+esp.m_player.m_offscreen_arrows.radius,number,377.0f,yes,Visuals/Players / Offscreen Arrows / Arrow Radius
+esp.m_player.m_offscreen_arrows.size,number,22.0f,yes,Visuals/Players / Offscreen Arrows / Arrow Size
+esp.m_player.m_offscreen_arrows.thickness,number,2.25f,no,
+esp.m_player.m_skeleton.enabled,boolean,true,yes,Visuals/Players / Skeleton & Hitboxes / Show Skeleton
+esp.m_player.m_skeleton.occluded_color.a,number,255,no,
+esp.m_player.m_skeleton.occluded_color.b,number,255,no,
+esp.m_player.m_skeleton.occluded_color.g,number,255,no,
+esp.m_player.m_skeleton.occluded_color.r,number,255,no,
+esp.m_player.m_skeleton.thickness,number,1.0f,no,
+esp.m_player.m_skeleton.visible_color.a,number,255,yes,Visuals/Players / Skeleton & Hitboxes / Show Skeleton
+esp.m_player.m_skeleton.visible_color.b,number,255,yes,Visuals/Players / Skeleton & Hitboxes / Show Skeleton
+esp.m_player.m_skeleton.visible_color.g,number,255,yes,Visuals/Players / Skeleton & Hitboxes / Show Skeleton
+esp.m_player.m_skeleton.visible_color.r,number,255,yes,Visuals/Players / Skeleton & Hitboxes / Show Skeleton
+esp.m_player.m_threat_module.body_color.a,number,70,yes,Visuals/Players / Threat Hitboxes / Body Hitbox Color
+esp.m_player.m_threat_module.body_color.b,number,255,yes,Visuals/Players / Threat Hitboxes / Body Hitbox Color
+esp.m_player.m_threat_module.body_color.g,number,255,yes,Visuals/Players / Threat Hitboxes / Body Hitbox Color
+esp.m_player.m_threat_module.body_color.r,number,255,yes,Visuals/Players / Threat Hitboxes / Body Hitbox Color
+esp.m_player.m_threat_module.body_hitbox,boolean,true,no,
+esp.m_player.m_threat_module.enabled,boolean,false,yes,Visuals/Players / Skeleton & Hitboxes / Threat Hitboxes
+esp.m_player.m_threat_module.fill_alpha,number,30.0f,yes,Visuals/Players / Threat Hitboxes / Fill Alpha
+esp.m_player.m_threat_module.head_color.a,number,110,yes,Visuals/Players / Threat Hitboxes / Head Hitbox Color
+esp.m_player.m_threat_module.head_color.b,number,50,yes,Visuals/Players / Threat Hitboxes / Head Hitbox Color
+esp.m_player.m_threat_module.head_color.g,number,50,yes,Visuals/Players / Threat Hitboxes / Head Hitbox Color
+esp.m_player.m_threat_module.head_color.r,number,230,yes,Visuals/Players / Threat Hitboxes / Head Hitbox Color
+esp.m_player.m_threat_module.head_hitbox,boolean,true,no,
+esp.m_player.m_threat_module.limb_color.a,number,50,no,
+esp.m_player.m_threat_module.limb_color.b,number,255,no,
+esp.m_player.m_threat_module.limb_color.g,number,255,no,
+esp.m_player.m_threat_module.limb_color.r,number,255,no,
+esp.m_player.m_threat_module.limb_hitbox,boolean,true,no,
+esp.m_player.m_threat_module.max_distance,number,60.0f,no,
+esp.m_player.m_threat_module.outline_alpha,number,220.0f,no,
+esp.m_player.m_threat_module.outline_thickness,number,1.0f,no,
+esp.m_player.m_view_line.color.a,number,255,yes,Visuals/Players / Skeleton & Hitboxes / Show View Line
+esp.m_player.m_view_line.color.b,number,255,yes,Visuals/Players / Skeleton & Hitboxes / Show View Line
+esp.m_player.m_view_line.color.g,number,255,yes,Visuals/Players / Skeleton & Hitboxes / Show View Line
+esp.m_player.m_view_line.color.r,number,255,yes,Visuals/Players / Skeleton & Hitboxes / Show View Line
+esp.m_player.m_view_line.enabled,boolean,true,yes,Visuals/Players / Skeleton & Hitboxes / Show View Line
+esp.m_player.m_view_line.length,number,50.0f,no,
+esp.m_player.m_view_line.thickness,number,1.0f,no,
+esp.m_player.m_weapon.ammo.empty_color.a,number,245,yes,Visuals/Players / Weapon Settings / Empty Color | Visuals/Players / Editor Weapon Settings / Empty Color
+esp.m_player.m_weapon.ammo.empty_color.b,number,65,yes,Visuals/Players / Weapon Settings / Empty Color | Visuals/Players / Editor Weapon Settings / Empty Color
+esp.m_player.m_weapon.ammo.empty_color.g,number,55,yes,Visuals/Players / Weapon Settings / Empty Color | Visuals/Players / Editor Weapon Settings / Empty Color
+esp.m_player.m_weapon.ammo.empty_color.r,number,225,yes,Visuals/Players / Weapon Settings / Empty Color | Visuals/Players / Editor Weapon Settings / Empty Color
+esp.m_player.m_weapon.ammo.enabled,boolean,true,yes,Visuals/Players / Weapon Settings / Ammo Indicator | Visuals/Players / Editor Weapon Settings / Ammo Indicator
+esp.m_player.m_weapon.ammo.show_count,boolean,false,yes,Visuals/Players / Weapon Settings / Exact Ammo Count | Visuals/Players / Editor Weapon Settings / Exact Ammo Count
+esp.m_player.m_weapon.display,number,1,yes,Visuals/Players / Weapon Settings / Display | Visuals/Players / Editor Weapon Settings / Display
+esp.m_player.m_weapon.enabled,boolean,true,yes,Visuals/Players / Details / Show Weapon
+esp.m_player.m_weapon.icon_color.a,number,240,yes,Visuals/Players / Weapon Settings / Icon Color | Visuals/Players / Editor Weapon Settings / Icon Color
+esp.m_player.m_weapon.icon_color.b,number,245,yes,Visuals/Players / Weapon Settings / Icon Color | Visuals/Players / Editor Weapon Settings / Icon Color
+esp.m_player.m_weapon.icon_color.g,number,240,yes,Visuals/Players / Weapon Settings / Icon Color | Visuals/Players / Editor Weapon Settings / Icon Color
+esp.m_player.m_weapon.icon_color.r,number,240,yes,Visuals/Players / Weapon Settings / Icon Color | Visuals/Players / Editor Weapon Settings / Icon Color
+esp.m_player.m_weapon.text_color.a,number,220,yes,Visuals/Players / Weapon Settings / Text Color | Visuals/Players / Editor Weapon Settings / Text Color
+esp.m_player.m_weapon.text_color.b,number,210,yes,Visuals/Players / Weapon Settings / Text Color | Visuals/Players / Editor Weapon Settings / Text Color
+esp.m_player.m_weapon.text_color.g,number,200,yes,Visuals/Players / Weapon Settings / Text Color | Visuals/Players / Editor Weapon Settings / Text Color
+esp.m_player.m_weapon.text_color.r,number,200,yes,Visuals/Players / Weapon Settings / Text Color | Visuals/Players / Editor Weapon Settings / Text Color
+esp.m_player.spectator_sync,boolean,false,yes,Visuals/Players / Legit Sync / Hide When Spectated
+esp.m_projectile.color_decoy.a,number,200,yes,Visuals/Projectiles / Colors / Decoy
+esp.m_projectile.color_decoy.b,number,200,yes,Visuals/Projectiles / Colors / Decoy
+esp.m_projectile.color_decoy.g,number,200,yes,Visuals/Projectiles / Colors / Decoy
+esp.m_projectile.color_decoy.r,number,200,yes,Visuals/Projectiles / Colors / Decoy
+esp.m_projectile.color_flash.a,number,220,yes,Visuals/Projectiles / Colors / Flashbang
+esp.m_projectile.color_flash.b,number,150,yes,Visuals/Projectiles / Colors / Flashbang
+esp.m_projectile.color_flash.g,number,220,yes,Visuals/Projectiles / Colors / Flashbang
+esp.m_projectile.color_flash.r,number,230,yes,Visuals/Projectiles / Colors / Flashbang
+esp.m_projectile.color_he.a,number,220,yes,Visuals/Projectiles / Colors / HE Grenade
+esp.m_projectile.color_he.b,number,150,yes,Visuals/Projectiles / Colors / HE Grenade
+esp.m_projectile.color_he.g,number,150,yes,Visuals/Projectiles / Colors / HE Grenade
+esp.m_projectile.color_he.r,number,220,yes,Visuals/Projectiles / Colors / HE Grenade
+esp.m_projectile.color_molotov.a,number,220,yes,Visuals/Projectiles / Colors / Molotov
+esp.m_projectile.color_molotov.b,number,130,yes,Visuals/Projectiles / Colors / Molotov
+esp.m_projectile.color_molotov.g,number,170,yes,Visuals/Projectiles / Colors / Molotov
+esp.m_projectile.color_molotov.r,number,220,yes,Visuals/Projectiles / Colors / Molotov
+esp.m_projectile.color_smoke.a,number,220,yes,Visuals/Projectiles / Colors / Smoke
+esp.m_projectile.color_smoke.b,number,180,yes,Visuals/Projectiles / Colors / Smoke
+esp.m_projectile.color_smoke.g,number,200,yes,Visuals/Projectiles / Colors / Smoke
+esp.m_projectile.color_smoke.r,number,160,yes,Visuals/Projectiles / Colors / Smoke
+esp.m_projectile.default_color.a,number,200,no,
+esp.m_projectile.default_color.b,number,215,no,
+esp.m_projectile.default_color.g,number,200,no,
+esp.m_projectile.default_color.r,number,195,no,
+esp.m_projectile.display_mode,number,0,yes,Visuals/Projectiles / Visual Elements / Display Mode
+esp.m_projectile.enabled,boolean,true,yes,Visuals/Projectiles / Visual Elements / Enable Projectiles
+esp.m_projectile.indicator_background.a,number,185,yes,Visuals/Projectiles / Indicator / Indicator Background
+esp.m_projectile.indicator_background.b,number,22,yes,Visuals/Projectiles / Indicator / Indicator Background
+esp.m_projectile.indicator_background.g,number,16,yes,Visuals/Projectiles / Indicator / Indicator Background
+esp.m_projectile.indicator_background.r,number,15,yes,Visuals/Projectiles / Indicator / Indicator Background
+esp.m_projectile.inferno_gradient_opacity,number,45.0f,yes,Visuals/Projectiles / Inferno Gradient / Gradient Opacity
+esp.m_projectile.inferno_gradient_width,number,34.0f,yes,Visuals/Projectiles / Inferno Gradient / Gradient Width
+esp.m_projectile.show_icon,boolean,true,yes,Visuals/Projectiles / Visual Elements / Show Icon / Show Text
+esp.m_projectile.show_inferno_bounds,boolean,true,yes,Visuals/Projectiles / Visual Elements / Inferno Bounds
+esp.m_projectile.show_timer_ring,boolean,true,yes,Visuals/Projectiles / Visual Elements / Effect Timer / Effect Timer Ring
+esp.m_projectile.timer_high_color.a,number,255,yes,Visuals/Projectiles / Indicator / Timer Full
+esp.m_projectile.timer_high_color.b,number,255,yes,Visuals/Projectiles / Indicator / Timer Full
+esp.m_projectile.timer_high_color.g,number,255,yes,Visuals/Projectiles / Indicator / Timer Full
+esp.m_projectile.timer_high_color.r,number,255,yes,Visuals/Projectiles / Indicator / Timer Full
+esp.m_projectile.timer_low_color.a,number,255,yes,Visuals/Projectiles / Indicator / Timer Low
+esp.m_projectile.timer_low_color.b,number,100,yes,Visuals/Projectiles / Indicator / Timer Low
+esp.m_projectile.timer_low_color.g,number,100,yes,Visuals/Projectiles / Indicator / Timer Low
+esp.m_projectile.timer_low_color.r,number,220,yes,Visuals/Projectiles / Indicator / Timer Low
+esp.m_radar.activation_key,number,0,yes,Visuals/Radar / Radar Players / Key
+esp.m_radar.activation_mode,number,0,yes,Visuals/Radar / Radar Players / Activation
+esp.m_radar.armor_color.a,number,255,yes,Visuals/Radar / Radar Players / Player Armor
+esp.m_radar.armor_color.b,number,255,yes,Visuals/Radar / Radar Players / Player Armor
+esp.m_radar.armor_color.g,number,155,yes,Visuals/Radar / Radar Players / Player Armor
+esp.m_radar.armor_color.r,number,80,yes,Visuals/Radar / Radar Players / Player Armor
+esp.m_radar.decoy_color.a,number,255,yes,Visuals/Radar / Grenade Markers / Decoy Color
+esp.m_radar.decoy_color.b,number,255,yes,Visuals/Radar / Grenade Markers / Decoy Color
+esp.m_radar.decoy_color.g,number,190,yes,Visuals/Radar / Grenade Markers / Decoy Color
+esp.m_radar.decoy_color.r,number,140,yes,Visuals/Radar / Grenade Markers / Decoy Color
+esp.m_radar.direction_color.a,number,255,yes,Visuals/Radar / Player Style / View Direction
+esp.m_radar.direction_color.b,number,255,yes,Visuals/Radar / Player Style / View Direction
+esp.m_radar.direction_color.g,number,255,yes,Visuals/Radar / Player Style / View Direction
+esp.m_radar.direction_color.r,number,255,yes,Visuals/Radar / Player Style / View Direction
+esp.m_radar.enabled,boolean,true,yes,Visuals/Radar / Radar Players / Overlay Enemy Markers
+esp.m_radar.enemy_color.a,number,255,yes,Visuals/Radar / Player Style / Enemy Marker
+esp.m_radar.enemy_color.b,number,64,yes,Visuals/Radar / Player Style / Enemy Marker
+esp.m_radar.enemy_color.g,number,64,yes,Visuals/Radar / Player Style / Enemy Marker
+esp.m_radar.enemy_color.r,number,255,yes,Visuals/Radar / Player Style / Enemy Marker
+esp.m_radar.flash_color.a,number,255,yes,Visuals/Radar / Grenade Markers / Flash Color
+esp.m_radar.flash_color.b,number,180,yes,Visuals/Radar / Grenade Markers / Flash Color
+esp.m_radar.flash_color.g,number,245,yes,Visuals/Radar / Grenade Markers / Flash Color
+esp.m_radar.flash_color.r,number,250,yes,Visuals/Radar / Grenade Markers / Flash Color
+esp.m_radar.he_color.a,number,255,yes,Visuals/Radar / Grenade Markers / HE Color
+esp.m_radar.he_color.b,number,80,yes,Visuals/Radar / Grenade Markers / HE Color
+esp.m_radar.he_color.g,number,105,yes,Visuals/Radar / Grenade Markers / HE Color
+esp.m_radar.he_color.r,number,255,yes,Visuals/Radar / Grenade Markers / HE Color
+esp.m_radar.health_color.a,number,255,yes,Visuals/Radar / Radar Players / Player Health
+esp.m_radar.health_color.b,number,125,yes,Visuals/Radar / Radar Players / Player Health
+esp.m_radar.health_color.g,number,230,yes,Visuals/Radar / Radar Players / Player Health
+esp.m_radar.health_color.r,number,95,yes,Visuals/Radar / Radar Players / Player Health
+esp.m_radar.information_scale,number,0.75f,yes,Visuals/Radar / Grenade Markers / Information Scale
+esp.m_radar.marker_scale,number,1.0f,yes,Visuals/Radar / Player Style / Marker Scale
+esp.m_radar.molotov_color.a,number,255,yes,Visuals/Radar / Grenade Markers / Molotov Color
+esp.m_radar.molotov_color.b,number,55,yes,Visuals/Radar / Grenade Markers / Molotov Color
+esp.m_radar.molotov_color.g,number,145,yes,Visuals/Radar / Grenade Markers / Molotov Color
+esp.m_radar.molotov_color.r,number,255,yes,Visuals/Radar / Grenade Markers / Molotov Color
+esp.m_radar.name_color.a,number,255,yes,Visuals/Radar / Radar Players / Player Names
+esp.m_radar.name_color.b,number,250,yes,Visuals/Radar / Radar Players / Player Names
+esp.m_radar.name_color.g,number,245,yes,Visuals/Radar / Radar Players / Player Names
+esp.m_radar.name_color.r,number,245,yes,Visuals/Radar / Radar Players / Player Names
+esp.m_radar.show_armor,boolean,true,yes,Visuals/Radar / Radar Players / Player Armor
+esp.m_radar.show_grenade_zones,boolean,true,yes,Visuals/Radar / Radar Grenades / Grenade Zones
+esp.m_radar.show_health,boolean,true,yes,Visuals/Radar / Radar Players / Player Health
+esp.m_radar.show_names,boolean,true,yes,Visuals/Radar / Radar Players / Player Names
+esp.m_radar.show_projectiles,boolean,true,yes,Visuals/Radar / Radar Grenades / Grenade Markers
+esp.m_radar.show_trajectories,boolean,true,yes,Visuals/Radar / Radar Grenades / Grenade Trajectories
+esp.m_radar.show_weapon,boolean,true,yes,Visuals/Radar / Radar Players / Player Weapon
+esp.m_radar.smoke_color.a,number,255,yes,Visuals/Radar / Grenade Markers / Smoke Color
+esp.m_radar.smoke_color.b,number,205,yes,Visuals/Radar / Grenade Markers / Smoke Color
+esp.m_radar.smoke_color.g,number,190,yes,Visuals/Radar / Grenade Markers / Smoke Color
+esp.m_radar.smoke_color.r,number,180,yes,Visuals/Radar / Grenade Markers / Smoke Color
+esp.m_radar.status_color.a,number,245,yes,Visuals/Radar / Player Style / Status Text
+esp.m_radar.status_color.b,number,240,yes,Visuals/Radar / Player Style / Status Text
+esp.m_radar.status_color.g,number,230,yes,Visuals/Radar / Player Style / Status Text
+esp.m_radar.status_color.r,number,225,yes,Visuals/Radar / Player Style / Status Text
+esp.m_radar.text_outline,boolean,true,yes,Visuals/Radar / Player Style / Text Outline
+esp.m_radar.text_outline_color.a,number,230,yes,Visuals/Radar / Text Outline / Outline Color
+esp.m_radar.text_outline_color.b,number,0,yes,Visuals/Radar / Text Outline / Outline Color
+esp.m_radar.text_outline_color.g,number,0,yes,Visuals/Radar / Text Outline / Outline Color
+esp.m_radar.text_outline_color.r,number,0,yes,Visuals/Radar / Text Outline / Outline Color
+esp.m_radar.text_outline_thickness,number,1.0f,yes,Visuals/Radar / Text Outline / Outline Thickness
+esp.m_radar.trajectory_endpoint_size,number,3.0f,yes,Visuals/Radar / Grenade Trajectories / End Point Size
+esp.m_radar.trajectory_thickness,number,1.5f,yes,Visuals/Radar / Grenade Trajectories / Line Thickness
+esp.m_radar.weapon_color.a,number,245,yes,Visuals/Radar / Radar Players / Player Weapon
+esp.m_radar.weapon_color.b,number,225,yes,Visuals/Radar / Radar Players / Player Weapon
+esp.m_radar.weapon_color.g,number,212,yes,Visuals/Radar / Radar Players / Player Weapon
+esp.m_radar.weapon_color.r,number,205,yes,Visuals/Radar / Radar Players / Player Weapon
+esp.m_radar.zone_fill_alpha,number,15.0f,yes,Visuals/Radar / Grenade Zones / Fill Opacity
+esp.m_radar.zone_outline_alpha,number,59.0f,yes,Visuals/Radar / Grenade Zones / Outline Opacity
+esp.m_radar.zone_outline_thickness,number,1.0f,yes,Visuals/Radar / Grenade Zones / Outline Thickness
+esp.m_sound.color.a,number,200,yes,Visuals/Players / Sound ESP / Ring Color
+esp.m_sound.color.b,number,255,yes,Visuals/Players / Sound ESP / Ring Color
+esp.m_sound.color.g,number,200,yes,Visuals/Players / Sound ESP / Ring Color
+esp.m_sound.color.r,number,120,yes,Visuals/Players / Sound ESP / Ring Color
+esp.m_sound.duration,number,1.6f,yes,Visuals/Players / Sound ESP / Duration
+esp.m_sound.enabled,boolean,false,yes,Visuals/Players / Skeleton & Hitboxes / Sound ESP
+esp.m_sound.local_sync,boolean,false,yes,Visuals/Players / Sound ESP / Local Sync
+esp.m_sound.radius,number,34.0f,yes,Visuals/Players / Sound ESP / Ring Radius
+misc.auto_accept,boolean,true,yes,Automation / MATCH AUTOMATION / Auto Accept Match
+misc.auto_crouch,boolean,false,yes,Walkbot / WALK BOT AUTOMATION / Auto Crouch
+misc.cpu_priority,number,1,yes,Misc/Overlay / Engine / CPU Priority
+misc.fps_limit,number,240,yes,Misc/Overlay / Engine / Maximum FPS
+misc.gpu_priority,number,0,yes,Misc/Overlay / Engine / GPU Priority
+misc.language,number,0,yes,Misc/Overlay / Interface / Language
+misc.limit_fps,boolean,true,yes,Misc/Overlay / Engine / FPS Limiter
+misc.m_auto_bonus.enabled,boolean,false,yes,Walkbot / WALK BOT AUTOMATION / Auto Bonus Weapon
+misc.m_auto_bonus.interval_ms,number,1000,yes,Walkbot / WALK BOT AUTOMATION / Interval
+misc.m_auto_bonus.key,number,71,yes,Walkbot / WALK BOT AUTOMATION / Pickup Key
+misc.m_auto_stop.enabled,boolean,false,yes,Triggerbot / Global / Triggerbot Core / Auto Stop / Auto Stop
+misc.m_auto_stop.physical_fire,boolean,true,no,
+misc.m_auto_stop.predictive_trigger,boolean,true,no,
+misc.m_auto_stop.required_shoot_speed,number,34.0f,yes,Triggerbot / Global / Triggerbot Core / Auto Stop / Shoot Speed
+misc.m_auto_stop.stop_speed,number,8.0f,yes,Triggerbot / Global / Triggerbot Core / Auto Stop / Stop Speed
+misc.m_bomb_info.layout.anchor,number,0,no,
+misc.m_bomb_info.layout.offset_x,number,40.0f,no,
+misc.m_bomb_info.layout.offset_y,number,40.0f,no,
+misc.m_bomb_info.layout.scale,number,1.0f,no,
+misc.m_bomb_info.layout.version,number,1,no,
+misc.m_bomb_info.position_x,number,40.0f,no,
+misc.m_bomb_info.position_y,number,40.0f,no,
+misc.m_bullet_tracers.bloom,boolean,true,yes,Visuals/Effects / Tracer Appearance / Bloom Effect
+misc.m_bullet_tracers.color.a,number,200,yes,Visuals/Effects / Tracer Appearance / Tracer Color
+misc.m_bullet_tracers.color.b,number,229,yes,Visuals/Effects / Tracer Appearance / Tracer Color
+misc.m_bullet_tracers.color.g,number,203,yes,Visuals/Effects / Tracer Appearance / Tracer Color
+misc.m_bullet_tracers.color.r,number,192,yes,Visuals/Effects / Tracer Appearance / Tracer Color
+misc.m_bullet_tracers.cube_edge_color.a,number,230,yes,Visuals/Effects / Impact Cubes / Cube Edge Color
+misc.m_bullet_tracers.cube_edge_color.b,number,229,yes,Visuals/Effects / Impact Cubes / Cube Edge Color
+misc.m_bullet_tracers.cube_edge_color.g,number,203,yes,Visuals/Effects / Impact Cubes / Cube Edge Color
+misc.m_bullet_tracers.cube_edge_color.r,number,192,yes,Visuals/Effects / Impact Cubes / Cube Edge Color
+misc.m_bullet_tracers.cube_face_alpha,number,38.0f,yes,Visuals/Effects / Impact Cubes / Cube Face Alpha
+misc.m_bullet_tracers.cube_half,number,1.25f,yes,Visuals/Effects / Impact Cubes / Cube Size
+misc.m_bullet_tracers.draw_cubes,boolean,true,yes,Visuals/Effects / Bullet Tracers / Impact Cubes
+misc.m_bullet_tracers.draw_line,boolean,true,yes,Visuals/Effects / Bullet Tracers / Draw Trajectory Line
+misc.m_bullet_tracers.duration,number,2.0f,yes,Visuals/Effects / Tracer Lifetime / Fade Duration
+misc.m_bullet_tracers.enabled,boolean,false,yes,Visuals/Effects / Bullet Effects / Enable Bullet Tracers
+misc.m_bullet_tracers.fade_far,number,160.0f,yes,Visuals/Effects / Distance Fade / Fade Far
+misc.m_bullet_tracers.fade_near,number,45.0f,yes,Visuals/Effects / Distance Fade / Fade Near
+misc.m_bullet_tracers.max_count,number,40,yes,Visuals/Effects / Tracer Lifetime / Max Tracers
+misc.m_bullet_tracers.thickness,number,1.5f,yes,Visuals/Effects / Tracer Appearance / Thickness
+misc.m_event_log.duration,number,5.0f,yes,Misc/Overlay / Event Log / Duration
+misc.m_event_log.enabled,boolean,false,yes,Misc/Overlay / Overlay / Show Event Log
+misc.m_event_log.layout.anchor,number,0,no,
+misc.m_event_log.layout.offset_x,number,40.0f,no,
+misc.m_event_log.layout.offset_y,number,40.0f,no,
+misc.m_event_log.layout.scale,number,1.0f,no,
+misc.m_event_log.layout.version,number,1,no,
+misc.m_event_log.max_entries,number,5,yes,Misc/Overlay / Event Log / Maximum Entries
+misc.m_event_log.show_blocked,boolean,true,yes,Misc/Overlay / Event Log / Events
+misc.m_event_log.show_hits,boolean,true,yes,Misc/Overlay / Event Log / Events
+misc.m_event_log.show_info,boolean,true,yes,Misc/Overlay / Event Log / Events
+misc.m_event_log.show_kills,boolean,true,yes,Misc/Overlay / Event Log / Events
+misc.m_event_log.show_misses,boolean,true,yes,Misc/Overlay / Event Log / Events
+misc.m_event_log.show_shots,boolean,true,yes,Misc/Overlay / Event Log / Events
+misc.m_game_controls.attack,number,1,yes,Misc/General / Game Binds / Attack
+misc.m_game_controls.attack2,number,2,yes,Misc/General / Game Binds / Secondary Attack
+misc.m_game_controls.back,number,83,yes,Misc/General / Game Binds / Back
+misc.m_game_controls.buy_menu,number,66,yes,Misc/General / Game Binds / Buy Menu
+misc.m_game_controls.duck,number,17,yes,Misc/General / Game Binds / Duck
+misc.m_game_controls.forward,number,87,yes,Misc/General / Game Binds / Forward
+misc.m_game_controls.jump,number,32,yes,Misc/General / Game Binds / Jump
+misc.m_game_controls.left,number,65,yes,Misc/General / Game Binds / Left
+misc.m_game_controls.reload,number,82,yes,Misc/General / Game Binds / Reload Weapon
+misc.m_game_controls.right,number,68,yes,Misc/General / Game Binds / Right
+misc.m_game_controls.use,number,69,yes,Misc/General / Game Binds / Use
+misc.m_game_controls.walk,number,16,yes,Misc/General / Game Binds / Walk
+misc.m_hitmarker.color.a,number,255,yes,Visuals/Effects / Hitmarker / Marker Color
+misc.m_hitmarker.color.b,number,250,yes,Visuals/Effects / Hitmarker / Marker Color
+misc.m_hitmarker.color.g,number,247,yes,Visuals/Effects / Hitmarker / Marker Color
+misc.m_hitmarker.color.r,number,245,yes,Visuals/Effects / Hitmarker / Marker Color
+misc.m_hitmarker.duration,number,0.55f,yes,Visuals/Effects / Hitmarker / Marker Duration
+misc.m_hitmarker.enabled,boolean,true,yes,Visuals/Effects / Bullet Effects / World Hitmarker
+misc.m_hitmarker.gap,number,3.0f,yes,Visuals/Effects / Hitmarker Geometry / Center Gap
+misc.m_hitmarker.size,number,8.0f,yes,Visuals/Effects / Hitmarker Geometry / Marker Size
+misc.m_hitmarker.thickness,number,1.5f,yes,Visuals/Effects / Hitmarker Geometry / Marker Thickness
+misc.m_hitsound.damage_color.a,number,255,yes,Visuals/Effects / Floating Damage / Damage Color
+misc.m_hitsound.damage_color.b,number,112,yes,Visuals/Effects / Floating Damage / Damage Color
+misc.m_hitsound.damage_color.g,number,108,yes,Visuals/Effects / Floating Damage / Damage Color
+misc.m_hitsound.damage_color.r,number,255,yes,Visuals/Effects / Floating Damage / Damage Color
+misc.m_hitsound.damage_duration,number,0.75f,yes,Visuals/Effects / Floating Damage / Damage Duration
+misc.m_hitsound.damage_rise,number,30.0f,yes,Visuals/Effects / Floating Damage / Damage Rise
+misc.m_hitsound.damage_size,number,13.0f,yes,Visuals/Effects / Floating Damage / Damage Size
+misc.m_hitsound.enabled,boolean,true,yes,Visuals/Effects / Bullet Effects / Hit Sound
+misc.m_hitsound.show_damage,boolean,true,yes,Visuals/Effects / Hit Sound / Floating Damage
+misc.m_hitsound.style,number,4,yes,Visuals/Effects / Hit Sound / Sound
+misc.m_hitsound.volume,number,0.55f,yes,Visuals/Effects / Hit Sound / Volume
+misc.m_keybind_list.enabled,boolean,false,yes,Misc/Overlay / Overlay / Show Active Binds
+misc.m_keybind_list.layout.anchor,number,0,no,
+misc.m_keybind_list.layout.offset_x,number,40.0f,no,
+misc.m_keybind_list.layout.offset_y,number,40.0f,no,
+misc.m_keybind_list.layout.scale,number,1.0f,no,
+misc.m_keybind_list.layout.version,number,1,no,
+misc.m_keybind_list.show_always,boolean,true,yes,Misc/Overlay / Active Binds / Always On Binds
+misc.m_keybind_list.show_hold,boolean,true,yes,Misc/Overlay / Active Binds / Hold Binds
+misc.m_keybind_list.show_toggle,boolean,true,yes,Misc/Overlay / Active Binds / Toggle Binds
+misc.m_spectator_list.enabled,boolean,false,yes,Misc/Overlay / Overlay / Show Spectators
+misc.m_spectator_list.layout.anchor,number,0,no,
+misc.m_spectator_list.layout.offset_x,number,40.0f,no,
+misc.m_spectator_list.layout.offset_y,number,40.0f,no,
+misc.m_spectator_list.layout.scale,number,1.0f,no,
+misc.m_spectator_list.layout.version,number,1,no,
+misc.m_spectator_list.position_x,number,40.0f,no,
+misc.m_spectator_list.position_y,number,40.0f,no,
+misc.m_spectator_list.show_avatars,boolean,true,no,
+misc.m_walk_bot.aim,boolean,true,yes,Walkbot / COMBAT / Own Aim
+misc.m_walk_bot.aim_body_lethal,boolean,true,yes,Walkbot / COMBAT / Body If Lethal
+misc.m_walk_bot.aim_hitboxes,number,1,yes,Walkbot / COMBAT / Hitboxes
+misc.m_walk_bot.aim_jitter,number,0.08f,yes,Walkbot / COMBAT / Jitter
+misc.m_walk_bot.aim_multipoint,boolean,false,yes,Walkbot / COMBAT / Multi-Point
+misc.m_walk_bot.aim_multipoint_config.body_scale,number,0.50f,yes,Walkbot / COMBAT / Body Scale
+misc.m_walk_bot.aim_multipoint_config.caps,boolean,true,yes,Walkbot / COMBAT / Cap Points
+misc.m_walk_bot.aim_multipoint_config.display,boolean,false,yes,Walkbot / COMBAT / Display Multipoints
+misc.m_walk_bot.aim_multipoint_config.head_scale,number,0.50f,yes,Walkbot / COMBAT / Head Scale
+misc.m_walk_bot.aim_multipoint_config.limb_scale,number,0.50f,yes,Walkbot / COMBAT / Limbs Scale
+misc.m_walk_bot.aim_multipoint_config.performance,number,0,yes,Walkbot / COMBAT / Performance
+misc.m_walk_bot.aim_multipoint_config.sides,boolean,true,yes,Walkbot / COMBAT / Side Points
+misc.m_walk_bot.aim_reaction_ms,number,100,yes,Walkbot / COMBAT / Reaction Time (ms)
+misc.m_walk_bot.aim_smoothing,number,20,yes,Walkbot / COMBAT / Smoothing
+misc.m_walk_bot.aim_speed,number,1.0f,yes,Walkbot / COMBAT / Hand Speed
+misc.m_walk_bot.auto_buy,boolean,false,yes,Walkbot / WALK BOT AUTOMATION / Auto Buy
+misc.m_walk_bot.auto_disconnect,boolean,false,yes,Automation / MATCH AUTOMATION / Auto Disconnect
+misc.m_walk_bot.auto_health_shot,boolean,false,yes,Walkbot / WALK BOT AUTOMATION / Auto Health Shot
+misc.m_walk_bot.auto_knife,boolean,false,yes,Walkbot / WALK BOT AUTOMATION / Auto Knife
+misc.m_walk_bot.auto_knife_afk_only,boolean,true,yes,Walkbot / WALK BOT AUTOMATION / Knife Only When Target Is AFK
+misc.m_walk_bot.auto_knife_debug,boolean,false,yes,Walkbot / WALK BOT AUTOMATION / Show Eligibility Debug
+misc.m_walk_bot.auto_knife_distance,number,300.0f,yes,Walkbot / WALK BOT AUTOMATION / Distance
+misc.m_walk_bot.auto_knife_respawn_grace_ms,number,1500,yes,Walkbot / WALK BOT AUTOMATION / Respawn Grace (ms)
+misc.m_walk_bot.auto_rejoin,boolean,false,yes,Automation / MATCH AUTOMATION / Auto Rejoin
+misc.m_walk_bot.auto_reload,boolean,true,yes,Walkbot / WALK BOT AUTOMATION / Auto Reload
+misc.m_walk_bot.auto_scope,boolean,true,yes,Walkbot / WALK BOT AUTOMATION / Auto Scope
+misc.m_walk_bot.autofire,boolean,true,yes,Walkbot / COMBAT / Autofire (Triggerbot Settings)
+misc.m_walk_bot.autofire_spray,boolean,false,yes,Walkbot / COMBAT / Spray Mode (Beta)
+misc.m_walk_bot.breakables,boolean,true,yes,Walkbot / WALK BOT / Break Obstacles
+misc.m_walk_bot.buy_edit,number,0,yes,Walkbot / WALK BOT AUTOMATION / Preset
+misc.m_walk_bot.buy_presets[*].custom,boolean,false,yes,Walkbot / WALK BOT AUTOMATION / Own Preset
+misc.m_walk_bot.buy_presets[*].items[*].code,string,"""""",yes,Walkbot / WALK BOT AUTOMATION / Buy Code | Walkbot / WALK BOT AUTOMATION / Remove Item | Walkbot / WALK BOT AUTOMATION / Add Item
+misc.m_walk_bot.buy_presets[*].items[*].enabled,boolean,false,yes,Walkbot / WALK BOT AUTOMATION / Enabled | Walkbot / WALK BOT AUTOMATION / Remove Item | Walkbot / WALK BOT AUTOMATION / Add Item
+misc.m_walk_bot.buy_presets[*].items[*].money,number,2000,yes,Walkbot / WALK BOT AUTOMATION / Amount | Walkbot / WALK BOT AUTOMATION / Remove Item | Walkbot / WALK BOT AUTOMATION / Add Item
+misc.m_walk_bot.buy_presets[*].items[*].money_rule,number,0,yes,Walkbot / WALK BOT AUTOMATION / Money | Walkbot / WALK BOT AUTOMATION / Remove Item | Walkbot / WALK BOT AUTOMATION / Add Item
+misc.m_walk_bot.buy_presets[*].items[*].side,number,0,yes,Walkbot / WALK BOT AUTOMATION / Side | Walkbot / WALK BOT AUTOMATION / Remove Item | Walkbot / WALK BOT AUTOMATION / Add Item
+misc.m_walk_bot.buy_presets[*].random_one,boolean,false,yes,Walkbot / WALK BOT AUTOMATION / One Random Item
+misc.m_walk_bot.disconnect_minutes,number,4,yes,Automation / MATCH AUTOMATION / Minutes On Server
+misc.m_walk_bot.disconnect_score,number,450,yes,Automation / MATCH AUTOMATION / Score
+misc.m_walk_bot.disconnect_spread,number,20,yes,Automation / MATCH AUTOMATION / Random Extra Time
+misc.m_walk_bot.enabled,boolean,false,yes,Walkbot / WALK BOT / Enable Walk Bot
+misc.m_walk_bot.game_mode,number,0,yes,Automation / MATCH AUTOMATION / Game Mode
+misc.m_walk_bot.health_shot_damage_ms,number,5000,yes,Walkbot / WALK BOT AUTOMATION / No Damage For
+misc.m_walk_bot.health_shot_debug,boolean,false,yes,Walkbot / WALK BOT AUTOMATION / Show Debug
+misc.m_walk_bot.health_shot_health,number,50,yes,Walkbot / WALK BOT AUTOMATION / Health Below
+misc.m_walk_bot.health_shot_key,number,88,yes,Walkbot / WALK BOT AUTOMATION / Use Bind
+misc.m_walk_bot.health_shot_near_distance,number,400,yes,Walkbot / WALK BOT AUTOMATION / No Enemy Within
+misc.m_walk_bot.hunt,boolean,false,yes,Walkbot / WALK BOT / Hunt Enemies
+misc.m_walk_bot.look,boolean,true,yes,Walkbot / WALK BOT / Turn Camera
+misc.m_walk_bot.mesh_color.a,number,46,yes,Walkbot / ROUTE DISPLAY / Mesh Color
+misc.m_walk_bot.mesh_color.b,number,255,yes,Walkbot / ROUTE DISPLAY / Mesh Color
+misc.m_walk_bot.mesh_color.g,number,240,yes,Walkbot / ROUTE DISPLAY / Mesh Color
+misc.m_walk_bot.mesh_color.r,number,235,yes,Walkbot / ROUTE DISPLAY / Mesh Color
+misc.m_walk_bot.mesh_distance,number,1400.0f,yes,Walkbot / ROUTE DISPLAY / Mesh Distance
+misc.m_walk_bot.path_color.a,number,220,yes,Walkbot / ROUTE DISPLAY / Route Color
+misc.m_walk_bot.path_color.b,number,255,yes,Walkbot / ROUTE DISPLAY / Route Color
+misc.m_walk_bot.path_color.g,number,170,yes,Walkbot / ROUTE DISPLAY / Route Color
+misc.m_walk_bot.path_color.r,number,120,yes,Walkbot / ROUTE DISPLAY / Route Color
+misc.m_walk_bot.path_thickness,number,2.0f,yes,Walkbot / ROUTE DISPLAY / Route Thickness
+misc.m_walk_bot.react_to_hits,boolean,true,yes,Walkbot / COMBAT / React To Hits
+misc.m_walk_bot.rear_defense,boolean,false,yes,Walkbot / COMBAT / Rear Defense
+misc.m_walk_bot.rear_defense_distance,number,600.0f,yes,Walkbot / COMBAT / Distance
+misc.m_walk_bot.rear_defense_fov,number,120.0f,yes,Walkbot / COMBAT / Rear FOV
+misc.m_walk_bot.rear_defense_hitboxes,number,3,yes,Walkbot / COMBAT / Hitboxes
+misc.m_walk_bot.rear_defense_smoothing,number,10,yes,Walkbot / COMBAT / Smoothing
+misc.m_walk_bot.rear_defense_weapon,number,0,yes,Walkbot / COMBAT / Weapon
+misc.m_walk_bot.record_key,number,119,yes,Walkbot / ROUTE DISPLAY / Record Route Key
+misc.m_walk_bot.route,number,0,yes,Walkbot / WALK BOT / Routes
+misc.m_walk_bot.show_mesh,boolean,true,yes,Walkbot / ROUTE DISPLAY / Show Nav Mesh
+misc.m_walk_bot.show_path,boolean,true,yes,Walkbot / ROUTE DISPLAY / Show Route
+misc.m_walk_bot.show_recordings,boolean,false,yes,Walkbot / ROUTE DISPLAY / Recorded Routes
+misc.m_walk_bot.spray_log,boolean,false,yes,Walkbot / COMBAT / Spray Log (CSV)
+misc.m_walk_bot.team,number,0,yes,Automation / MATCH AUTOMATION / Team
+misc.m_watermark.enabled,boolean,true,yes,Misc/Overlay / Overlay / Show Watermark
+misc.m_watermark.layout.anchor,number,0,no,
+misc.m_watermark.layout.offset_x,number,40.0f,no,
+misc.m_watermark.layout.offset_y,number,40.0f,no,
+misc.m_watermark.layout.scale,number,1.0f,no,
+misc.m_watermark.layout.version,number,1,no,
+misc.m_watermark.position_x,number,40.0f,no,
+misc.m_watermark.position_y,number,40.0f,no,
+misc.m_watermark.show_cpu,boolean,true,yes,Misc/Overlay / Watermark / Show CPU Load
+misc.m_watermark.show_fps,boolean,true,yes,Misc/Overlay / Watermark / Show FPS
+misc.m_watermark.show_loss,boolean,true,yes,Misc/Overlay / Watermark / Show Loss
+misc.m_watermark.show_ping,boolean,true,yes,Misc/Overlay / Watermark / Show Ping
+misc.m_watermark.vertical,boolean,false,no,
+misc.menu_scale,number,1.0f,yes,Misc/Overlay / Interface / DPI Scale
+misc.obs_bypass,boolean,false,yes,Misc/Overlay / Overlay / OBS Bypass
+misc.overlay_opacity,number,0.86f,yes,Misc/Overlay / Overlay / Overlay Opacity
+misc.palette.accent.a,number,255,yes,Misc/Overlay / Interface Colors / Interaction / Accent
+misc.palette.accent.b,number,208,yes,Misc/Overlay / Interface Colors / Interaction / Accent
+misc.palette.accent.g,number,180,yes,Misc/Overlay / Interface Colors / Interaction / Accent
+misc.palette.accent.r,number,180,yes,Misc/Overlay / Interface Colors / Interaction / Accent
+misc.palette.background.a,number,255,yes,Misc/Overlay / Interface Colors / Surfaces / Menu Background
+misc.palette.background.b,number,13,yes,Misc/Overlay / Interface Colors / Surfaces / Menu Background
+misc.palette.background.g,number,13,yes,Misc/Overlay / Interface Colors / Surfaces / Menu Background
+misc.palette.background.r,number,13,yes,Misc/Overlay / Interface Colors / Surfaces / Menu Background
+misc.palette.border.a,number,255,yes,Misc/Overlay / Interface Colors / Interaction / Borders
+misc.palette.border.b,number,33,yes,Misc/Overlay / Interface Colors / Interaction / Borders
+misc.palette.border.g,number,34,yes,Misc/Overlay / Interface Colors / Interaction / Borders
+misc.palette.border.r,number,36,yes,Misc/Overlay / Interface Colors / Interaction / Borders
+misc.palette.card.a,number,255,yes,Misc/Overlay / Interface Colors / Surfaces / Containers
+misc.palette.card.b,number,13,yes,Misc/Overlay / Interface Colors / Surfaces / Containers
+misc.palette.card.g,number,13,yes,Misc/Overlay / Interface Colors / Surfaces / Containers
+misc.palette.card.r,number,13,yes,Misc/Overlay / Interface Colors / Surfaces / Containers
+misc.palette.hover.a,number,255,yes,Misc/Overlay / Interface Colors / Interaction / Hover
+misc.palette.hover.b,number,34,yes,Misc/Overlay / Interface Colors / Interaction / Hover
+misc.palette.hover.g,number,32,yes,Misc/Overlay / Interface Colors / Interaction / Hover
+misc.palette.hover.r,number,30,yes,Misc/Overlay / Interface Colors / Interaction / Hover
+misc.palette.muted_text.a,number,255,yes,Misc/Overlay / Interface Colors / Typography / Muted Text
+misc.palette.muted_text.b,number,130,yes,Misc/Overlay / Interface Colors / Typography / Muted Text
+misc.palette.muted_text.g,number,128,yes,Misc/Overlay / Interface Colors / Typography / Muted Text
+misc.palette.muted_text.r,number,128,yes,Misc/Overlay / Interface Colors / Typography / Muted Text
+misc.palette.panel.a,number,255,yes,Misc/Overlay / Interface Colors / Surfaces / Controls
+misc.palette.panel.b,number,18,yes,Misc/Overlay / Interface Colors / Surfaces / Controls
+misc.palette.panel.g,number,18,yes,Misc/Overlay / Interface Colors / Surfaces / Controls
+misc.palette.panel.r,number,18,yes,Misc/Overlay / Interface Colors / Surfaces / Controls
+misc.palette.popup.a,number,255,yes,Misc/Overlay / Interface Colors / Surfaces / Popups
+misc.palette.popup.b,number,9,yes,Misc/Overlay / Interface Colors / Surfaces / Popups
+misc.palette.popup.g,number,11,yes,Misc/Overlay / Interface Colors / Surfaces / Popups
+misc.palette.popup.r,number,10,yes,Misc/Overlay / Interface Colors / Surfaces / Popups
+misc.palette.text.a,number,255,yes,Misc/Overlay / Interface Colors / Typography / Primary Text
+misc.palette.text.b,number,199,yes,Misc/Overlay / Interface Colors / Typography / Primary Text
+misc.palette.text.g,number,199,yes,Misc/Overlay / Interface Colors / Typography / Primary Text
+misc.palette.text.r,number,199,yes,Misc/Overlay / Interface Colors / Typography / Primary Text
+misc.trigger_debug_overlay,boolean,false,yes,Triggerbot / Global / Triggerbot Core / Show Decision Debug
+misc.use_gpu,boolean,true,yes,Misc/Overlay / Engine / GPU Effects

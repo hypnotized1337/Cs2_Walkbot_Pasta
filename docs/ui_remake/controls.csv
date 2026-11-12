@@ -1,0 +1,769 @@
+page,section,label,widget_type,config_key,default,min,max,condition,source_file,source_line
+Walkbot,WALK BOT,Enable Walk Bot,toggle,misc.m_walk_bot.enabled,false,,,,src/ui/menu/walk_bot_page.cpp,42
+Walkbot,WALK BOT,Routes,select,misc.m_walk_bot.route,0: Random Points (selected default); 1: Recorded Routes,0,1,,src/ui/menu/walk_bot_page.cpp,43-45
+Walkbot,WALK BOT,Behaviour,settings_popup_button,@ui.walkbot.behaviour,closed,,,Opens Hunt Enemies / Turn Camera / Break Obstacles settings,src/ui/menu/walk_bot_page.cpp,46-53
+Walkbot,WALK BOT,Hunt Enemies,toggle,misc.m_walk_bot.hunt,false,,,Behaviour popup,src/ui/menu/walk_bot_page.cpp,46-50
+Walkbot,WALK BOT,Turn Camera,toggle,misc.m_walk_bot.look,true,,,Behaviour popup,src/ui/menu/walk_bot_page.cpp,46-51
+Walkbot,WALK BOT,Break Obstacles,toggle,misc.m_walk_bot.breakables,true,,,Behaviour popup,src/ui/menu/walk_bot_page.cpp,46-52
+Walkbot,COMBAT,Own Aim,toggle+settings popup,misc.m_walk_bot.aim,true,,,,src/ui/menu/walk_bot_page.cpp,59-60
+Walkbot,COMBAT,Hand Speed,slider,misc.m_walk_bot.aim_speed,1.0,0.4,2.5,Own Aim popup; step 0.1,src/ui/menu/walk_bot_page.cpp,62
+Walkbot,COMBAT,Smoothing,slider,misc.m_walk_bot.aim_smoothing,20,0,100,Own Aim popup,src/ui/menu/walk_bot_page.cpp,63
+Walkbot,COMBAT,Jitter,slider,misc.m_walk_bot.aim_jitter,0.08,0.0,1.5,Own Aim popup; step 0.05,src/ui/menu/walk_bot_page.cpp,64
+Walkbot,COMBAT,Reaction Time (ms),slider,misc.m_walk_bot.aim_reaction_ms,100,0,500,Own Aim popup,src/ui/menu/walk_bot_page.cpp,65
+Walkbot,COMBAT,Body If Lethal,toggle,misc.m_walk_bot.aim_body_lethal,true,,,Own Aim popup,src/ui/menu/walk_bot_page.cpp,66
+Walkbot,COMBAT,Hitboxes,multiselect,misc.m_walk_bot.aim_hitboxes,"1: Head; bitmask options Head=1, Body=2, Arms=4, Legs=8",,,Own Aim popup,src/ui/menu/walk_bot_page.cpp;src/ui/menu/widgets.cpp,67;359-368
+Walkbot,COMBAT,Multi-Point,toggle+settings popup,misc.m_walk_bot.aim_multipoint,false,,,Own Aim popup,src/ui/menu/walk_bot_page.cpp;src/ui/menu/combat_widgets.cpp,68;135-152
+Walkbot,COMBAT,Performance,select,misc.m_walk_bot.aim_multipoint_config.performance,0: High Performance (selected default); 1: Medium; 2: Low,0,2,Multi-Point popup,src/ui/menu/combat_widgets.cpp,140-145
+Walkbot,COMBAT,Cap Points,toggle,misc.m_walk_bot.aim_multipoint_config.caps,true,,,Multi-Point popup,src/ui/menu/combat_widgets.cpp,146
+Walkbot,COMBAT,Side Points,toggle,misc.m_walk_bot.aim_multipoint_config.sides,true,,,Multi-Point popup,src/ui/menu/combat_widgets.cpp,147
+Walkbot,COMBAT,Display Multipoints,toggle,misc.m_walk_bot.aim_multipoint_config.display,false,,,Multi-Point popup,src/ui/menu/combat_widgets.cpp,148
+Walkbot,COMBAT,Head Scale,slider,misc.m_walk_bot.aim_multipoint_config.head_scale,0.50,0.05,0.95,Multi-Point popup; step 0.05,src/ui/menu/combat_widgets.cpp,149
+Walkbot,COMBAT,Body Scale,slider,misc.m_walk_bot.aim_multipoint_config.body_scale,0.50,0.05,0.95,Multi-Point popup; step 0.05,src/ui/menu/combat_widgets.cpp,150
+Walkbot,COMBAT,Limbs Scale,slider,misc.m_walk_bot.aim_multipoint_config.limb_scale,0.50,0.05,0.95,Multi-Point popup; step 0.05,src/ui/menu/combat_widgets.cpp,151
+Walkbot,COMBAT,Autofire (Triggerbot Settings),toggle,misc.m_walk_bot.autofire,true,,,,src/ui/menu/walk_bot_page.cpp,71
+Walkbot,COMBAT,Spray Mode (Beta),toggle+settings popup,misc.m_walk_bot.autofire_spray,false,,,,src/ui/menu/walk_bot_page.cpp,72-73
+Walkbot,COMBAT,Spray Log (CSV),toggle,misc.m_walk_bot.spray_log,false,,,Spray Mode popup,src/ui/menu/walk_bot_page.cpp,73
+Walkbot,COMBAT,Rear Defense,toggle+settings popup,misc.m_walk_bot.rear_defense,false,,,step 25,src/ui/menu/walk_bot_page.cpp,74-75
+Walkbot,COMBAT,Distance,slider,misc.m_walk_bot.rear_defense_distance,600.0,100.0,1500.0,Rear Defense popup; step 25,src/ui/menu/walk_bot_page.cpp,78
+Walkbot,COMBAT,Rear FOV,slider,misc.m_walk_bot.rear_defense_fov,120.0,40.0,180.0,Rear Defense popup; step 5; step 5,src/ui/menu/walk_bot_page.cpp,79
+Walkbot,COMBAT,Smoothing,slider,misc.m_walk_bot.rear_defense_smoothing,10,0,100,Rear Defense popup,src/ui/menu/walk_bot_page.cpp,80
+Walkbot,COMBAT,Hitboxes,multiselect,misc.m_walk_bot.rear_defense_hitboxes,"3: Head + Body; bitmask options Head=1, Body=2, Arms=4, Legs=8",,,Rear Defense popup,src/ui/menu/walk_bot_page.cpp;src/ui/menu/widgets.cpp,81;359-368
+Walkbot,COMBAT,Weapon,select,misc.m_walk_bot.rear_defense_weapon,0: Primary (selected default); 1: Knife,0,1,Rear Defense popup,src/ui/menu/walk_bot_page.cpp,82-83
+Walkbot,COMBAT,React To Hits,toggle,misc.m_walk_bot.react_to_hits,true,,,,src/ui/menu/walk_bot_page.cpp,85
+Walkbot,ROUTE DISPLAY,Show Route,toggle+settings popup,misc.m_walk_bot.show_path,true,,,,src/ui/menu/walk_bot_page.cpp,93-98
+Walkbot,ROUTE DISPLAY,Route Color,color,misc.m_walk_bot.path_color,"RGBA(120,170,255,220)",,,Show Route popup,src/ui/menu/walk_bot_page.cpp,96
+Walkbot,ROUTE DISPLAY,Route Thickness,slider,misc.m_walk_bot.path_thickness,2.0,0.5,6.0,Show Route popup; step 0.5,src/ui/menu/walk_bot_page.cpp,97
+Walkbot,ROUTE DISPLAY,Show Nav Mesh,toggle+settings popup,misc.m_walk_bot.show_mesh,true,,,,src/ui/menu/walk_bot_page.cpp,99-104
+Walkbot,ROUTE DISPLAY,Mesh Color,color,misc.m_walk_bot.mesh_color,"RGBA(235,240,255,46)",,,Show Nav Mesh popup,src/ui/menu/walk_bot_page.cpp,102
+Walkbot,ROUTE DISPLAY,Mesh Distance,slider,misc.m_walk_bot.mesh_distance,1400.0,200.0,4000.0,Show Nav Mesh popup; step 50,src/ui/menu/walk_bot_page.cpp,103
+Walkbot,ROUTE DISPLAY,Recorded Routes,toggle+settings popup,misc.m_walk_bot.show_recordings,false,,,,src/ui/menu/walk_bot_page.cpp,107-114
+Walkbot,ROUTE DISPLAY,Record Route Key,keybind,misc.m_walk_bot.record_key,VK_F8,,,Recorded Routes popup; keyboard-only; Escape clears,src/ui/menu/walk_bot_page.cpp,110
+Walkbot,ROUTE DISPLAY,Folder,button,@action.open_walkbot_folder,Opens runtime storage root/walkbot,,,Recorded Routes popup,src/ui/menu/walk_bot_page.cpp,111-113
+Walkbot,WALK BOT AUTOMATION,Auto Crouch,toggle,misc.auto_crouch,false,,,"Walk Bot enabled; controls are disabled and visually dimmed while false, with values preserved.",src/ui/menu/walk_bot_page.cpp,132
+Walkbot,WALK BOT AUTOMATION,Auto Scope,toggle,misc.m_walk_bot.auto_scope,true,,,"Walk Bot enabled; controls are disabled and visually dimmed while false, with values preserved.",src/ui/menu/walk_bot_page.cpp,133
+Walkbot,WALK BOT AUTOMATION,Auto Bonus Weapon,toggle+settings popup,misc.m_auto_bonus.enabled,false,,,"Walk Bot enabled; controls are disabled and visually dimmed while false, with values preserved.",src/ui/menu/walk_bot_page.cpp,134-139
+Walkbot,WALK BOT AUTOMATION,Pickup Key,keybind,misc.m_auto_bonus.key,'G' (71 decimal),,,Walk Bot enabled; Auto Bonus Weapon popup; keyboard-only=true; game_control=false,src/ui/menu/walk_bot_page.cpp,137
+Walkbot,WALK BOT AUTOMATION,Interval,slider,misc.m_auto_bonus.interval_ms,1000,250,5000,Walk Bot enabled; Auto Bonus Weapon popup,src/ui/menu/walk_bot_page.cpp,138
+Walkbot,WALK BOT AUTOMATION,Auto Knife,toggle+settings popup,misc.m_walk_bot.auto_knife,false,,,"Walk Bot enabled; controls are disabled and visually dimmed while false, with values preserved.",src/ui/menu/walk_bot_page.cpp,140-147
+Walkbot,WALK BOT AUTOMATION,Distance,slider,misc.m_walk_bot.auto_knife_distance,300.0,80.0,600.0,Walk Bot enabled; Auto Knife popup; step 10; step 10,src/ui/menu/walk_bot_page.cpp,143
+Walkbot,WALK BOT AUTOMATION,Respawn Grace (ms),slider,misc.m_walk_bot.auto_knife_respawn_grace_ms,1500,0,5000,Walk Bot enabled; Auto Knife popup,src/ui/menu/walk_bot_page.cpp,144
+Walkbot,WALK BOT AUTOMATION,Knife Only When Target Is AFK,toggle,misc.m_walk_bot.auto_knife_afk_only,true,,,Walk Bot enabled; Auto Knife popup,src/ui/menu/walk_bot_page.cpp,145
+Walkbot,WALK BOT AUTOMATION,Show Eligibility Debug,toggle,misc.m_walk_bot.auto_knife_debug,false,,,Walk Bot enabled; Auto Knife popup,src/ui/menu/walk_bot_page.cpp,146
+Walkbot,WALK BOT AUTOMATION,Auto Health Shot,toggle+settings popup,misc.m_walk_bot.auto_health_shot,false,,,Walk Bot enabled; UI locked when off although config comment describes standalone behavior.,src/ui/menu/walk_bot_page.cpp,148-156
+Walkbot,WALK BOT AUTOMATION,Health Below,slider,misc.m_walk_bot.health_shot_health,50,1,99,Walk Bot enabled; Auto Health Shot popup,src/ui/menu/walk_bot_page.cpp,151
+Walkbot,WALK BOT AUTOMATION,No Damage For,slider,misc.m_walk_bot.health_shot_damage_ms,5000,0,15000,Walk Bot enabled; Auto Health Shot popup; suffix ms,src/ui/menu/walk_bot_page.cpp,152
+Walkbot,WALK BOT AUTOMATION,No Enemy Within,slider,misc.m_walk_bot.health_shot_near_distance,400,0,2000,Walk Bot enabled; Auto Health Shot popup; suffix u; 0 disables gate,src/ui/menu/walk_bot_page.cpp,153
+Walkbot,WALK BOT AUTOMATION,Use Bind,keybind,misc.m_walk_bot.health_shot_key,'X' (88 decimal),,,Walk Bot enabled; Auto Health Shot popup; keyboard-only=true; game_control=false; Escape clears,src/ui/menu/walk_bot_page.cpp,154
+Walkbot,WALK BOT AUTOMATION,Show Debug,toggle,misc.m_walk_bot.health_shot_debug,false,,,Walk Bot enabled; Auto Health Shot popup,src/ui/menu/walk_bot_page.cpp,155
+Walkbot,WALK BOT AUTOMATION,Auto Reload,toggle,misc.m_walk_bot.auto_reload,true,,,"Walk Bot enabled; controls are disabled and visually dimmed while false, with values preserved.",src/ui/menu/walk_bot_page.cpp,157
+Walkbot,WALK BOT AUTOMATION,Auto Buy,toggle+settings popup,misc.m_walk_bot.auto_buy,false,,,"Walk Bot enabled; controls are disabled and visually dimmed while false, with values preserved.",src/ui/menu/walk_bot_page.cpp,158-211
+Walkbot,WALK BOT AUTOMATION,Preset,select,misc.m_walk_bot.buy_edit,0: Default (selected default); 1: Premier; 2: Competitive; 3: Wingman; 4: Casual; 5: Deathmatch,0,5,Walk Bot enabled; Auto Buy popup,src/ui/menu/walk_bot_page.cpp,162-164
+Walkbot,WALK BOT AUTOMATION,Own Preset,toggle,misc.m_walk_bot.buy_presets[*].custom,false per preset,,,Walk Bot enabled; Auto Buy popup; only shown when selected preset is non-Default,src/ui/menu/walk_bot_page.cpp,165-166
+Walkbot,WALK BOT AUTOMATION,One Random Item,toggle,misc.m_walk_bot.buy_presets[*].random_one,false per preset,,,Walk Bot enabled; Auto Buy popup; only if selected preset is Default or custom=true,src/ui/menu/walk_bot_page.cpp,167-169
+Walkbot,WALK BOT AUTOMATION,Enabled,toggle,misc.m_walk_bot.buy_presets[*].items[*].enabled,false in empty slot; add initializes true,,,Walk Bot enabled; Auto Buy popup; selected preset must be Default or custom=true; one row per populated item (0–10),src/ui/menu/walk_bot_page.cpp,171-188
+Walkbot,WALK BOT AUTOMATION,Buy Code,text input,misc.m_walk_bot.buy_presets[*].items[*].code,empty in empty slot; add initializes empty,0,3 chars (4-byte buffer incl NUL),Walk Bot enabled; Auto Buy popup; selected preset must be Default or custom=true; one row per populated item (0–10),src/ui/menu/walk_bot_page.cpp,173-188
+Walkbot,WALK BOT AUTOMATION,Side,select,misc.m_walk_bot.buy_presets[*].items[*].side,0: Both Sides (selected default); 1: T; 2: CT,0,2,Walk Bot enabled; Auto Buy popup; selected preset must be Default or custom=true; one row per populated item (0–10),src/ui/menu/walk_bot_page.cpp,189-190
+Walkbot,WALK BOT AUTOMATION,Money,select,misc.m_walk_bot.buy_presets[*].items[*].money_rule,0: Any Money (selected default); 1: Less Than; 2: At Least,0,2,Walk Bot enabled; Auto Buy popup; selected preset must be Default or custom=true; one row per populated item (0–10),src/ui/menu/walk_bot_page.cpp,191-192
+Walkbot,WALK BOT AUTOMATION,Amount,slider,misc.m_walk_bot.buy_presets[*].items[*].money,2000,0,16000,Walk Bot enabled; Auto Buy popup; selected preset must be Default or custom=true; one row per populated item (0–10); suffix $,src/ui/menu/walk_bot_page.cpp,193
+Walkbot,WALK BOT AUTOMATION,Remove Item,button,@action.remove_buy_item;misc.m_walk_bot.buy_presets[*].items[*];@ui.item_index,Removes selected item; remaining items shift up,,,Walk Bot enabled; Auto Buy popup; selected preset must be Default or custom=true; one row per populated item (0–10),src/ui/menu/walk_bot_page.cpp,194-203
+Walkbot,WALK BOT AUTOMATION,Add Item,button,@action.add_buy_item;misc.m_walk_bot.buy_presets[*].items[*],"Adds {enabled=true, code="""", side=0, money_rule=0, money=2000}; max 10 per preset",,,Walk Bot enabled; Auto Buy popup; preset must be Default or custom=true; only while count < 10,src/ui/menu/walk_bot_page.cpp,205-210
+Automation,MATCH AUTOMATION,Auto Accept Match,toggle,misc.auto_accept,true,,,,src/ui/menu/automation_page.cpp,25
+Automation,MATCH AUTOMATION,Auto Rejoin,toggle+settings popup,misc.m_walk_bot.auto_rejoin,false,,,,src/ui/menu/automation_page.cpp,26-36
+Automation,MATCH AUTOMATION,Game Mode,select,misc.m_walk_bot.game_mode,0: Deathmatch (selected default); 1: Casual; 2: Competitive; 3: Wingman; 4: Premier,0,4,Auto Rejoin popup,src/ui/menu/automation_page.cpp,29-32
+Automation,MATCH AUTOMATION,Team,select,misc.m_walk_bot.team,0: Terrorists (selected default); 1: Counter-Terrorists,0,1,Auto Rejoin popup,src/ui/menu/automation_page.cpp,33-35
+Automation,MATCH AUTOMATION,Auto Disconnect,toggle+settings popup,misc.m_walk_bot.auto_disconnect,false,,,,src/ui/menu/automation_page.cpp,37-43
+Automation,MATCH AUTOMATION,Score,slider,misc.m_walk_bot.disconnect_score,450,0,2000,Auto Disconnect popup,src/ui/menu/automation_page.cpp,40
+Automation,MATCH AUTOMATION,Minutes On Server,slider,misc.m_walk_bot.disconnect_minutes,4,0,60,Auto Disconnect popup; suffix min,src/ui/menu/automation_page.cpp,41
+Automation,MATCH AUTOMATION,Random Extra Time,slider,misc.m_walk_bot.disconnect_spread,20,0,100,Auto Disconnect popup; percent,src/ui/menu/automation_page.cpp,42
+Aimbot,Weapon group navigation,Global,tab_button,@ui.combat_group,m_weapon_group=-1,,,Always,src/ui/menu/combat_page.cpp,18; caller src/ui/menu/aimbot_page.cpp:12
+Aimbot,Weapon group navigation,Pistol,tab_button,@ui.combat_group,m_weapon_group=0,,,Always,src/ui/menu/combat_page.cpp,18; caller src/ui/menu/aimbot_page.cpp:12
+Aimbot,Weapon group navigation,SMG,tab_button,@ui.combat_group,m_weapon_group=1,,,Always,src/ui/menu/combat_page.cpp,18; caller src/ui/menu/aimbot_page.cpp:12
+Aimbot,Weapon group navigation,Rifle,tab_button,@ui.combat_group,m_weapon_group=2,,,Always,src/ui/menu/combat_page.cpp,18; caller src/ui/menu/aimbot_page.cpp:12
+Aimbot,Weapon group navigation,Shotgun,tab_button,@ui.combat_group,m_weapon_group=3,,,Always,src/ui/menu/combat_page.cpp,18; caller src/ui/menu/aimbot_page.cpp:12
+Aimbot,Weapon group navigation,Sniper,tab_button,@ui.combat_group,m_weapon_group=4,,,Always,src/ui/menu/combat_page.cpp,18; caller src/ui/menu/aimbot_page.cpp:12
+Aimbot,Weapon group navigation,Heavy,tab_button,@ui.combat_group,m_weapon_group=5,,,Always,src/ui/menu/combat_page.cpp,18; caller src/ui/menu/aimbot_page.cpp:12
+Triggerbot,Weapon group navigation,Global,tab_button,@ui.combat_group,m_weapon_group=-1,,,Always,src/ui/menu/combat_page.cpp,18; caller src/ui/menu/triggerbot_page.cpp:12
+Triggerbot,Weapon group navigation,Pistol,tab_button,@ui.combat_group,m_weapon_group=0,,,Always,src/ui/menu/combat_page.cpp,18; caller src/ui/menu/triggerbot_page.cpp:12
+Triggerbot,Weapon group navigation,SMG,tab_button,@ui.combat_group,m_weapon_group=1,,,Always,src/ui/menu/combat_page.cpp,18; caller src/ui/menu/triggerbot_page.cpp:12
+Triggerbot,Weapon group navigation,Rifle,tab_button,@ui.combat_group,m_weapon_group=2,,,Always,src/ui/menu/combat_page.cpp,18; caller src/ui/menu/triggerbot_page.cpp:12
+Triggerbot,Weapon group navigation,Shotgun,tab_button,@ui.combat_group,m_weapon_group=3,,,Always,src/ui/menu/combat_page.cpp,18; caller src/ui/menu/triggerbot_page.cpp:12
+Triggerbot,Weapon group navigation,Sniper,tab_button,@ui.combat_group,m_weapon_group=4,,,Always,src/ui/menu/combat_page.cpp,18; caller src/ui/menu/triggerbot_page.cpp:12
+Triggerbot,Weapon group navigation,Heavy,tab_button,@ui.combat_group,m_weapon_group=5,,,Always,src/ui/menu/combat_page.cpp,18; caller src/ui/menu/triggerbot_page.cpp:12
+Aimbot,Global / Targeting,Master Switch,toggle_popup,combat_global.aimbot_enabled,false (global_settings) / group use_global=true,,,Global profile,src/ui/menu/aimbot_page.cpp,21; helper combat_widgets.cpp:51-54
+Aimbot,Global / Targeting,Master Switch settings,popup_button,@ui.popup.open.master_switch,— (UI state only),,,Global profile,src/ui/menu/combat_widgets.cpp,53-54
+Aimbot,Global / Targeting,Mode,dropdown,combat_global.aimbot_activation_mode,activation::hold (0),,,Global profile; Master Switch popup,src/ui/menu/combat_widgets.cpp,53
+Aimbot,Global / Targeting,Key,keybind,combat_global.aimbot_key,0x43 (67),,,Global profile; activation mode != Always On,src/ui/menu/aimbot_page.cpp,24-25; helper widgets.cpp:467
+Aimbot,Global / Targeting,"Checks (Jump, Smoke, Flash)",multiselect,combat_global.aimbot_checks.airborne;combat_global.aimbot_checks.smoke;combat_global.aimbot_checks.flashed,false; false; false (legit_checks defaults),,,Global profile,src/ui/menu/combat_widgets.cpp,10-18; caller src/ui/menu/aimbot_page.cpp:26
+Aimbot,Global / Targeting,"Hitboxes (Head, Body, Arms, Legs)",multiselect,combat_global.aimbot_hitbox_parts,aim_part::all (15),,,Global profile,src/ui/menu/aimbot_page.cpp,27; helper widgets.cpp:359
+Aimbot,Global / Targeting,FOV settings,popup_button,@ui.popup.open.fov,— (UI state only),,,Global profile,src/ui/menu/combat_widgets.cpp,78-101
+Aimbot,Global / Targeting / FOV,Mode,dropdown,combat_global.aimbot_fov_config.selection,target_distance (2); options Fixed/Distance/Target,,,Global profile; FOV popup,src/ui/menu/combat_widgets.cpp,81
+Aimbot,Global / Targeting / FOV,Radius,slider,combat_global.aimbot_fov,2 (global_settings),1,360,FOV mode = Fixed; Global profile,src/ui/menu/combat_widgets.cpp,84
+Aimbot,Global / Targeting / FOV,Max Radius (summary),slider,combat_global.aimbot_fov_config.target_near_fov,20.0 (target_near_fov default),2.0,45.0,FOV mode != Fixed; FOV popup,src/ui/menu/combat_widgets.cpp,88
+Aimbot,Global / Targeting / FOV,Advanced settings,popup_button,@ui.popup.open.fov_advanced,— (UI state only),,,Global profile; FOV mode != Fixed,src/ui/menu/combat_widgets.cpp,89-98
+Aimbot,Global / Targeting / FOV / Advanced,Full Size At,slider,combat_global.aimbot_fov_config.target_near_distance_m,2.5 m,0.5,10.0,FOV mode = Target; Advanced popup,src/ui/menu/combat_widgets.cpp,93
+Aimbot,Global / Targeting / FOV / Advanced,Max Radius,slider,combat_global.aimbot_fov_config.target_near_fov,20.0°,2.0,45.0,FOV mode = Target; Advanced popup,src/ui/menu/combat_widgets.cpp,94
+Aimbot,Global / Targeting / FOV / Advanced,Min Size At,slider,combat_global.aimbot_fov_config.target_far_distance_m,10.0 m,10.0,100.0,FOV mode = Target; Advanced popup,src/ui/menu/combat_widgets.cpp,95
+Aimbot,Global / Targeting / FOV / Advanced,Min Radius,slider,combat_global.aimbot_fov_config.target_far_fov,2.0°,0.25,15.0,FOV mode = Target; Advanced popup,src/ui/menu/combat_widgets.cpp,96
+Aimbot,Global / Targeting / FOV / Advanced,Falloff,slider,combat_global.aimbot_fov_config.target_distance_curve,1.0,0.25,4.0,FOV mode = Target; Advanced popup,src/ui/menu/combat_widgets.cpp,97
+Aimbot,Global / Targeting / FOV,Max Radius (summary),slider,combat_global.aimbot_fov_config.near_fov,2.0 (near_fov default),2.0,45.0,FOV mode = Distance; FOV popup,src/ui/menu/combat_widgets.cpp,88
+Aimbot,Global / Targeting / FOV / Advanced,Full Size At,slider,combat_global.aimbot_fov_config.near_distance_m,2.5 m,0.5,10.0,FOV mode = Distance; Advanced popup,src/ui/menu/combat_widgets.cpp,93
+Aimbot,Global / Targeting / FOV / Advanced,Max Radius,slider,combat_global.aimbot_fov_config.near_fov,2.0°,2.0,45.0,FOV mode = Distance; Advanced popup,src/ui/menu/combat_widgets.cpp,94
+Aimbot,Global / Targeting / FOV / Advanced,Min Size At,slider,combat_global.aimbot_fov_config.far_distance_m,10.0 m,10.0,100.0,FOV mode = Distance; Advanced popup,src/ui/menu/combat_widgets.cpp,95
+Aimbot,Global / Targeting / FOV / Advanced,Min Radius,slider,combat_global.aimbot_fov_config.far_fov,2.0°,0.25,15.0,FOV mode = Distance; Advanced popup,src/ui/menu/combat_widgets.cpp,96
+Aimbot,Global / Targeting / FOV / Advanced,Falloff,slider,combat_global.aimbot_fov_config.distance_curve,1.0,0.25,4.0,FOV mode = Distance; Advanced popup,src/ui/menu/combat_widgets.cpp,97
+Aimbot,Global / Targeting / FOV,Visualization (toggle + color picker),toggle_color_picker,combat_global.aimbot_draw_fov;combat_global.aimbot_fov_color,"true; rgba{217,217,217,125}",,,"Global profile; FOV popup; in overrides, draw/color are global",src/ui/menu/combat_widgets.cpp,100; caller src/ui/menu/aimbot_page.cpp:28
+Aimbot,Global / Targeting / Humanizer,Humanizer Profile,settings_popup_button,@ui.popup.open.humanizer_profile,— (UI state only),,,Global profile,src/ui/menu/combat_widgets.cpp,106
+Aimbot,Global / Targeting / Humanizer,Preview,preview,@ui.preview.humanizer,derived from amount/smoothing/profile; no persisted key,,,Humanizer Profile popup,src/ui/menu/combat_widgets.cpp,109
+Aimbot,Global / Targeting / Humanizer,Amount,slider,combat_global.aimbot_humanize,35,0,100,Humanizer Profile popup,src/ui/menu/combat_widgets.cpp,110
+Aimbot,Global / Targeting / Humanizer,Smoothing,slider,combat_global.aimbot_smoothing,5,0,50,Humanizer Profile popup,src/ui/menu/combat_widgets.cpp,111
+Aimbot,Global / Targeting / Humanizer,Motion settings,popup_button,@ui.popup.open.humanizer_motion,— (UI state only),,,Humanizer Profile popup,src/ui/menu/combat_widgets.cpp,112-119
+Aimbot,Global / Targeting / Humanizer / Motion,Gravity,slider,combat_global.aimbot_humanizer.gravity,9.0,0.0,20.0,Motion popup,src/ui/menu/combat_widgets.cpp,115
+Aimbot,Global / Targeting / Humanizer / Motion,Wind,slider,combat_global.aimbot_humanizer.wind,0.8,0.0,20.0,Motion popup,src/ui/menu/combat_widgets.cpp,116
+Aimbot,Global / Targeting / Humanizer / Motion,Max Step,slider,combat_global.aimbot_humanizer.max_step,24.0,1.0,90.0,Motion popup,src/ui/menu/combat_widgets.cpp,117
+Aimbot,Global / Targeting / Humanizer / Motion,Damping,slider,combat_global.aimbot_humanizer.damping,0.85,0.0,1.0,Motion popup,src/ui/menu/combat_widgets.cpp,118
+Aimbot,Global / Targeting / Humanizer,Behavior settings,popup_button,@ui.popup.open.humanizer_behavior,— (UI state only),,,Humanizer Profile popup,src/ui/menu/combat_widgets.cpp,120-131
+Aimbot,Global / Targeting / Humanizer / Behavior,Reaction Min,slider,combat_global.aimbot_humanizer.reaction_min_ms,25 ms,0,500,Behavior popup,src/ui/menu/combat_widgets.cpp,124
+Aimbot,Global / Targeting / Humanizer / Behavior,Reaction Max,slider,combat_global.aimbot_humanizer.reaction_max_ms,60 ms,0,750,Behavior popup,src/ui/menu/combat_widgets.cpp,125
+Aimbot,Global / Targeting / Humanizer / Behavior,Curve,slider,combat_global.aimbot_humanizer.curve,0.40,0.0,1.0,Behavior popup,src/ui/menu/combat_widgets.cpp,126
+Aimbot,Global / Targeting / Humanizer / Behavior,Overshoot Chance,slider,combat_global.aimbot_humanizer.overshoot_chance,5.0%,0.0,100.0,Behavior popup,src/ui/menu/combat_widgets.cpp,127
+Aimbot,Global / Targeting / Humanizer / Behavior,Overshoot Amount,slider,combat_global.aimbot_humanizer.overshoot_amount,0.04,0.0,1.0,Behavior popup,src/ui/menu/combat_widgets.cpp,128
+Aimbot,Global / Targeting / Humanizer / Behavior,Jitter,slider,combat_global.aimbot_humanizer.jitter,0.10,0.0,3.0,Behavior popup,src/ui/menu/combat_widgets.cpp,129
+Aimbot,Global / Targeting / Humanizer / Behavior,Deadzone,slider,combat_global.aimbot_humanizer.deadzone,0.25°,0.0,2.0,Behavior popup,src/ui/menu/combat_widgets.cpp,130
+Aimbot,Global / Targeting / Multi-Point,Multi-Point,toggle_popup,combat_global.aimbot_multipoint,true,,,Global profile,src/ui/menu/combat_widgets.cpp,137; caller src/ui/menu/aimbot_page.cpp:31
+Aimbot,Global / Targeting / Multi-Point,Multi-Point settings,popup_button,@ui.popup.open.multipoint,— (UI state only),,,Global profile,src/ui/menu/combat_widgets.cpp,137-152
+Aimbot,Global / Targeting / Multi-Point,Performance,dropdown,combat_global.aimbot_multipoint_config.performance,high_performance (0); High Performance/Medium/Low,,,Multi-Point popup,src/ui/menu/combat_widgets.cpp,141
+Aimbot,Global / Targeting / Multi-Point,Cap Points,toggle,combat_global.aimbot_multipoint_config.caps,true,,,Multi-Point popup,src/ui/menu/combat_widgets.cpp,146
+Aimbot,Global / Targeting / Multi-Point,Side Points,toggle,combat_global.aimbot_multipoint_config.sides,true,,,Multi-Point popup,src/ui/menu/combat_widgets.cpp,147
+Aimbot,Global / Targeting / Multi-Point,Display Multipoints,toggle,combat_global.aimbot_multipoint_config.display,false,,,Multi-Point popup,src/ui/menu/combat_widgets.cpp,148
+Aimbot,Global / Targeting / Multi-Point,Head Scale,slider,combat_global.aimbot_multipoint_config.head_scale,0.50,0.05,0.95,Multi-Point popup,src/ui/menu/combat_widgets.cpp,149
+Aimbot,Global / Targeting / Multi-Point,Body Scale,slider,combat_global.aimbot_multipoint_config.body_scale,0.50,0.05,0.95,Multi-Point popup,src/ui/menu/combat_widgets.cpp,150
+Aimbot,Global / Targeting / Multi-Point,Limbs Scale,slider,combat_global.aimbot_multipoint_config.limb_scale,0.50,0.05,0.95,Multi-Point popup,src/ui/menu/combat_widgets.cpp,151
+Aimbot,Global / Targeting / Prediction,Prediction,toggle_popup,combat_global.aimbot_prediction.enabled,true,,,Global profile,src/ui/menu/combat_widgets.cpp,43; caller src/ui/menu/aimbot_page.cpp:32
+Aimbot,Global / Targeting / Prediction,Prediction settings,popup_button,@ui.popup.open.prediction,— (UI state only),,,Global profile,src/ui/menu/combat_widgets.cpp,43-48
+Aimbot,Global / Targeting / Prediction,Max Horizon,slider,combat_global.aimbot_prediction.max_horizon_ms,120.0 ms,0.0,120.0,Prediction popup,src/ui/menu/combat_widgets.cpp,46
+Aimbot,Global / Targeting / Prediction,Acceleration,toggle,combat_global.aimbot_prediction.acceleration,false,,,Prediction popup,src/ui/menu/combat_widgets.cpp,47
+Aimbot,Global / Targeting,Lethal Only,toggle,combat_global.aimbot_lethal_only,true,,,Global profile,src/ui/menu/aimbot_page.cpp,33
+Aimbot,Global / Recoil Control,RCS,toggle_popup,combat_global.aimbot_rcs.enabled,false,,,Always (global profile),src/ui/menu/combat_widgets.cpp,157; caller src/ui/menu/aimbot_page.cpp:36
+Aimbot,Global / Recoil Control,RCS settings,popup_button,@ui.popup.open.rcs,— (UI state only),,,Global profile,src/ui/menu/combat_widgets.cpp,157-164
+Aimbot,Global / Recoil Control,Start Bullet,slider,combat_global.aimbot_rcs.start_bullet,2,1,10,RCS popup,src/ui/menu/combat_widgets.cpp,160
+Aimbot,Global / Recoil Control,Pitch Strength,slider,combat_global.aimbot_rcs.pitch,100.0%,0.0,200.0,RCS popup,src/ui/menu/combat_widgets.cpp,161
+Aimbot,Global / Recoil Control,Yaw Strength,slider,combat_global.aimbot_rcs.yaw,100.0%,0.0,200.0,RCS popup,src/ui/menu/combat_widgets.cpp,162
+Aimbot,Global / Recoil Control,Correction Time,slider,combat_global.aimbot_rcs.response_ms,35.0 ms,1.0,150.0,RCS popup,src/ui/menu/combat_widgets.cpp,163
+Aimbot,Global / Penetration,Only Visible,toggle,combat_global.aimbot_checks.walls,penetration (1) => toggle false,,,Aimbot enabled,src/ui/menu/combat_widgets.cpp,20-26; caller src/ui/menu/aimbot_page.cpp:41
+Aimbot,Global / Penetration,Min Damage,slider,combat_global.aimbot_min_damage,65.0,1.0,100.0,Aimbot enabled,src/ui/menu/aimbot_page.cpp,42
+Aimbot,Global / Penetration,Damage Override,toggle_popup,combat_global.aimbot_min_damage_override_enabled,true,,,Aimbot enabled,src/ui/menu/combat_widgets.cpp,59; caller src/ui/menu/aimbot_page.cpp:43-45
+Aimbot,Global / Penetration,Damage Override settings,popup_button,@ui.popup.open.aimbot_damage_override,— (UI state only),,,Aimbot enabled,src/ui/menu/combat_widgets.cpp,59-66
+Aimbot,Global / Penetration / Damage Override,Mode,dropdown,combat_global.aimbot_min_damage_override_mode,activation::hold (0); Hold/Always On/Toggle,,,Damage Override popup,src/ui/menu/combat_widgets.cpp,62
+Aimbot,Global / Penetration / Damage Override,Key,keybind,combat_global.aimbot_min_damage_override_key,0x05 (5),,,Damage Override popup; mode != Always On,src/ui/menu/combat_widgets.cpp,64
+Aimbot,Global / Penetration / Damage Override,Override Damage,slider,combat_global.aimbot_min_damage_override,10.0,1.0,100.0,Damage Override popup,src/ui/menu/combat_widgets.cpp,65
+Aimbot,Override tab,Inherit Global Settings,toggle,combat_overrides[*].use_global,true,,,Weapon group tab selected,src/ui/menu/aimbot_page.cpp,50-52
+Aimbot,Override / Targeting,"Checks (Jump, Smoke, Flash)",multiselect,combat_overrides[*].aimbot_checks.airborne;combat_overrides[*].aimbot_checks.smoke;combat_overrides[*].aimbot_checks.flashed,false; false; false (legit_checks defaults),,,Override tab; Inherit Global Settings is OFF and global aimbot is ON,src/ui/menu/combat_widgets.cpp,10-18; caller src/ui/menu/aimbot_page.cpp:57
+Aimbot,Override / Targeting,"Hitboxes (Head, Body, Arms, Legs)",multiselect,combat_overrides[*].aimbot_hitbox_parts,aim_part::all (15),,,Override tab; Inherit Global Settings is OFF and global aimbot is ON,src/ui/menu/aimbot_page.cpp,58; helper widgets.cpp:359
+Aimbot,Override / Targeting,FOV settings,popup_button,@ui.popup.open.fov,— (UI state only),,,Override tab; Inherit Global Settings is OFF and global aimbot is ON,src/ui/menu/combat_widgets.cpp,78-101
+Aimbot,Override / Targeting / FOV,Mode,dropdown,combat_overrides[*].aimbot_fov_config.selection,target_distance (2); options Fixed/Distance/Target,,,Override tab; Inherit Global Settings is OFF and global aimbot is ON; FOV popup,src/ui/menu/combat_widgets.cpp,81
+Aimbot,Override / Targeting / FOV,Radius,slider,combat_overrides[*].aimbot_fov,2 (global_settings),1,360,FOV mode = Fixed; Override tab; Inherit Global Settings is OFF and global aimbot is ON,src/ui/menu/combat_widgets.cpp,84
+Aimbot,Override / Targeting / FOV,Max Radius (summary),slider,combat_overrides[*].aimbot_fov_config.target_near_fov,20.0 (target_near_fov default),2.0,45.0,FOV mode != Fixed; FOV popup,src/ui/menu/combat_widgets.cpp,88
+Aimbot,Override / Targeting / FOV,Advanced settings,popup_button,@ui.popup.open.fov_advanced,— (UI state only),,,Override tab; Inherit Global Settings is OFF and global aimbot is ON; FOV mode != Fixed,src/ui/menu/combat_widgets.cpp,89-98
+Aimbot,Override / Targeting / FOV / Advanced,Full Size At,slider,combat_overrides[*].aimbot_fov_config.target_near_distance_m,2.5 m,0.5,10.0,FOV mode = Target; Advanced popup,src/ui/menu/combat_widgets.cpp,93
+Aimbot,Override / Targeting / FOV / Advanced,Max Radius,slider,combat_overrides[*].aimbot_fov_config.target_near_fov,20.0°,2.0,45.0,FOV mode = Target; Advanced popup,src/ui/menu/combat_widgets.cpp,94
+Aimbot,Override / Targeting / FOV / Advanced,Min Size At,slider,combat_overrides[*].aimbot_fov_config.target_far_distance_m,10.0 m,10.0,100.0,FOV mode = Target; Advanced popup,src/ui/menu/combat_widgets.cpp,95
+Aimbot,Override / Targeting / FOV / Advanced,Min Radius,slider,combat_overrides[*].aimbot_fov_config.target_far_fov,2.0°,0.25,15.0,FOV mode = Target; Advanced popup,src/ui/menu/combat_widgets.cpp,96
+Aimbot,Override / Targeting / FOV / Advanced,Falloff,slider,combat_overrides[*].aimbot_fov_config.target_distance_curve,1.0,0.25,4.0,FOV mode = Target; Advanced popup,src/ui/menu/combat_widgets.cpp,97
+Aimbot,Override / Targeting / FOV,Max Radius (summary),slider,combat_overrides[*].aimbot_fov_config.near_fov,2.0 (near_fov default),2.0,45.0,FOV mode = Distance; FOV popup,src/ui/menu/combat_widgets.cpp,88
+Aimbot,Override / Targeting / FOV / Advanced,Full Size At,slider,combat_overrides[*].aimbot_fov_config.near_distance_m,2.5 m,0.5,10.0,FOV mode = Distance; Advanced popup,src/ui/menu/combat_widgets.cpp,93
+Aimbot,Override / Targeting / FOV / Advanced,Max Radius,slider,combat_overrides[*].aimbot_fov_config.near_fov,2.0°,2.0,45.0,FOV mode = Distance; Advanced popup,src/ui/menu/combat_widgets.cpp,94
+Aimbot,Override / Targeting / FOV / Advanced,Min Size At,slider,combat_overrides[*].aimbot_fov_config.far_distance_m,10.0 m,10.0,100.0,FOV mode = Distance; Advanced popup,src/ui/menu/combat_widgets.cpp,95
+Aimbot,Override / Targeting / FOV / Advanced,Min Radius,slider,combat_overrides[*].aimbot_fov_config.far_fov,2.0°,0.25,15.0,FOV mode = Distance; Advanced popup,src/ui/menu/combat_widgets.cpp,96
+Aimbot,Override / Targeting / FOV / Advanced,Falloff,slider,combat_overrides[*].aimbot_fov_config.distance_curve,1.0,0.25,4.0,FOV mode = Distance; Advanced popup,src/ui/menu/combat_widgets.cpp,97
+Aimbot,Override / Targeting / FOV,Visualization (toggle + color picker),toggle_color_picker,combat_global.aimbot_draw_fov;combat_global.aimbot_fov_color,"true; rgba{217,217,217,125}",,,"Override tab; Inherit Global Settings is OFF and global aimbot is ON; FOV popup; in overrides, draw/color are global",src/ui/menu/combat_widgets.cpp,100; caller src/ui/menu/aimbot_page.cpp:59
+Aimbot,Override / Targeting / Humanizer,Humanizer Profile,settings_popup_button,@ui.popup.open.humanizer_profile,— (UI state only),,,Override tab; Inherit Global Settings is OFF and global aimbot is ON,src/ui/menu/combat_widgets.cpp,106
+Aimbot,Override / Targeting / Humanizer,Preview,preview,@ui.preview.humanizer,derived from amount/smoothing/profile; no persisted key,,,Humanizer Profile popup,src/ui/menu/combat_widgets.cpp,109
+Aimbot,Override / Targeting / Humanizer,Amount,slider,combat_overrides[*].aimbot_humanize,35,0,100,Humanizer Profile popup,src/ui/menu/combat_widgets.cpp,110
+Aimbot,Override / Targeting / Humanizer,Smoothing,slider,combat_overrides[*].aimbot_smoothing,5,0,50,Humanizer Profile popup,src/ui/menu/combat_widgets.cpp,111
+Aimbot,Override / Targeting / Humanizer,Motion settings,popup_button,@ui.popup.open.humanizer_motion,— (UI state only),,,Humanizer Profile popup,src/ui/menu/combat_widgets.cpp,112-119
+Aimbot,Override / Targeting / Humanizer / Motion,Gravity,slider,combat_overrides[*].aimbot_humanizer.gravity,9.0,0.0,20.0,Motion popup,src/ui/menu/combat_widgets.cpp,115
+Aimbot,Override / Targeting / Humanizer / Motion,Wind,slider,combat_overrides[*].aimbot_humanizer.wind,0.8,0.0,20.0,Motion popup,src/ui/menu/combat_widgets.cpp,116
+Aimbot,Override / Targeting / Humanizer / Motion,Max Step,slider,combat_overrides[*].aimbot_humanizer.max_step,24.0,1.0,90.0,Motion popup,src/ui/menu/combat_widgets.cpp,117
+Aimbot,Override / Targeting / Humanizer / Motion,Damping,slider,combat_overrides[*].aimbot_humanizer.damping,0.85,0.0,1.0,Motion popup,src/ui/menu/combat_widgets.cpp,118
+Aimbot,Override / Targeting / Humanizer,Behavior settings,popup_button,@ui.popup.open.humanizer_behavior,— (UI state only),,,Humanizer Profile popup,src/ui/menu/combat_widgets.cpp,120-131
+Aimbot,Override / Targeting / Humanizer / Behavior,Reaction Min,slider,combat_overrides[*].aimbot_humanizer.reaction_min_ms,25 ms,0,500,Behavior popup,src/ui/menu/combat_widgets.cpp,124
+Aimbot,Override / Targeting / Humanizer / Behavior,Reaction Max,slider,combat_overrides[*].aimbot_humanizer.reaction_max_ms,60 ms,0,750,Behavior popup,src/ui/menu/combat_widgets.cpp,125
+Aimbot,Override / Targeting / Humanizer / Behavior,Curve,slider,combat_overrides[*].aimbot_humanizer.curve,0.40,0.0,1.0,Behavior popup,src/ui/menu/combat_widgets.cpp,126
+Aimbot,Override / Targeting / Humanizer / Behavior,Overshoot Chance,slider,combat_overrides[*].aimbot_humanizer.overshoot_chance,5.0%,0.0,100.0,Behavior popup,src/ui/menu/combat_widgets.cpp,127
+Aimbot,Override / Targeting / Humanizer / Behavior,Overshoot Amount,slider,combat_overrides[*].aimbot_humanizer.overshoot_amount,0.04,0.0,1.0,Behavior popup,src/ui/menu/combat_widgets.cpp,128
+Aimbot,Override / Targeting / Humanizer / Behavior,Jitter,slider,combat_overrides[*].aimbot_humanizer.jitter,0.10,0.0,3.0,Behavior popup,src/ui/menu/combat_widgets.cpp,129
+Aimbot,Override / Targeting / Humanizer / Behavior,Deadzone,slider,combat_overrides[*].aimbot_humanizer.deadzone,0.25°,0.0,2.0,Behavior popup,src/ui/menu/combat_widgets.cpp,130
+Aimbot,Override / Targeting / Multi-Point,Multi-Point,toggle_popup,combat_overrides[*].aimbot_multipoint,true,,,Override tab; Inherit Global Settings is OFF and global aimbot is ON,src/ui/menu/combat_widgets.cpp,137; caller src/ui/menu/aimbot_page.cpp:62
+Aimbot,Override / Targeting / Multi-Point,Multi-Point settings,popup_button,@ui.popup.open.multipoint,— (UI state only),,,Override tab; Inherit Global Settings is OFF and global aimbot is ON,src/ui/menu/combat_widgets.cpp,137-152
+Aimbot,Override / Targeting / Multi-Point,Performance,dropdown,combat_overrides[*].aimbot_multipoint_config.performance,high_performance (0); High Performance/Medium/Low,,,Multi-Point popup,src/ui/menu/combat_widgets.cpp,141
+Aimbot,Override / Targeting / Multi-Point,Cap Points,toggle,combat_overrides[*].aimbot_multipoint_config.caps,true,,,Multi-Point popup,src/ui/menu/combat_widgets.cpp,146
+Aimbot,Override / Targeting / Multi-Point,Side Points,toggle,combat_overrides[*].aimbot_multipoint_config.sides,true,,,Multi-Point popup,src/ui/menu/combat_widgets.cpp,147
+Aimbot,Override / Targeting / Multi-Point,Display Multipoints,toggle,combat_overrides[*].aimbot_multipoint_config.display,false,,,Multi-Point popup,src/ui/menu/combat_widgets.cpp,148
+Aimbot,Override / Targeting / Multi-Point,Head Scale,slider,combat_overrides[*].aimbot_multipoint_config.head_scale,0.50,0.05,0.95,Multi-Point popup,src/ui/menu/combat_widgets.cpp,149
+Aimbot,Override / Targeting / Multi-Point,Body Scale,slider,combat_overrides[*].aimbot_multipoint_config.body_scale,0.50,0.05,0.95,Multi-Point popup,src/ui/menu/combat_widgets.cpp,150
+Aimbot,Override / Targeting / Multi-Point,Limbs Scale,slider,combat_overrides[*].aimbot_multipoint_config.limb_scale,0.50,0.05,0.95,Multi-Point popup,src/ui/menu/combat_widgets.cpp,151
+Aimbot,Override / Targeting / Prediction,Prediction,toggle_popup,combat_overrides[*].aimbot_prediction.enabled,true,,,Override tab; Inherit Global Settings is OFF and global aimbot is ON,src/ui/menu/combat_widgets.cpp,43; caller src/ui/menu/aimbot_page.cpp:63
+Aimbot,Override / Targeting / Prediction,Prediction settings,popup_button,@ui.popup.open.prediction,— (UI state only),,,Override tab; Inherit Global Settings is OFF and global aimbot is ON,src/ui/menu/combat_widgets.cpp,43-48
+Aimbot,Override / Targeting / Prediction,Max Horizon,slider,combat_overrides[*].aimbot_prediction.max_horizon_ms,120.0 ms,0.0,120.0,Prediction popup,src/ui/menu/combat_widgets.cpp,46
+Aimbot,Override / Targeting / Prediction,Acceleration,toggle,combat_overrides[*].aimbot_prediction.acceleration,false,,,Prediction popup,src/ui/menu/combat_widgets.cpp,47
+Aimbot,Override / Targeting,Lethal Only,toggle,combat_overrides[*].aimbot_lethal_only,true,,,Override tab; Inherit Global Settings is OFF and global aimbot is ON,src/ui/menu/aimbot_page.cpp,64
+Aimbot,Override / Recoil Control,RCS,toggle_popup,combat_overrides[*].aimbot_rcs.enabled,false,,,Override tab; Inherit Global Settings is OFF and global aimbot is ON,src/ui/menu/combat_widgets.cpp,157; caller src/ui/menu/aimbot_page.cpp:66
+Aimbot,Override / Recoil Control,RCS settings,popup_button,@ui.popup.open.rcs,— (UI state only),,,Override tab; Inherit Global Settings is OFF and global aimbot is ON,src/ui/menu/combat_widgets.cpp,157-164
+Aimbot,Override / Recoil Control,Start Bullet,slider,combat_overrides[*].aimbot_rcs.start_bullet,2,1,10,RCS popup,src/ui/menu/combat_widgets.cpp,160
+Aimbot,Override / Recoil Control,Pitch Strength,slider,combat_overrides[*].aimbot_rcs.pitch,100.0%,0.0,200.0,RCS popup,src/ui/menu/combat_widgets.cpp,161
+Aimbot,Override / Recoil Control,Yaw Strength,slider,combat_overrides[*].aimbot_rcs.yaw,100.0%,0.0,200.0,RCS popup,src/ui/menu/combat_widgets.cpp,162
+Aimbot,Override / Recoil Control,Correction Time,slider,combat_overrides[*].aimbot_rcs.response_ms,35.0 ms,1.0,150.0,RCS popup,src/ui/menu/combat_widgets.cpp,163
+Aimbot,Override / Penetration,Only Visible,toggle,combat_overrides[*].aimbot_checks.walls,penetration (1) => toggle false,,,Override tab; Inherit Global Settings OFF and global aimbot ON,src/ui/menu/combat_widgets.cpp,20-26; caller src/ui/menu/aimbot_page.cpp:70
+Aimbot,Override / Penetration,Min Damage,slider,combat_overrides[*].aimbot_min_damage,65.0,1.0,100.0,Override tab; Inherit Global Settings OFF and global aimbot ON,src/ui/menu/aimbot_page.cpp,71
+Triggerbot,Global / Triggerbot Core,Master Switch,toggle_popup,combat_global.triggerbot_enabled,true,,,Global profile,src/ui/menu/triggerbot_page.cpp,23; helper combat_widgets.cpp:51-54
+Triggerbot,Global / Triggerbot Core,Master Switch settings,popup_button,@ui.popup.open.trigger_master_switch,— (UI state only),,,Global profile,src/ui/menu/combat_widgets.cpp,53-54
+Triggerbot,Global / Triggerbot Core,Mode,dropdown,combat_global.triggerbot_activation_mode,activation::hold (0); Hold/Always On/Toggle,,,Master Switch popup,src/ui/menu/combat_widgets.cpp,53
+Triggerbot,Global / Triggerbot Core,Key,keybind,combat_global.triggerbot_key,0x43 (67),,,Triggerbot enabled; activation mode != Always On,src/ui/menu/triggerbot_page.cpp,26-27; helper widgets.cpp:467
+Triggerbot,Global / Triggerbot Core,"Checks (Jump, Smoke, Flash)",multiselect,combat_global.triggerbot_checks.airborne;combat_global.triggerbot_checks.smoke;combat_global.triggerbot_checks.flashed,false; false; false (legit_checks defaults),,,Triggerbot enabled,src/ui/menu/combat_widgets.cpp,10-18; caller src/ui/menu/triggerbot_page.cpp:28
+Triggerbot,Global / Triggerbot Core,Seed Type,dropdown,combat_global.triggerbot_seed_type,seed_mode::none (0); None/Restricted/Unrestricted,,,Triggerbot enabled,src/ui/menu/triggerbot_page.cpp,29
+Triggerbot,Global / Triggerbot Core,"Hitboxes (Head, Body, Arms, Legs)",multiselect,combat_global.triggerbot_hitbox_parts,aim_part::head (1),,,Triggerbot enabled,src/ui/menu/triggerbot_page.cpp,30; helper widgets.cpp:359
+Triggerbot,Global / Triggerbot Core,Reaction Time (ms),slider,combat_global.triggerbot_reaction_time,0 ms,0,400,Triggerbot enabled; seed type != None,src/ui/menu/triggerbot_page.cpp,32
+Triggerbot,Global / Triggerbot Core,Hitchance,slider,combat_global.triggerbot_hitchance,75.0%,0.0,100.0,Triggerbot enabled; seed type = None,src/ui/menu/triggerbot_page.cpp,35
+Triggerbot,Global / Triggerbot Core / Auto Stop,Auto Stop,toggle_popup,misc.m_auto_stop.enabled,false (misc::auto_stop),,,Triggerbot enabled; seed type = None,src/ui/menu/triggerbot_page.cpp,39-45
+Triggerbot,Global / Triggerbot Core / Auto Stop,Auto Stop settings,popup_button,@ui.popup.open.auto_stop,— (UI state only),,,Triggerbot enabled; seed type = None,src/ui/menu/popups.cpp,356-378
+Triggerbot,Global / Triggerbot Core / Auto Stop,Stop Speed,slider,misc.m_auto_stop.stop_speed,8.0 u/s,0.0,150.0,Auto Stop popup,src/ui/menu/triggerbot_page.cpp,43
+Triggerbot,Global / Triggerbot Core / Auto Stop,Shoot Speed,slider,misc.m_auto_stop.required_shoot_speed,34.0%,0.0,60.0,Auto Stop popup,src/ui/menu/triggerbot_page.cpp,44
+Triggerbot,Global / Triggerbot Core / Shot Timing,Shot Timing settings,popup_button,@ui.popup.open.trigger_shot_timing,— (UI state only),,,Triggerbot enabled; seed type = None,src/ui/menu/combat_widgets.cpp,30-38
+Triggerbot,Global / Triggerbot Core / Shot Timing,Delay Before,slider,combat_global.triggerbot_delay,10 ms,0,500,Shot Timing popup; Triggerbot enabled; seed type = None,src/ui/menu/combat_widgets.cpp,33
+Triggerbot,Global / Triggerbot Core / Shot Timing,Randomize,slider,combat_global.triggerbot_randomize_ms,5 ms,0,100,Shot Timing popup; Triggerbot enabled; seed type = None,src/ui/menu/combat_widgets.cpp,34
+Triggerbot,Global / Triggerbot Core / Shot Timing,Outlier Chance,slider,combat_global.triggerbot_outlier_chance,3.0%,0.0,25.0,Shot Timing popup; Triggerbot enabled; seed type = None,src/ui/menu/combat_widgets.cpp,35
+Triggerbot,Global / Triggerbot Core / Shot Timing,Outlier Delay,slider,combat_global.triggerbot_outlier_delay_ms,20 ms,0,500,Shot Timing popup; Triggerbot enabled; seed type = None,src/ui/menu/combat_widgets.cpp,36
+Triggerbot,Global / Triggerbot Core / Shot Timing,Delay After,slider,combat_global.triggerbot_delay_after_ms,100 ms,0,1000,Shot Timing popup; Triggerbot enabled; seed type = None,src/ui/menu/combat_widgets.cpp,37
+Triggerbot,Global / Triggerbot Core,Predictive,toggle,combat_global.triggerbot_predictive,true,,,Triggerbot enabled,src/ui/menu/triggerbot_page.cpp,51
+Triggerbot,Global / Triggerbot Core,Lethal Only,toggle,combat_global.triggerbot_lethal_only,false,,,Triggerbot enabled,src/ui/menu/triggerbot_page.cpp,52
+Triggerbot,Global / Triggerbot Core,Show Decision Debug,toggle,misc.trigger_debug_overlay,false,,,Triggerbot enabled,src/ui/menu/triggerbot_page.cpp,53
+Triggerbot,Global / Penetration,Only Visible,toggle,combat_global.triggerbot_checks.walls,penetration (1) => toggle false,,,Triggerbot enabled,src/ui/menu/combat_widgets.cpp,20-26; caller src/ui/menu/triggerbot_page.cpp:60
+Triggerbot,Global / Penetration,Min Damage,slider,combat_global.triggerbot_min_damage,90.0,1.0,100.0,Triggerbot enabled,src/ui/menu/triggerbot_page.cpp,61
+Triggerbot,Global / Penetration,Damage Override,toggle_popup,combat_global.triggerbot_min_damage_override_enabled,false,,,Triggerbot enabled,src/ui/menu/combat_widgets.cpp,59; caller src/ui/menu/triggerbot_page.cpp:62-65
+Triggerbot,Global / Penetration,Damage Override settings,popup_button,@ui.popup.open.triggerbot_damage_override,— (UI state only),,,Triggerbot enabled,src/ui/menu/combat_widgets.cpp,59-66
+Triggerbot,Global / Penetration / Damage Override,Mode,dropdown,combat_global.triggerbot_min_damage_override_mode,activation::hold (0); Hold/Always On/Toggle,,,Damage Override popup,src/ui/menu/combat_widgets.cpp,62
+Triggerbot,Global / Penetration / Damage Override,Key,keybind,combat_global.triggerbot_min_damage_override_key,0 (VK 0),,,Damage Override popup; mode != Always On,src/ui/menu/combat_widgets.cpp,64
+Triggerbot,Global / Penetration / Damage Override,Override Damage,slider,combat_global.triggerbot_min_damage_override,1.0,1.0,100.0,Damage Override popup,src/ui/menu/combat_widgets.cpp,65
+Triggerbot,Override tab,Inherit Global Settings,toggle,combat_overrides[*].use_global,true,,,Weapon group tab selected,src/ui/menu/triggerbot_page.cpp,70-72
+Triggerbot,Override / Triggerbot Core,"Checks (Jump, Smoke, Flash)",multiselect,combat_overrides[*].triggerbot_checks.airborne;combat_overrides[*].triggerbot_checks.smoke;combat_overrides[*].triggerbot_checks.flashed,false; false; false (legit_checks defaults),,,Override tab; Inherit Global Settings is OFF and global triggerbot is ON,src/ui/menu/combat_widgets.cpp,10-18; caller src/ui/menu/triggerbot_page.cpp:79
+Triggerbot,Override / Triggerbot Core,Seed Type,dropdown,combat_overrides[*].triggerbot_seed_type,seed_mode::none (0); None/Restricted/Unrestricted,,,Override tab; Inherit Global Settings is OFF and global triggerbot is ON,src/ui/menu/triggerbot_page.cpp,80
+Triggerbot,Override / Triggerbot Core,"Hitboxes (Head, Body, Arms, Legs)",multiselect,combat_overrides[*].triggerbot_hitbox_parts,aim_part::head (1),,,Override tab; Inherit Global Settings is OFF and global triggerbot is ON,src/ui/menu/triggerbot_page.cpp,81; helper widgets.cpp:359
+Triggerbot,Override / Triggerbot Core,Reaction Time (ms),slider,combat_overrides[*].triggerbot_reaction_time,0 ms,0,400,Override tab; Inherit Global Settings is OFF and global triggerbot is ON; seed type != None,src/ui/menu/triggerbot_page.cpp,84
+Triggerbot,Override / Triggerbot Core,Hitchance,slider,combat_overrides[*].triggerbot_hitchance,75.0%,0.0,100.0,Override tab; Inherit Global Settings is OFF and global triggerbot is ON; seed type = None,src/ui/menu/triggerbot_page.cpp,88
+Triggerbot,Override / Triggerbot Core / Shot Timing,Shot Timing settings,popup_button,@ui.popup.open.trigger_shot_timing,— (UI state only),,,Override tab; Inherit Global Settings is OFF and global triggerbot is ON; seed type = None,src/ui/menu/combat_widgets.cpp,30-38
+Triggerbot,Override / Triggerbot Core / Shot Timing,Delay Before,slider,combat_overrides[*].triggerbot_delay,10 ms,0,500,Shot Timing popup; Override tab; Inherit Global Settings is OFF and global triggerbot is ON; seed type = None,src/ui/menu/combat_widgets.cpp,33
+Triggerbot,Override / Triggerbot Core / Shot Timing,Randomize,slider,combat_overrides[*].triggerbot_randomize_ms,5 ms,0,100,Shot Timing popup; Override tab; Inherit Global Settings is OFF and global triggerbot is ON; seed type = None,src/ui/menu/combat_widgets.cpp,34
+Triggerbot,Override / Triggerbot Core / Shot Timing,Outlier Chance,slider,combat_overrides[*].triggerbot_outlier_chance,3.0%,0.0,25.0,Shot Timing popup; Override tab; Inherit Global Settings is OFF and global triggerbot is ON; seed type = None,src/ui/menu/combat_widgets.cpp,35
+Triggerbot,Override / Triggerbot Core / Shot Timing,Outlier Delay,slider,combat_overrides[*].triggerbot_outlier_delay_ms,20 ms,0,500,Shot Timing popup; Override tab; Inherit Global Settings is OFF and global triggerbot is ON; seed type = None,src/ui/menu/combat_widgets.cpp,36
+Triggerbot,Override / Triggerbot Core / Shot Timing,Delay After,slider,combat_overrides[*].triggerbot_delay_after_ms,100 ms,0,1000,Shot Timing popup; Override tab; Inherit Global Settings is OFF and global triggerbot is ON; seed type = None,src/ui/menu/combat_widgets.cpp,37
+Triggerbot,Override / Triggerbot Core,Predictive,toggle,combat_overrides[*].triggerbot_predictive,true,,,Override tab; Inherit Global Settings is OFF and global triggerbot is ON,src/ui/menu/triggerbot_page.cpp,94
+Triggerbot,Override / Triggerbot Core,Lethal Only,toggle,combat_overrides[*].triggerbot_lethal_only,false,,,Override tab; Inherit Global Settings is OFF and global triggerbot is ON,src/ui/menu/triggerbot_page.cpp,95
+Triggerbot,Override / Penetration,Only Visible,toggle,combat_overrides[*].triggerbot_checks.walls,penetration (1) => toggle false,,,Override tab; Inherit Global Settings is OFF and global triggerbot is ON,src/ui/menu/combat_widgets.cpp,20-26; caller src/ui/menu/triggerbot_page.cpp:100
+Triggerbot,Override / Penetration,Min Damage,slider,combat_overrides[*].triggerbot_min_damage,90.0,1.0,100.0,Override tab; Inherit Global Settings is OFF and global triggerbot is ON,src/ui/menu/triggerbot_page.cpp,101
+Aimbot,Global / Targeting / FOV,Saturation / Value area,color_picker_area,combat_global.aimbot_fov_color,rgba color default in paired Visualization row,0,1,Aimbot enabled; FOV popup; color swatch clicked,src/ui/menu/popups.cpp,157-165; caller src/ui/menu/aimbot_page.cpp:28
+Aimbot,Global / Targeting / FOV,Hue strip,color_picker_area,combat_global.aimbot_fov_color,rgba color default in paired Visualization row,0,1,Aimbot enabled; FOV popup; color swatch clicked,src/ui/menu/popups.cpp,188-197; caller src/ui/menu/aimbot_page.cpp:28
+Aimbot,Global / Targeting / FOV,Alpha strip,color_picker_area,combat_global.aimbot_fov_color,rgba color default in paired Visualization row,0,1,Aimbot enabled; FOV popup; color swatch clicked,src/ui/menu/popups.cpp,204-222; caller src/ui/menu/aimbot_page.cpp:28
+Aimbot,Override / Targeting / FOV,Saturation / Value area,color_picker_area,combat_global.aimbot_fov_color,rgba color default in paired Visualization row,0,1,Override tab; Inherit Global Settings OFF and global aimbot ON; FOV popup; color swatch clicked,src/ui/menu/popups.cpp,157-165; caller src/ui/menu/aimbot_page.cpp:59
+Aimbot,Override / Targeting / FOV,Hue strip,color_picker_area,combat_global.aimbot_fov_color,rgba color default in paired Visualization row,0,1,Override tab; Inherit Global Settings OFF and global aimbot ON; FOV popup; color swatch clicked,src/ui/menu/popups.cpp,188-197; caller src/ui/menu/aimbot_page.cpp:59
+Aimbot,Override / Targeting / FOV,Alpha strip,color_picker_area,combat_global.aimbot_fov_color,rgba color default in paired Visualization row,0,1,Override tab; Inherit Global Settings OFF and global aimbot ON; FOV popup; color swatch clicked,src/ui/menu/popups.cpp,204-222; caller src/ui/menu/aimbot_page.cpp:59
+Aimbot,Global / Targeting / FOV,Open color picker,color_picker_button,@ui.popup.open.aimbot_fov_color,— (UI state only),,,Aimbot enabled; FOV popup,src/ui/menu/widgets.cpp,82-91; caller src/ui/menu/aimbot_page.cpp:28
+Aimbot,Override / Targeting / FOV,Open color picker,color_picker_button,@ui.popup.open.aimbot_fov_color,— (UI state only),,,Override tab; Inherit Global Settings OFF and global aimbot ON; FOV popup,src/ui/menu/widgets.cpp,82-91; caller src/ui/menu/aimbot_page.cpp:59
+Aimbot,Checks,Flash Threshold,slider,combat_global.aimbot_checks.flash_threshold_percent,85.0f,0,100,new control (no old UI); Global profile; flash check enabled; blindness percentage,,
+Aimbot,Checks,Flash Threshold,slider,combat_overrides[*].aimbot_checks.flash_threshold_percent,85.0f,0,100,new control (no old UI); Override profile; Inherit Global Settings OFF; flash check enabled; blindness percentage,,
+Triggerbot,Checks,Flash Threshold,slider,combat_global.triggerbot_checks.flash_threshold_percent,85.0f,0,100,new control (no old UI); Global profile; flash check enabled; blindness percentage,,
+Triggerbot,Checks,Flash Threshold,slider,combat_overrides[*].triggerbot_checks.flash_threshold_percent,85.0f,0,100,new control (no old UI); Override profile; Inherit Global Settings OFF; flash check enabled; blindness percentage,,
+Triggerbot,Revolver,Pre-Cock,toggle,combat_global.triggerbot_revolver_pre_cock,false,,,new control (no old UI); Global profile; revolver path; release margin is milliseconds,,
+Triggerbot,Revolver,Release Margin,slider,combat_global.triggerbot_revolver_release_margin_ms,16,1,60,new control (no old UI); Global profile; revolver path; release margin is milliseconds,,
+Triggerbot,Revolver,Pre-Cock,toggle,combat_overrides[*].triggerbot_revolver_pre_cock,false,,,new control (no old UI); Override profile; Inherit Global Settings OFF; revolver path; release margin is milliseconds,,
+Triggerbot,Revolver,Release Margin,slider,combat_overrides[*].triggerbot_revolver_release_margin_ms,16,1,60,new control (no old UI); Override profile; Inherit Global Settings OFF; revolver path; release margin is milliseconds,,
+Aimbot,Penetration Crosshair,Enable,toggle,combat_global.penetration_crosshair,false,,,new control (no old UI); Global profile,,
+Aimbot,Penetration Crosshair,Can Penetrate,color_picker,combat_global.penetration_color_yes,"[0,255,0,255]",,,new control (no old UI); Global profile,,
+Aimbot,Penetration Crosshair,Cannot Penetrate,color_picker,combat_global.penetration_color_no,"[255,0,0,255]",,,new control (no old UI); Global profile,,
+Misc/General,Game Binds,Forward,keybind,misc.m_game_controls.forward,W,,,Game controls; Attack binds may capture mouse; keyboard-only for other listed binds,src/ui/menu/misc_page.cpp,107
+Misc/General,Game Binds,Back,keybind,misc.m_game_controls.back,S,,,Game controls; Attack binds may capture mouse; keyboard-only for other listed binds,src/ui/menu/misc_page.cpp,108
+Misc/General,Game Binds,Left,keybind,misc.m_game_controls.left,A,,,Game controls; Attack binds may capture mouse; keyboard-only for other listed binds,src/ui/menu/misc_page.cpp,109
+Misc/General,Game Binds,Right,keybind,misc.m_game_controls.right,D,,,Game controls; Attack binds may capture mouse; keyboard-only for other listed binds,src/ui/menu/misc_page.cpp,110
+Misc/General,Game Binds,Walk,keybind,misc.m_game_controls.walk,VK_SHIFT,,,Game controls; Attack binds may capture mouse; keyboard-only for other listed binds,src/ui/menu/misc_page.cpp,111
+Misc/General,Game Binds,Duck,keybind,misc.m_game_controls.duck,VK_CONTROL,,,Game controls; Attack binds may capture mouse; keyboard-only for other listed binds,src/ui/menu/misc_page.cpp,112
+Misc/General,Game Binds,Jump,keybind,misc.m_game_controls.jump,VK_SPACE,,,Game controls; Attack binds may capture mouse; keyboard-only for other listed binds,src/ui/menu/misc_page.cpp,113
+Misc/General,Game Binds,Attack,keybind,misc.m_game_controls.attack,VK_LBUTTON,,,Game controls; Attack binds may capture mouse; keyboard-only for other listed binds,src/ui/menu/misc_page.cpp,118
+Misc/General,Game Binds,Secondary Attack,keybind,misc.m_game_controls.attack2,VK_RBUTTON,,,Game controls; Attack binds may capture mouse; keyboard-only for other listed binds,src/ui/menu/misc_page.cpp,119
+Misc/General,Game Binds,Use,keybind,misc.m_game_controls.use,E,,,Game controls; Attack binds may capture mouse; keyboard-only for other listed binds,src/ui/menu/misc_page.cpp,120
+Misc/General,Game Binds,Reload Weapon,keybind,misc.m_game_controls.reload,R,,,Game controls; Attack binds may capture mouse; keyboard-only for other listed binds,src/ui/menu/misc_page.cpp,121
+Misc/General,Game Binds,Buy Menu,keybind,misc.m_game_controls.buy_menu,B,,,Game controls; Attack binds may capture mouse; keyboard-only for other listed binds,src/ui/menu/misc_page.cpp,122
+Misc/General,Game Binds,Reset Game Binds,action,@action.misc.reset_game_binds,,,,Always; restores game_controls struct defaults,src/ui/menu/misc_page.cpp,123
+Misc/General,Support,Diagnostic Report,action,@action.misc.save_diagnostic_report,,,,Always,src/ui/menu/misc_page.cpp,142
+Misc/General,Support,Logs,action,@action.misc.open_logs_folder,,,,Always,src/ui/menu/misc_page.cpp,144
+Misc/General,Support,First-run Guide,action,@action.misc.show_first_run_guide,,,,Always,src/ui/menu/misc_page.cpp,146
+Misc/General,Support,Unload PASTA,action,@action.misc.unload,,,,Always,src/ui/menu/misc_page.cpp,148
+Misc/Overlay,Interface,Language,select,misc.language,0: English,0,1,Options English=0; Русский=1,src/ui/menu/misc_page.cpp,163
+Misc/Overlay,Interface,DPI Scale,select,misc.menu_scale,1.00 (100%),0.5,1.5,"Options 50%, 75%, 100%, 125%, 150%; stored as 0.50, 0.75, 1.00, 1.25, 1.50",src/ui/menu/misc_page.cpp,171
+Misc/Overlay,Interface Colors / Typography,Primary Text,color,misc.palette.text,"199,199,199,255",0,255,Interface Colors popup; RGBA channels,src/ui/menu/misc_page.cpp,179
+Misc/Overlay,Interface Colors / Typography,Muted Text,color,misc.palette.muted_text,"128,128,130,255",0,255,Interface Colors popup; RGBA channels,src/ui/menu/misc_page.cpp,180
+Misc/Overlay,Interface Colors / Surfaces,Menu Background,color,misc.palette.background,"13,13,13,255",0,255,Interface Colors popup; RGBA channels,src/ui/menu/misc_page.cpp,185
+Misc/Overlay,Interface Colors / Surfaces,Controls,color,misc.palette.panel,"18,18,18,255",0,255,Interface Colors popup; RGBA channels,src/ui/menu/misc_page.cpp,186
+Misc/Overlay,Interface Colors / Surfaces,Containers,color,misc.palette.card,"13,13,13,255",0,255,Interface Colors popup; RGBA channels,src/ui/menu/misc_page.cpp,187
+Misc/Overlay,Interface Colors / Surfaces,Popups,color,misc.palette.popup,"10,11,9,255",0,255,Interface Colors popup; RGBA channels,src/ui/menu/misc_page.cpp,188
+Misc/Overlay,Interface Colors / Interaction,Accent,color,misc.palette.accent,"180,180,208,255",0,255,Interface Colors popup; RGBA channels,src/ui/menu/misc_page.cpp,193
+Misc/Overlay,Interface Colors / Interaction,Hover,color,misc.palette.hover,"30,32,34,255",0,255,Interface Colors popup; RGBA channels,src/ui/menu/misc_page.cpp,194
+Misc/Overlay,Interface Colors / Interaction,Borders,color,misc.palette.border,"36,34,33,255",0,255,Interface Colors popup; RGBA channels,src/ui/menu/misc_page.cpp,195
+Misc/Overlay,Engine,FPS Limiter,toggle-popup,misc.limit_fps,true,,,FPS slider popup available regardless of toggle state,src/ui/menu/misc_page.cpp,202
+Misc/Overlay,Engine,Maximum FPS,slider,misc.fps_limit,240,30,1000,FPS Limiter popup; step uses widget default,src/ui/menu/misc_page.cpp,203
+Misc/Overlay,Engine,GPU Effects,toggle,misc.use_gpu,true,,,,src/ui/menu/misc_page.cpp,204
+Misc/Overlay,Engine,CPU Priority,select,misc.cpu_priority,1: Balanced,0,2,Options Game First=0; Balanced=1; Overlay First=2,src/ui/menu/misc_page.cpp,206
+Misc/Overlay,Engine,GPU Priority,select,misc.gpu_priority,0: Game First,0,2,Options Game First=0; Balanced=1; Overlay First=2,src/ui/menu/misc_page.cpp,207
+Misc/Overlay,Overlay,OBS Bypass,toggle,misc.obs_bypass,false,,,,src/ui/menu/misc_page.cpp,213
+Misc/Overlay,Overlay,Show Watermark,toggle-popup,misc.m_watermark.enabled,true,,,Watermark settings popup available regardless of toggle state,src/ui/menu/misc_page.cpp,214
+Misc/Overlay,Watermark,Show Ping,toggle,misc.m_watermark.show_ping,true,,,Show Watermark popup,src/ui/menu/misc_page.cpp,217
+Misc/Overlay,Watermark,Show Loss,toggle,misc.m_watermark.show_loss,true,,,Show Watermark popup,src/ui/menu/misc_page.cpp,218
+Misc/Overlay,Watermark,Show CPU Load,toggle,misc.m_watermark.show_cpu,true,,,Show Watermark popup,src/ui/menu/misc_page.cpp,219
+Misc/Overlay,Watermark,Show FPS,toggle,misc.m_watermark.show_fps,true,,,Show Watermark popup,src/ui/menu/misc_page.cpp,220
+Misc/Overlay,Overlay,Show Spectators,toggle,misc.m_spectator_list.enabled,false,,,,src/ui/menu/misc_page.cpp,222
+Misc/Overlay,Overlay,Show Event Log,toggle-popup,misc.m_event_log.enabled,false,,,Event Log settings popup available regardless of toggle state,src/ui/menu/misc_page.cpp,223
+Misc/Overlay,Event Log,Duration,slider,misc.m_event_log.duration,5.0,0.5,20.0,Show Event Log popup; step 0.5 s,src/ui/menu/misc_page.cpp,226
+Misc/Overlay,Event Log,Maximum Entries,slider,misc.m_event_log.max_entries,5,1,5,Show Event Log popup,src/ui/menu/misc_page.cpp,227
+Misc/Overlay,Event Log,Events,multiselect,misc.m_event_log.show_shots;misc.m_event_log.show_hits;misc.m_event_log.show_kills;misc.m_event_log.show_misses;misc.m_event_log.show_blocked;misc.m_event_log.show_info,true;true;true;true;true;true,,,"Show Event Log popup; options Shots, Hits, Kills, Misses, Blocked, Info; all selected by default",src/ui/menu/misc_page.cpp,237
+Misc/Overlay,Overlay,Show Active Binds,toggle-popup,misc.m_keybind_list.enabled,false,,,Active Binds settings popup available regardless of toggle state,src/ui/menu/misc_page.cpp,245
+Misc/Overlay,Active Binds,Always On Binds,toggle,misc.m_keybind_list.show_always,true,,,Show Active Binds popup,src/ui/menu/misc_page.cpp,248
+Misc/Overlay,Active Binds,Hold Binds,toggle,misc.m_keybind_list.show_hold,true,,,Show Active Binds popup,src/ui/menu/misc_page.cpp,249
+Misc/Overlay,Active Binds,Toggle Binds,toggle,misc.m_keybind_list.show_toggle,true,,,Show Active Binds popup,src/ui/menu/misc_page.cpp,250
+Misc/Overlay,Overlay,Show Bomb Info,toggle,esp.m_bomb.show_info_panel,true,,,"Value belongs to the serialized esp section, not misc",src/ui/menu/misc_page.cpp,252
+Misc/Overlay,Overlay,Overlay Opacity,slider,misc.overlay_opacity,0.86 (86%),25,100,Step 1%; UI percentage is stored as 0.25–1.00 scalar,src/ui/menu/misc_page.cpp,254
+Configs,Folder,Import,action,@action.config.import,,,,Configured config folder required; opens native config-file picker,src/ui/menu/configs_page.cpp,100
+Configs,Folder,Open folder,action,@action.config.open_folder,,,,Configured folder required; disabled without folder,src/ui/menu/configs_page.cpp,103
+Configs,Folder,Change folder,action,@action.config.change_folder,,,,Always; opens native folder chooser,src/ui/menu/configs_page.cpp,107
+Configs,Folder,Choose folder,action,@action.config.choose_folder,,,,Empty state when no config folder is selected; opens native folder chooser,src/ui/menu/configs_page.cpp,153
+Configs,Save New,New config,input,@ui.config.new_name,,,,Always; Enter submits save; Save button disabled without folder or with empty name,src/ui/menu/configs_page.cpp,321
+Configs,Save New,Save,action,@action.config.save_new,,,,Configured folder and non-empty name; Enter in name field also saves,src/ui/menu/configs_page.cpp;src/ui/menu/configs_page.cpp;src/ui/menu/library_widgets.cpp,81-84;326;200
+Configs,Config Tile Actions,Overwrite with current,menu-action,@action.config.overwrite,,,,Healthy config tile action menu only; rescans after operation,src/ui/menu/configs_page.cpp,187
+Configs,Config Tile Actions,Rename,menu-action,@action.config.rename,,,,Healthy config tile action menu only; opens inline rename input,src/ui/menu/configs_page.cpp,190
+Configs,Config Tile Actions,Duplicate,menu-action,@action.config.duplicate,,,,Healthy config tile action menu only; rescans after operation,src/ui/menu/configs_page.cpp,196
+Configs,Config Tile Actions,Delete,menu-action,@action.config.delete,,,,All config tiles; broken tiles expose Delete only; rescans after operation,src/ui/menu/configs_page.cpp,201
+Configs,Config Tile,Load,action,@action.config.load,,,,Healthy config tile only; omitted for broken entries,src/ui/menu/configs_page.cpp,213
+Configs,Config Tile,Rename name,input,@ui.config.rename_name,,,,Only after Rename; Enter submits; Escape or loss of input focus cancels,src/ui/menu/configs_page.cpp,231-236
+Guide,Language,English,choice-card,@ui.guide.language,0: English,0,1,First step; applies immediately and persists through general settings,src/ui/menu/guide_page.cpp,289
+Guide,Language,Русский,choice-card,@ui.guide.language,1: Русский,0,1,First step; applies immediately and persists through general settings,src/ui/menu/guide_page.cpp,289
+Guide,Hotkeys,Open / close the menu,key-select,hotkeys.menu,Insert,,,Hotkeys step; choices F1–F12; Insert; Delete; Home; End; Page Up/Down; Pause; Scroll Lock; Num Lock; must differ from exit key; saves hotkeys.cfg,src/ui/menu/guide_page.cpp,344-366;79;141
+Guide,Hotkeys,Exit PASTA,key-select,hotkeys.exit,End,,,Hotkeys step; choices F1–F12; Insert; Delete; Home; End; Page Up/Down; Pause; Scroll Lock; Num Lock; must differ from menu key; saves hotkeys.cfg,src/ui/menu/guide_page.cpp,344-366;79;141
+Guide,Good to know,Open data folder,action,@action.guide.open_data_folder,,,,Good to know step; opens runtime data root in Explorer,src/ui/menu/guide_page.cpp,397;helper guide_page.cpp:62
+Guide,Navigation,Back,button,@ui.guide.back,,,,Steps 2–4 only,src/ui/menu/guide_page.cpp,578;helper guide_page.cpp:62
+Guide,Navigation,Next / Finish,button,@ui.guide.next_or_finish,,,,Next on steps 1–3; Finish on step 4; marks guide completed,src/ui/menu/guide_page.cpp,585;helper guide_page.cpp:62
+Guide,Navigation,Skip,button,@ui.guide.skip,,,,All steps; marks guide completed,src/ui/menu/guide_page.cpp,602
+Navigation,Top Tabs,Aimbot,tab_button,@ui.menu.page,m_page=0,,,Always; switches top-level page and resets page animation,src/ui/menu/menu.cpp,227-260
+Navigation,Top Tabs,Triggerbot,tab_button,@ui.menu.page,m_page=1,,,Always; switches top-level page and resets page animation,src/ui/menu/menu.cpp,227-260
+Navigation,Top Tabs,Visuals,tab_button,@ui.menu.page,m_page=2,,,Always; switches top-level page and resets page animation,src/ui/menu/menu.cpp,227-260
+Navigation,Top Tabs,Walk Bot,tab_button,@ui.menu.page,m_page=3,,,Always; switches top-level page and resets page animation,src/ui/menu/menu.cpp,227-260
+Navigation,Top Tabs,Automation,tab_button,@ui.menu.page,m_page=4,,,Always; switches top-level page and resets page animation,src/ui/menu/menu.cpp,227-260
+Navigation,Top Tabs,Misc,tab_button,@ui.menu.page,m_page=5,,,Always; switches top-level page and resets page animation,src/ui/menu/menu.cpp,227-260
+Navigation,Top Tabs,Configs,tab_button,@ui.menu.page,m_page=6,,,Always; switches top-level page and resets page animation,src/ui/menu/menu.cpp,227-260
+Navigation,Misc Subnav,General,tab_button,@ui.misc.group,m_misc_group=0,,,Visible on Misc page; selects Misc subpage and resets content animation,src/ui/menu/misc_page.cpp,269-281
+Navigation,Misc Subnav,Overlay,tab_button,@ui.misc.group,m_misc_group=1,,,Visible on Misc page; selects Misc subpage and resets content animation,src/ui/menu/misc_page.cpp,269-281
+Navigation,Misc Subnav,Configs,tab_button,@ui.misc.group,m_misc_group=2,,,Visible on Misc page; selects Misc subpage and resets content animation,src/ui/menu/misc_page.cpp,269-281
+Navigation,Misc Header,Unload,tab_button,@action.misc.unload,,,,Visible on every Misc subpage; requests shutdown,src/ui/menu/misc_page.cpp,284-291
+Configs,Folder,Selected config folder,display-state,@state.registry.ConfigFolder,,,,Current configured folder; shown in status line when no recent operation notice is visible; stored in HKCU\Software\Vesta\ConfigFolder,src/ui/menu/configs_page.cpp;src/platform/windows/user_settings.cpp,132-133;55-56
+Configs,Config Tile,Healthy config actions menu,action-menu-opener,@ui.config.tile_actions,,,,"Healthy config tile; opens Overwrite with current, Rename, Duplicate, Delete menu",src/ui/menu/configs_page.cpp;src/ui/menu/library_widgets.cpp;src/ui/menu/library_widgets.cpp,183;277;281
+Configs,Config Tile,Broken config actions menu,action-menu-opener,@ui.config.tile_actions,,,,Broken config tile; opens Delete-only menu,src/ui/menu/configs_page.cpp;src/ui/menu/library_widgets.cpp;src/ui/menu/library_widgets.cpp,183;277;281
+Misc/Overlay,Interface Colors,Interface Colors,settings-popup-opener,@ui.misc.palette.interface_colors,,,,Always,src/ui/menu/misc_page.cpp;src/ui/menu/popups.cpp;src/ui/menu/popups.cpp,173;340;345
+Misc/Overlay,Interface Colors,Typography,settings-popup-opener,@ui.misc.palette.typography,,,,Interface Colors popup,src/ui/menu/misc_page.cpp;src/ui/menu/popups.cpp;src/ui/menu/popups.cpp,176;340;345
+Misc/Overlay,Interface Colors,Surfaces,settings-popup-opener,@ui.misc.palette.surfaces,,,,Interface Colors popup,src/ui/menu/misc_page.cpp;src/ui/menu/popups.cpp;src/ui/menu/popups.cpp,182;340;345
+Misc/Overlay,Interface Colors,Interaction,settings-popup-opener,@ui.misc.palette.interaction,,,,Interface Colors popup,src/ui/menu/misc_page.cpp;src/ui/menu/popups.cpp;src/ui/menu/popups.cpp,190;340;345
+Visuals/Items,Item Ammo,Show Item Ammo,toggle,esp.m_item.m_ammo.enabled,true,,,new control (no old UI); Requested saved setting; preserve existing rendering behavior,,
+Visuals/Items,Item Ammo,Ammo Color,color,esp.m_item.m_ammo.color,"[255,255,255,200]",0,255,new control (no old UI); Requested saved setting; RGBA channels,,
+Visuals/Items,Item Ammo,Empty Ammo Color,color,esp.m_item.m_ammo.empty_color,"[220,80,80,200]",0,255,new control (no old UI); Requested saved setting; RGBA channels,,
+Visuals/Items,Filters,Shotguns,toggle,esp.m_item.m_filters.shotguns,true,,,new control (no old UI); Requested saved filter; preserve existing behavior,,
+Visuals/Items,Filters,Heavy,toggle,esp.m_item.m_filters.heavy,true,,,new control (no old UI); Requested saved filter; preserve existing behavior,,
+Visuals/Projectiles,Colors,Default Color,color,esp.m_projectile.default_color,"[195,200,215,200]",0,255,new control (no old UI); Requested saved setting; RGBA channels,,
+Misc,Spectator List,Show Avatars,toggle,misc.m_spectator_list.show_avatars,true,,,"new control (no old UI); BLOCKED: saved field has no runtime consumer; owner decision required, do not present as functional",,
+Triggerbot,Auto Stop,Physical Fire,toggle,misc.m_auto_stop.physical_fire,true,,,"new control (no old UI); BLOCKED: saved field has no runtime consumer; owner decision required, no gameplay changes authorized",,
+Triggerbot,Auto Stop,Predictive Trigger,toggle,misc.m_auto_stop.predictive_trigger,true,,,"new control (no old UI); BLOCKED: saved field has no runtime consumer; owner decision required, no gameplay changes authorized",,
+Visuals/Players,Navigation,Players,subtab-button,@ui.visuals.tab.players,,,,Always; selects the corresponding visuals subtab,src/ui/menu/visuals_page.cpp,512
+Visuals/Players,Master,Enable Player ESP,toggle-popup,esp.m_player.enabled,true,,,Always; popup opens independently of toggle state,src/ui/menu/visuals_page.cpp,31
+Visuals/Players,Master,Mode,select,esp.m_player.activation_mode,Always On (0),0,2,"Always; options Always On=0, Hold=1, Toggle=2",src/ui/menu/visuals_page.cpp,35
+Visuals/Players,Master,Key,keybind,esp.m_player.activation_key,0,,,Only when activation_mode is Hold (1) or Toggle (2),src/ui/menu/visuals_page.cpp,37
+Visuals/Players,Master,Legit Sync,toggle-popup,esp.m_player.m_legit_sync.enabled,false,,,Always; popup opens independently of toggle state,src/ui/menu/visuals_page.cpp,39
+Visuals/Players,Legit Sync,Hide When Spectated,toggle,esp.m_player.spectator_sync,false,,,Legit Sync settings popup open,src/ui/menu/visuals_page.cpp,42
+Visuals/Players,Legit Sync,Direct Visibility,toggle,esp.m_player.m_legit_sync.direct_visible,true,,,Legit Sync settings popup open,src/ui/menu/visuals_page.cpp,43
+Visuals/Players,Legit Sync,Radar Spotted,toggle,esp.m_player.m_legit_sync.radar,true,,,Legit Sync settings popup open,src/ui/menu/visuals_page.cpp,44
+Visuals/Players,Legit Sync,Audible Sounds,toggle,esp.m_player.m_legit_sync.sound,true,,,Legit Sync settings popup open,src/ui/menu/visuals_page.cpp,45
+Visuals/Players,Legit Sync,Radar Hold,slider,esp.m_player.m_legit_sync.radar_hold,2.0,0.1,10,Legit Sync settings popup open; step 0.1 s,src/ui/menu/visuals_page.cpp,46
+Visuals/Players,Legit Sync,Sound Hold,slider,esp.m_player.m_legit_sync.sound_hold,1.6,0.1,10,Legit Sync settings popup open; step 0.1 s,src/ui/menu/visuals_page.cpp,47
+Visuals/Players,Legit Sync,Hearing Distance,slider,esp.m_player.m_legit_sync.sound_distance,1100.0,100,2500,Legit Sync settings popup open; step 10 u,src/ui/menu/visuals_page.cpp,48
+Visuals/Players,Legit Sync,Pulse Period,slider,esp.m_player.m_legit_sync.pulse_period,1.8,0.4,5,Legit Sync settings popup open; step 0.1 s,src/ui/menu/visuals_page.cpp,56
+Visuals/Players,Legit Sync,Pulse Minimum,slider,esp.m_player.m_legit_sync.pulse_min_opacity,0.20,0,100,Legit Sync settings popup open; UI displays percent and stores 0–1 fraction; step 1%,src/ui/menu/visuals_page.cpp,52
+Visuals/Players,Legit Sync,Pulse Maximum,slider,esp.m_player.m_legit_sync.pulse_max_opacity,1.00,Pulse Minimum,100,Legit Sync settings popup open; minimum tracks Pulse Minimum; UI displays percent and stores 0–1 fraction; step 1%,src/ui/menu/visuals_page.cpp,53
+Visuals/Players,Bounding Box,Show Box,toggle,esp.m_player.m_box.enabled,true,,,,src/ui/menu/visuals_page.cpp,63
+Visuals/Players,Bounding Box,Style,select,esp.m_player.m_box.style,Cornered (1),0,1,"Always; options Full=0, Cornered=1",src/ui/menu/visuals_page.cpp,66
+Visuals/Players,Bounding Box,Corner Length,slider,esp.m_player.m_box.corner_length,10.0,4.0,30.0,Visible only when Style=Cornered (1); step 0.5,src/ui/menu/visuals_page.cpp,69
+Visuals/Players,Bounding Box,Background Fill,toggle-popup,esp.m_player.m_box.fill,false,,,Always; popup open reveals four fill/box colors,src/ui/menu/visuals_page.cpp,70
+Visuals/Players,Bounding Box,Box Visible Color,color,esp.m_player.m_box.visible_color,"[220,60,60,255]",,,Background Fill settings popup open,src/ui/menu/visuals_page.cpp,73
+Visuals/Players,Bounding Box,Box Occluded Color,color,esp.m_player.m_box.occluded_color,"[160,50,50,180]",,,Background Fill settings popup open,src/ui/menu/visuals_page.cpp,74
+Visuals/Players,Bounding Box,Fill Visible Color,color,esp.m_player.m_box.fill_visible_color,"[60,200,100,80]",,,Background Fill settings popup open,src/ui/menu/visuals_page.cpp,75
+Visuals/Players,Bounding Box,Fill Occluded Color,color,esp.m_player.m_box.fill_occluded_color,"[100,100,110,80]",,,Background Fill settings popup open,src/ui/menu/visuals_page.cpp,76
+Visuals/Players,Details,Show Name,toggle-color,esp.m_player.m_name.enabled;esp.m_player.m_name.color.r;esp.m_player.m_name.color.g;esp.m_player.m_name.color.b;esp.m_player.m_name.color.a,"true;[245,245,250,240]",,,Always; inline color picker popup,src/ui/menu/visuals_page.cpp,82
+Visuals/Players,Details,Show Weapon,toggle-popup,esp.m_player.m_weapon.enabled,true,,,Always; popup open reveals weapon display/color/ammo settings,src/ui/menu/visuals_page.cpp,83
+Visuals/Players,Weapon Settings,Display,select,esp.m_player.m_weapon.display,Icon (1),0,2,"Show Weapon settings popup open; Text=0, Icon=1, Text + Icon=2",src/ui/menu/widgets.cpp,633
+Visuals/Players,Weapon Settings,Text Color,color,esp.m_player.m_weapon.text_color,"[200,200,210,220]",,,Show Weapon settings popup open,src/ui/menu/widgets.cpp,635
+Visuals/Players,Weapon Settings,Icon Color,color,esp.m_player.m_weapon.icon_color,"[240,240,245,240]",,,Show Weapon settings popup open,src/ui/menu/widgets.cpp,636
+Visuals/Players,Weapon Settings,Ammo Indicator,toggle-popup,esp.m_player.m_weapon.ammo.enabled,true,,,Show Weapon settings popup open; ammo settings popup available,src/ui/menu/widgets.cpp,637
+Visuals/Players,Weapon Settings,Exact Ammo Count,toggle,esp.m_player.m_weapon.ammo.show_count,false,,,Ammo Indicator settings popup open,src/ui/menu/widgets.cpp,640
+Visuals/Players,Weapon Settings,Empty Color,color,esp.m_player.m_weapon.ammo.empty_color,"[225,55,65,245]",,,Ammo Indicator settings popup open,src/ui/menu/widgets.cpp,641
+Visuals/Players,Details,Health Bar,toggle-popup,esp.m_player.m_health_bar.enabled,true,,,Always; popup open reveals bar settings,src/ui/menu/visuals_page.cpp,85
+Visuals/Players,Details,Armor Bar,toggle-popup,esp.m_player.m_armor_bar.enabled,true,,,Always; popup open reveals bar settings,src/ui/menu/visuals_page.cpp,87
+Visuals/Players,Health Bar Settings,Position,select,esp.m_player.m_health_bar.position,left (0),0,3,"Health Bar settings popup open; Left=0, Top=1, Bottom=2, Right=3",src/ui/menu/internal.hpp,715
+Visuals/Players,Health Bar Settings,Thickness,slider,esp.m_player.m_health_bar.thickness,3.0,1.0,12.0,Health Bar settings popup open; step 0.5 px,src/ui/menu/internal.hpp,719
+Visuals/Players,Health Bar Settings,Outline,toggle-popup,esp.m_player.m_health_bar.outline,true,,,Health Bar settings popup open; outline popup open,src/ui/menu/internal.hpp,720
+Visuals/Players,Health Bar Settings,Outline Thickness,slider,esp.m_player.m_health_bar.outline_thickness,1.0,0.5,4.0,Outline settings popup open; step 0.5 px,src/ui/menu/internal.hpp,723
+Visuals/Players,Health Bar Settings,Outline Color,color,esp.m_player.m_health_bar.outline_color,"[0,0,0,255]",,,Outline settings popup open,src/ui/menu/internal.hpp,724
+Visuals/Players,Health Bar Settings,Gradient,toggle-popup,esp.m_player.m_health_bar.gradient,true,,,Health Bar settings popup open; gradient popup open,src/ui/menu/internal.hpp,726
+Visuals/Players,Health Bar Settings,Full Color,color,esp.m_player.m_health_bar.full_color,"[215,50,220,255]",,,Gradient settings popup open,src/ui/menu/internal.hpp,729
+Visuals/Players,Health Bar Settings,Low Color,color,esp.m_player.m_health_bar.low_color,"[220,50,50,255]",,,Gradient settings popup open,src/ui/menu/internal.hpp,730
+Visuals/Players,Health Bar Settings,Segments,toggle-popup,esp.m_player.m_health_bar.segments,off (1 segment),,,Health Bar settings popup open; segment popup open,src/ui/menu/internal.hpp,733
+Visuals/Players,Health Bar Settings,Count,slider,esp.m_player.m_health_bar.segments,1,2,10,Segments settings popup open; step 1; toggling on initializes 4,src/ui/menu/internal.hpp,736
+Visuals/Players,Health Bar Settings,Gap,slider,esp.m_player.m_health_bar.segment_gap,2.5,0.0,4.0,Segments settings popup open; step 0.5 px,src/ui/menu/internal.hpp,737
+Visuals/Players,Health Bar Settings,Show Value,toggle-popup,esp.m_player.m_health_bar.show_value,true,,,Health Bar settings popup open; value popup open,src/ui/menu/internal.hpp,743
+Visuals/Players,Health Bar Settings,Text Color,color,esp.m_player.m_health_bar.text_color,"[245,245,250,255]",,,Show Value settings popup open,src/ui/menu/internal.hpp,743
+Visuals/Players,Health Bar Settings,Background Color,color,esp.m_player.m_health_bar.background_color,"[0,17,28,220]",,,Health Bar settings popup open,src/ui/menu/internal.hpp,744
+Visuals/Players,Armor Bar Settings,Position,select,esp.m_player.m_armor_bar.position,bottom (2),0,3,"Armor Bar settings popup open; Left=0, Top=1, Bottom=2, Right=3",src/ui/menu/internal.hpp,715
+Visuals/Players,Armor Bar Settings,Thickness,slider,esp.m_player.m_armor_bar.thickness,3.5,1.0,12.0,Armor Bar settings popup open; step 0.5 px,src/ui/menu/internal.hpp,719
+Visuals/Players,Armor Bar Settings,Outline,toggle-popup,esp.m_player.m_armor_bar.outline,true,,,Armor Bar settings popup open; outline popup open,src/ui/menu/internal.hpp,720
+Visuals/Players,Armor Bar Settings,Outline Thickness,slider,esp.m_player.m_armor_bar.outline_thickness,1.0,0.5,4.0,Outline settings popup open; step 0.5 px,src/ui/menu/internal.hpp,723
+Visuals/Players,Armor Bar Settings,Outline Color,color,esp.m_player.m_armor_bar.outline_color,"[0,0,0,255]",,,Outline settings popup open,src/ui/menu/internal.hpp,724
+Visuals/Players,Armor Bar Settings,Gradient,toggle-popup,esp.m_player.m_armor_bar.gradient,false,,,Armor Bar settings popup open; gradient popup open,src/ui/menu/internal.hpp,726
+Visuals/Players,Armor Bar Settings,Full Color,color,esp.m_player.m_armor_bar.full_color,"[50,80,220,255]",,,Gradient settings popup open,src/ui/menu/internal.hpp,729
+Visuals/Players,Armor Bar Settings,Low Color,color,esp.m_player.m_armor_bar.low_color,"[50,80,220,255]",,,Gradient settings popup open,src/ui/menu/internal.hpp,730
+Visuals/Players,Armor Bar Settings,Segments,toggle-popup,esp.m_player.m_armor_bar.segments,off (1 segment),,,Armor Bar settings popup open; segment popup open,src/ui/menu/internal.hpp,733
+Visuals/Players,Armor Bar Settings,Count,slider,esp.m_player.m_armor_bar.segments,1,2,10,Segments settings popup open; step 1; toggling on initializes 4,src/ui/menu/internal.hpp,736
+Visuals/Players,Armor Bar Settings,Gap,slider,esp.m_player.m_armor_bar.segment_gap,1.0,0.0,4.0,Segments settings popup open; step 0.5 px,src/ui/menu/internal.hpp,737
+Visuals/Players,Armor Bar Settings,Show Value,toggle-popup,esp.m_player.m_armor_bar.show_value,false,,,Armor Bar settings popup open; value popup open,src/ui/menu/internal.hpp,743
+Visuals/Players,Armor Bar Settings,Text Color,color,esp.m_player.m_armor_bar.text_color,"[245,245,250,255]",,,Show Value settings popup open,src/ui/menu/internal.hpp,743
+Visuals/Players,Armor Bar Settings,Background Color,color,esp.m_player.m_armor_bar.background_color,"[10,10,14,220]",,,Armor Bar settings popup open,src/ui/menu/internal.hpp,744
+Visuals/Players,Details,Info Flags,toggle-popup,esp.m_player.m_info_flags.enabled,true,,,Always; popup open reveals flag selection and style controls,src/ui/menu/visuals_page.cpp,89
+Visuals/Players,Info Flags Settings,Active Flags,multiselect,esp.m_player.m_info_flags.flags,money|armor|kit|scoped|defusing|flashed|ping|bomb_damage,0,511,"Info Flags settings popup open; nine options: Money, Armor, Defuse Kit, Scoped, Defusing, Flashed, Ping, Distance, Bomb Damage",src/ui/menu/widgets.cpp,653
+Visuals/Players,Info Flags Settings,Edit Flag,select,@ui.player_info_flags.selected_style,Money (0),0,8,Info Flags settings popup open; view-only selection chooses style target,src/ui/menu/widgets.cpp,660
+Visuals/Players,Details,Chams,toggle-popup,esp.m_chams.enabled,true,,,Always; Chams settings popup open,src/ui/menu/visuals_page.cpp,94
+Visuals/Players,Chams Settings,Antialiasing,toggle,esp.m_chams.antialiasing,true,,,Chams settings popup open,src/ui/menu/visuals_page.cpp,98
+Visuals/Players,Chams Settings,Model Glow,toggle-popup,esp.m_chams.glow_effect.enabled,true,,,Chams settings popup open; nested settings popup opens independently of enabled state,src/ui/menu/visuals_page.cpp,99
+Visuals/Players,Chams Model Glow,Glow Color,color,esp.m_chams.glow_effect.color,"[125,85,255,150]",,,Model Glow settings popup open,src/ui/menu/visuals_page.cpp,103
+Visuals/Players,Chams Model Glow,Glow Radius,slider,esp.m_chams.glow_effect.radius,4.0,0.5,16.0,Model Glow settings popup open; step 0.5 u,src/ui/menu/visuals_page.cpp,104
+Visuals/Players,Chams Model Glow,Glow Strength,slider,esp.m_chams.glow_effect.strength,0.65,0.0,1.0,Model Glow settings popup open; step 0.01,src/ui/menu/visuals_page.cpp,105
+Visuals/Players,Chams Settings,Death Shatter,toggle-popup,esp.m_chams.kill_effect.enabled,true,,,Chams settings popup open; nested settings popup opens independently of enabled state,src/ui/menu/visuals_page.cpp,107
+Visuals/Players,Chams Death Shatter,Particle Color,color,esp.m_chams.kill_effect.color,"[170,125,255,220]",,,Death Shatter settings popup open,src/ui/menu/visuals_page.cpp,111
+Visuals/Players,Chams Death Shatter,Particle Duration,slider,esp.m_chams.kill_effect.duration,0.9,0.2,3.0,Death Shatter settings popup open; step 0.05 s,src/ui/menu/visuals_page.cpp,112
+Visuals/Players,Chams Death Shatter,Particle Size,slider,esp.m_chams.kill_effect.size,3.0,1.0,8.0,Death Shatter settings popup open; step 0.5 px,src/ui/menu/visuals_page.cpp,113
+Visuals/Players,Chams Death Shatter,Particle Count,slider,esp.m_chams.kill_effect.count,14,4,32,Death Shatter settings popup open; step 1,src/ui/menu/visuals_page.cpp,114
+Visuals/Players,Chams Settings,On Hit Chams,toggle-popup,esp.m_chams.on_shot.enabled,true,,,Chams settings popup open; nested settings popup open,src/ui/menu/visuals_page.cpp,116
+Visuals/Players,Chams On Hit,Ghost Duration,slider,esp.m_chams.on_shot.duration,0.55,0.1,3.0,On Hit Chams settings popup open; step 0.05 s,src/ui/menu/visuals_page.cpp,119
+Visuals/Players,Chams On Hit,Ghost Appearance,settings-popup,@ui.chams.on_hit.appearance,,,,On Hit Chams settings popup open; opens material settings,src/ui/menu/visuals_page.cpp,121
+Visuals/Players,Chams Settings,Occlusion,settings-popup,@ui.chams.occlusion.settings,,,,Chams settings popup open; nested popup opens,src/ui/menu/visuals_page.cpp,125
+Visuals/Players,Chams Occlusion,Dynamic Doors,toggle,esp.m_chams.occlude_dynamic_doors,true,,,Occlusion settings popup open,src/ui/menu/visuals_page.cpp,128
+Visuals/Players,Chams Occlusion,Smoke Occlusion,toggle,esp.m_chams.occlude_smoke,true,,,Occlusion settings popup open,src/ui/menu/visuals_page.cpp,129
+Visuals/Players,Chams Visible Material,Material,select,esp.m_chams.visible.type,glow_outline (3),0,6,"Chams Visible settings popup open; Solid=0, Shaded=1, Glow=2, Glow Outline=3, Iridescent=4, Water Flow=5, Glossy=6",src/ui/menu/widgets.cpp,668
+Visuals/Players,Chams Visible Material,Color,color,esp.m_chams.visible.color.r;esp.m_chams.visible.color.g;esp.m_chams.visible.color.b;esp.m_chams.visible.color.a,"[136,60,255,184]",,,Chams Visible settings popup open,src/ui/menu/widgets.cpp,669
+Visuals/Players,Chams Visible Material,Wireframe,toggle,esp.m_chams.visible.wireframe,false,,,Chams Visible settings popup open,src/ui/menu/widgets.cpp,670
+Visuals/Players,Chams Visible Material,Roughness,slider,esp.m_chams.visible.roughness,0.349999994,0,1,Chams Visible settings popup open; visible only when Material=shaded (1); step 0.01,src/ui/menu/widgets.cpp,677
+Visuals/Players,Chams Visible Material,Metalness,slider,esp.m_chams.visible.metalness,0.0,0,1,Chams Visible settings popup open; visible only when Material=shaded (1); step 0.01,src/ui/menu/widgets.cpp,678
+Visuals/Players,Chams Visible Material,Exponent,slider,esp.m_chams.visible.exponent,5.099999905,0.1,8,Chams Visible settings popup open; visible only when Material=glow (2); step 0.1,src/ui/menu/widgets.cpp,682
+Visuals/Players,Chams Visible Material,Exponent,slider,esp.m_chams.visible.exponent,5.099999905,0.1,8,Chams Visible settings popup open; visible only when Material=glow_outline (3); step 0.1,src/ui/menu/widgets.cpp,682
+Visuals/Players,Chams Visible Material,Falloff,slider,esp.m_chams.visible.falloff,0.050000001,0.05,2,Chams Visible settings popup open; visible only when Material=glow_outline (3); step 0.05,src/ui/menu/widgets.cpp,687
+Visuals/Players,Chams Visible Material,Fresnel Filling,slider,esp.m_chams.visible.fresnel_fill,0.719999969,0,1,Chams Visible settings popup open; visible only when Material=glow_outline (3); step 0.01,src/ui/menu/widgets.cpp,688
+Visuals/Players,Chams Visible Material,Strength,slider,esp.m_chams.visible.strength,0.329999983,0,1,Chams Visible settings popup open; visible only when Material=iridescent (4); step 0.01,src/ui/menu/widgets.cpp,692
+Visuals/Players,Chams Visible Material,Roughness,slider,esp.m_chams.visible.roughness,0.349999994,0,1,Chams Visible settings popup open; visible only when Material=iridescent (4); step 0.01,src/ui/menu/widgets.cpp,677
+Visuals/Players,Chams Visible Material,Speed,slider,esp.m_chams.visible.speed,4.0,0,4,Chams Visible settings popup open; visible only when Material=water_flow (5); step 0.05,src/ui/menu/widgets.cpp,697
+Visuals/Players,Chams Visible Material,Exponent,slider,esp.m_chams.visible.exponent,5.099999905,0.1,8,Chams Visible settings popup open; visible only when Material=glossy (6); step 0.1,src/ui/menu/widgets.cpp,682
+Visuals/Players,Chams Visible Material,Fresnel Filling,slider,esp.m_chams.visible.fresnel_fill,0.719999969,0,1,Chams Visible settings popup open; visible only when Material=glossy (6); step 0.01,src/ui/menu/widgets.cpp,688
+Visuals/Players,Chams Visible Material,Falloff,slider,esp.m_chams.visible.falloff,0.050000001,0.05,2,Chams Visible settings popup open; visible only when Material=glossy (6); step 0.05,src/ui/menu/widgets.cpp,687
+Visuals/Players,Chams Visible Material,Tint,color,esp.m_chams.visible.tint.r;esp.m_chams.visible.tint.g;esp.m_chams.visible.tint.b;esp.m_chams.visible.tint.a,"[120,200,255,255]",,,Chams Visible settings popup open; visible only when Material=glossy (6),src/ui/menu/widgets.cpp,704
+Visuals/Players,Chams Occluded Material,Material,select,esp.m_chams.invisible.type,water_flow (5),0,6,"Chams Occluded settings popup open; Solid=0, Shaded=1, Glow=2, Glow Outline=3, Iridescent=4, Water Flow=5, Glossy=6",src/ui/menu/widgets.cpp,668
+Visuals/Players,Chams Occluded Material,Color,color,esp.m_chams.invisible.color.r;esp.m_chams.invisible.color.g;esp.m_chams.invisible.color.b;esp.m_chams.invisible.color.a,"[60,71,255,200]",,,Chams Occluded settings popup open,src/ui/menu/widgets.cpp,669
+Visuals/Players,Chams Occluded Material,Wireframe,toggle,esp.m_chams.invisible.wireframe,false,,,Chams Occluded settings popup open,src/ui/menu/widgets.cpp,670
+Visuals/Players,Chams Occluded Material,Roughness,slider,esp.m_chams.invisible.roughness,0.349999994,0,1,Chams Occluded settings popup open; visible only when Material=shaded (1); step 0.01,src/ui/menu/widgets.cpp,677
+Visuals/Players,Chams Occluded Material,Metalness,slider,esp.m_chams.invisible.metalness,0.0,0,1,Chams Occluded settings popup open; visible only when Material=shaded (1); step 0.01,src/ui/menu/widgets.cpp,678
+Visuals/Players,Chams Occluded Material,Exponent,slider,esp.m_chams.invisible.exponent,2.0,0.1,8,Chams Occluded settings popup open; visible only when Material=glow (2); step 0.1,src/ui/menu/widgets.cpp,682
+Visuals/Players,Chams Occluded Material,Exponent,slider,esp.m_chams.invisible.exponent,2.0,0.1,8,Chams Occluded settings popup open; visible only when Material=glow_outline (3); step 0.1,src/ui/menu/widgets.cpp,682
+Visuals/Players,Chams Occluded Material,Falloff,slider,esp.m_chams.invisible.falloff,0.5,0.05,2,Chams Occluded settings popup open; visible only when Material=glow_outline (3); step 0.05,src/ui/menu/widgets.cpp,687
+Visuals/Players,Chams Occluded Material,Fresnel Filling,slider,esp.m_chams.invisible.fresnel_fill,0.25,0,1,Chams Occluded settings popup open; visible only when Material=glow_outline (3); step 0.01,src/ui/menu/widgets.cpp,688
+Visuals/Players,Chams Occluded Material,Strength,slider,esp.m_chams.invisible.strength,1.0,0,1,Chams Occluded settings popup open; visible only when Material=iridescent (4); step 0.01,src/ui/menu/widgets.cpp,692
+Visuals/Players,Chams Occluded Material,Roughness,slider,esp.m_chams.invisible.roughness,0.349999994,0,1,Chams Occluded settings popup open; visible only when Material=iridescent (4); step 0.01,src/ui/menu/widgets.cpp,677
+Visuals/Players,Chams Occluded Material,Speed,slider,esp.m_chams.invisible.speed,1.200000048,0,4,Chams Occluded settings popup open; visible only when Material=water_flow (5); step 0.05,src/ui/menu/widgets.cpp,697
+Visuals/Players,Chams Occluded Material,Exponent,slider,esp.m_chams.invisible.exponent,2.0,0.1,8,Chams Occluded settings popup open; visible only when Material=glossy (6); step 0.1,src/ui/menu/widgets.cpp,682
+Visuals/Players,Chams Occluded Material,Fresnel Filling,slider,esp.m_chams.invisible.fresnel_fill,0.25,0,1,Chams Occluded settings popup open; visible only when Material=glossy (6); step 0.01,src/ui/menu/widgets.cpp,688
+Visuals/Players,Chams Occluded Material,Falloff,slider,esp.m_chams.invisible.falloff,0.5,0.05,2,Chams Occluded settings popup open; visible only when Material=glossy (6); step 0.05,src/ui/menu/widgets.cpp,687
+Visuals/Players,Chams Occluded Material,Tint,color,esp.m_chams.invisible.tint.r;esp.m_chams.invisible.tint.g;esp.m_chams.invisible.tint.b;esp.m_chams.invisible.tint.a,"[120,200,255,255]",,,Chams Occluded settings popup open; visible only when Material=glossy (6),src/ui/menu/widgets.cpp,704
+Visuals/Players,Chams On Hit Appearance,Material,select,esp.m_chams.on_shot.appearance.type,glow_outline (3),0,6,"Ghost Appearance settings popup open; Solid=0, Shaded=1, Glow=2, Glow Outline=3, Iridescent=4, Water Flow=5, Glossy=6",src/ui/menu/widgets.cpp,668
+Visuals/Players,Chams On Hit Appearance,Color,color,esp.m_chams.on_shot.appearance.color.r;esp.m_chams.on_shot.appearance.color.g;esp.m_chams.on_shot.appearance.color.b;esp.m_chams.on_shot.appearance.color.a,"[255,185,80,150]",,,Ghost Appearance settings popup open,src/ui/menu/widgets.cpp,669
+Visuals/Players,Chams On Hit Appearance,Wireframe,toggle,esp.m_chams.on_shot.appearance.wireframe,false,,,Ghost Appearance settings popup open,src/ui/menu/widgets.cpp,670
+Visuals/Players,Chams On Hit Appearance,Roughness,slider,esp.m_chams.on_shot.appearance.roughness,0.35,0,1,Ghost Appearance settings popup open; visible only when Material=shaded (1); step 0.01,src/ui/menu/widgets.cpp,677
+Visuals/Players,Chams On Hit Appearance,Metalness,slider,esp.m_chams.on_shot.appearance.metalness,0.0,0,1,Ghost Appearance settings popup open; visible only when Material=shaded (1); step 0.01,src/ui/menu/widgets.cpp,678
+Visuals/Players,Chams On Hit Appearance,Exponent,slider,esp.m_chams.on_shot.appearance.exponent,3.0,0.1,8,Ghost Appearance settings popup open; visible only when Material=glow (2); step 0.1,src/ui/menu/widgets.cpp,682
+Visuals/Players,Chams On Hit Appearance,Exponent,slider,esp.m_chams.on_shot.appearance.exponent,3.0,0.1,8,Ghost Appearance settings popup open; visible only when Material=glow_outline (3); step 0.1,src/ui/menu/widgets.cpp,682
+Visuals/Players,Chams On Hit Appearance,Falloff,slider,esp.m_chams.on_shot.appearance.falloff,0.18,0.05,2,Ghost Appearance settings popup open; visible only when Material=glow_outline (3); step 0.05,src/ui/menu/widgets.cpp,687
+Visuals/Players,Chams On Hit Appearance,Fresnel Filling,slider,esp.m_chams.on_shot.appearance.fresnel_fill,0.22,0,1,Ghost Appearance settings popup open; visible only when Material=glow_outline (3); step 0.01,src/ui/menu/widgets.cpp,688
+Visuals/Players,Chams On Hit Appearance,Strength,slider,esp.m_chams.on_shot.appearance.strength,1.0,0,1,Ghost Appearance settings popup open; visible only when Material=iridescent (4); step 0.01,src/ui/menu/widgets.cpp,692
+Visuals/Players,Chams On Hit Appearance,Roughness,slider,esp.m_chams.on_shot.appearance.roughness,0.35,0,1,Ghost Appearance settings popup open; visible only when Material=iridescent (4); step 0.01,src/ui/menu/widgets.cpp,677
+Visuals/Players,Chams On Hit Appearance,Speed,slider,esp.m_chams.on_shot.appearance.speed,1.0,0,4,Ghost Appearance settings popup open; visible only when Material=water_flow (5); step 0.05,src/ui/menu/widgets.cpp,697
+Visuals/Players,Chams On Hit Appearance,Exponent,slider,esp.m_chams.on_shot.appearance.exponent,3.0,0.1,8,Ghost Appearance settings popup open; visible only when Material=glossy (6); step 0.1,src/ui/menu/widgets.cpp,682
+Visuals/Players,Chams On Hit Appearance,Fresnel Filling,slider,esp.m_chams.on_shot.appearance.fresnel_fill,0.22,0,1,Ghost Appearance settings popup open; visible only when Material=glossy (6); step 0.01,src/ui/menu/widgets.cpp,688
+Visuals/Players,Chams On Hit Appearance,Falloff,slider,esp.m_chams.on_shot.appearance.falloff,0.18,0.05,2,Ghost Appearance settings popup open; visible only when Material=glossy (6); step 0.05,src/ui/menu/widgets.cpp,687
+Visuals/Players,Chams On Hit Appearance,Tint,color,esp.m_chams.on_shot.appearance.tint.r;esp.m_chams.on_shot.appearance.tint.g;esp.m_chams.on_shot.appearance.tint.b;esp.m_chams.on_shot.appearance.tint.a,"[120,200,255,255]",,,Ghost Appearance settings popup open; visible only when Material=glossy (6),src/ui/menu/widgets.cpp,704
+Visuals/Players,Skeleton & Hitboxes,Show Skeleton,toggle-color,esp.m_player.m_skeleton.enabled;esp.m_player.m_skeleton.visible_color,"true;[255,255,255,255]",,,Always; inline color picker popup,src/ui/menu/visuals_page.cpp,141
+Visuals/Players,Skeleton & Hitboxes,Show Head Circle,toggle-color,esp.m_player.m_head_circle.enabled;esp.m_player.m_head_circle.color,"true;[255,255,255,255]",,,Always; inline color picker popup,src/ui/menu/visuals_page.cpp,142
+Visuals/Players,Skeleton & Hitboxes,Show View Line,toggle-color,esp.m_player.m_view_line.enabled;esp.m_player.m_view_line.color,"true;[255,255,255,255]",,,Always; inline color picker popup,src/ui/menu/visuals_page.cpp,143
+Visuals/Players,Skeleton & Hitboxes,Offscreen Arrows,toggle-popup,esp.m_player.m_offscreen_arrows.enabled,true,,,Always; popup open reveals arrow and bloom controls,src/ui/menu/visuals_page.cpp,144
+Visuals/Players,Offscreen Arrows,Arrow Color,color,esp.m_player.m_offscreen_arrows.color,"[204,230,241,255]",,,Offscreen Arrows settings popup open,src/ui/menu/visuals_page.cpp,148
+Visuals/Players,Offscreen Arrows,Arrow Size,slider,esp.m_player.m_offscreen_arrows.size,22.0,6.0,40.0,Offscreen Arrows settings popup open; step 0.5,src/ui/menu/visuals_page.cpp,149
+Visuals/Players,Offscreen Arrows,Arrow Radius,slider,esp.m_player.m_offscreen_arrows.radius,377.0,40.0,500.0,Offscreen Arrows settings popup open; step 1.0,src/ui/menu/visuals_page.cpp,150
+Visuals/Players,Offscreen Arrows,Bloom,toggle-popup,esp.m_player.m_offscreen_arrows.bloom,true,,,Offscreen Arrows settings popup open; bloom popup open,src/ui/menu/visuals_page.cpp,151
+Visuals/Players,Arrow Bloom,Bloom Color,color,esp.m_player.m_offscreen_arrows.bloom_color,"[120,190,255,210]",,,Bloom settings popup open,src/ui/menu/visuals_page.cpp,155
+Visuals/Players,Arrow Bloom,Bloom Radius,slider,esp.m_player.m_offscreen_arrows.bloom_radius,6.0,1.0,16.0,Bloom settings popup open; step 0.5 px,src/ui/menu/visuals_page.cpp,156
+Visuals/Players,Arrow Bloom,Bloom Speed,slider,esp.m_player.m_offscreen_arrows.bloom_speed,0.50,0.05,2.0,Bloom settings popup open; step 0.05 Hz,src/ui/menu/visuals_page.cpp,157
+Visuals/Players,Arrow Bloom,Minimum Glow,slider,esp.m_player.m_offscreen_arrows.bloom_min_alpha,0.12,0.0,1.0,Bloom settings popup open; step 0.01,src/ui/menu/visuals_page.cpp,158
+Visuals/Players,Arrow Bloom,Maximum Glow,slider,esp.m_player.m_offscreen_arrows.bloom_max_alpha,0.68,0.0,1.0,Bloom settings popup open; step 0.01,src/ui/menu/visuals_page.cpp,159
+Visuals/Players,Skeleton & Hitboxes,Threat Hitboxes,toggle-popup,esp.m_player.m_threat_module.enabled,false,,,Always; popup open reveals colors and fill alpha,src/ui/menu/visuals_page.cpp,162
+Visuals/Players,Threat Hitboxes,Head Hitbox Color,color,esp.m_player.m_threat_module.head_color,"[230,50,50,110]",,,Threat Hitboxes settings popup open,src/ui/menu/visuals_page.cpp,165
+Visuals/Players,Threat Hitboxes,Body Hitbox Color,color,esp.m_player.m_threat_module.body_color,"[255,255,255,70]",,,Threat Hitboxes settings popup open,src/ui/menu/visuals_page.cpp,166
+Visuals/Players,Threat Hitboxes,Fill Alpha,slider,esp.m_player.m_threat_module.fill_alpha,30.0,0.0,255.0,Threat Hitboxes settings popup open; step 1,src/ui/menu/visuals_page.cpp,167
+Visuals/Players,Skeleton & Hitboxes,Sound ESP,toggle-popup,esp.m_sound.enabled,false,,,Always; popup open reveals sound controls,src/ui/menu/visuals_page.cpp,172
+Visuals/Players,Sound ESP,Ring Color,color,esp.m_sound.color,"[120,200,255,200]",,,Sound ESP settings popup open,src/ui/menu/visuals_page.cpp,175
+Visuals/Players,Sound ESP,Local Sync,toggle,esp.m_sound.local_sync,false,,,Sound ESP settings popup open,src/ui/menu/visuals_page.cpp,176
+Visuals/Players,Sound ESP,Duration,slider,esp.m_sound.duration,1.6,0.5,4.0,Sound ESP settings popup open; step 0.05 s,src/ui/menu/visuals_page.cpp,177
+Visuals/Players,Sound ESP,Ring Radius,slider,esp.m_sound.radius,34.0,10.0,80.0,Sound ESP settings popup open; step 0.5,src/ui/menu/visuals_page.cpp,178
+Visuals/Players,Visual Editor,Name Drag,editor-drag,esp.m_player.m_layout.name.x;esp.m_player.m_layout.name.y,0.494192481;-0.018994622,,,"Visual editor shown only on Visuals/Players; element shown when esp.m_player.m_name.enabled is true; coordinates are normalized to player layout reference, with negative/>1 overhang; drag is clamped to preview bounds; bar release near dock updates bar position",src/ui/menu/visual_editor.cpp,880
+Visuals/Players,Visual Editor,Name Scale,editor-wheel-scale,esp.m_player.m_layout.name.scale,1.160000086,0.55,2.0,"Visual editor shown only on Visuals/Players; element shown when esp.m_player.m_name.enabled is true; hover element and mouse wheel, 0.08 per wheel unit",src/ui/menu/visual_editor.cpp,880
+Visuals/Players,Visual Editor,Name Settings Popup,editor-settings-popup,@ui.visual_editor.name.settings,,,,Visual editor shown only on Visuals/Players; element shown when esp.m_player.m_name.enabled is true; right-click element; invokes corresponding shared settings callback,src/ui/menu/popups.cpp,382
+Visuals/Players,Visual Editor,Weapon Drag,editor-drag,esp.m_player.m_layout.weapon.x;esp.m_player.m_layout.weapon.y,0.50;1.038997650,,,"Visual editor shown only on Visuals/Players; element shown when esp.m_player.m_weapon.enabled is true; coordinates are normalized to player layout reference, with negative/>1 overhang; drag is clamped to preview bounds; bar release near dock updates bar position",src/ui/menu/visual_editor.cpp,882
+Visuals/Players,Visual Editor,Weapon Scale,editor-wheel-scale,esp.m_player.m_layout.weapon.scale,1.0,0.55,2.0,"Visual editor shown only on Visuals/Players; element shown when esp.m_player.m_weapon.enabled is true; hover element and mouse wheel, 0.08 per wheel unit",src/ui/menu/visual_editor.cpp,882
+Visuals/Players,Visual Editor,Weapon Settings Popup,editor-settings-popup,@ui.visual_editor.weapon.settings,,,,Visual editor shown only on Visuals/Players; element shown when esp.m_player.m_weapon.enabled is true; right-click element; invokes corresponding shared settings callback,src/ui/menu/popups.cpp,382
+Visuals/Players,Visual Editor,Health Bar Drag,editor-drag,esp.m_player.m_layout.health.x;esp.m_player.m_layout.health.y,-0.017735176;0.50,,,"Visual editor shown only on Visuals/Players; element shown when esp.m_player.m_health_bar.enabled is true; coordinates are normalized to player layout reference, with negative/>1 overhang; drag is clamped to preview bounds; bar release near dock updates bar position",src/ui/menu/visual_editor.cpp,884
+Visuals/Players,Visual Editor,Health Bar Scale,editor-wheel-scale,esp.m_player.m_layout.health.scale,0.920000017,0.55,2.0,"Visual editor shown only on Visuals/Players; element shown when esp.m_player.m_health_bar.enabled is true; hover element and mouse wheel, 0.08 per wheel unit",src/ui/menu/visual_editor.cpp,884
+Visuals/Players,Visual Editor,Health Bar Settings Popup,editor-settings-popup,@ui.visual_editor.health.settings,,,,Visual editor shown only on Visuals/Players; element shown when esp.m_player.m_health_bar.enabled is true; right-click element; invokes same bar settings rows listed above,src/ui/menu/popups.cpp,382
+Visuals/Players,Visual Editor,Armor Bar Drag,editor-drag,esp.m_player.m_layout.armor.x;esp.m_player.m_layout.armor.y,0.50;1.012,,,"Visual editor shown only on Visuals/Players; element shown when esp.m_player.m_armor_bar.enabled is true; coordinates are normalized to player layout reference, with negative/>1 overhang; drag is clamped to preview bounds; bar release near dock updates bar position",src/ui/menu/visual_editor.cpp,886
+Visuals/Players,Visual Editor,Armor Bar Scale,editor-wheel-scale,esp.m_player.m_layout.armor.scale,1.0,0.55,2.0,"Visual editor shown only on Visuals/Players; element shown when esp.m_player.m_armor_bar.enabled is true; hover element and mouse wheel, 0.08 per wheel unit",src/ui/menu/visual_editor.cpp,886
+Visuals/Players,Visual Editor,Armor Bar Settings Popup,editor-settings-popup,@ui.visual_editor.armor.settings,,,,Visual editor shown only on Visuals/Players; element shown when esp.m_player.m_armor_bar.enabled is true; right-click element; invokes same bar settings rows listed above,src/ui/menu/popups.cpp,382
+Visuals/Players,Visual Editor,Info Flags Drag,editor-drag,esp.m_player.m_layout.flags.x;esp.m_player.m_layout.flags.y,0.949290633;-0.009056670,,,"Visual editor shown only on Visuals/Players; element shown when esp.m_player.m_info_flags.enabled is true and at least one flag selected; coordinates are normalized to player layout reference, with negative/>1 overhang; drag is clamped to preview bounds; bar release near dock updates bar position",src/ui/menu/visual_editor.cpp,887
+Visuals/Players,Visual Editor,Info Flags Scale,editor-wheel-scale,esp.m_player.m_layout.flags.scale,1.0,0.55,2.0,"Visual editor shown only on Visuals/Players; element shown when esp.m_player.m_info_flags.enabled is true and at least one flag selected; hover element and mouse wheel, 0.08 per wheel unit",src/ui/menu/visual_editor.cpp,887
+Visuals/Players,Visual Editor,Info Flags Settings Popup,editor-settings-popup,@ui.visual_editor.flags.settings,,,,Visual editor shown only on Visuals/Players; element shown when esp.m_player.m_info_flags.enabled is true and at least one flag selected; right-click element; invokes corresponding shared settings callback,src/ui/menu/popups.cpp,382
+Visuals/Players,Visual Editor,Orbit Model,editor-orbit,@action.visual_editor.orbit_model,,,,Visual editor shown and live model preview available; drag preview outside element hit regions,src/ui/menu/visual_editor.cpp,800
+Visuals/Players,Editor Weapon Settings,Display,select,esp.m_player.m_weapon.display,Icon (1),0,2,"Show Weapon settings popup open; Text=0, Icon=1, Text + Icon=2; also shown in Visual Editor right-click settings popup",src/ui/menu/widgets.cpp,633
+Visuals/Players,Editor Weapon Settings,Text Color,color,esp.m_player.m_weapon.text_color,"[200,200,210,220]",,,Show Weapon settings popup open; also shown in Visual Editor right-click settings popup,src/ui/menu/widgets.cpp,635
+Visuals/Players,Editor Weapon Settings,Icon Color,color,esp.m_player.m_weapon.icon_color,"[240,240,245,240]",,,Show Weapon settings popup open; also shown in Visual Editor right-click settings popup,src/ui/menu/widgets.cpp,636
+Visuals/Players,Editor Weapon Settings,Ammo Indicator,toggle-popup,esp.m_player.m_weapon.ammo.enabled,true,,,Show Weapon settings popup open; ammo settings popup available; also shown in Visual Editor right-click settings popup,src/ui/menu/widgets.cpp,637
+Visuals/Players,Editor Weapon Settings,Exact Ammo Count,toggle,esp.m_player.m_weapon.ammo.show_count,false,,,Ammo Indicator settings popup open; also shown in Visual Editor right-click settings popup,src/ui/menu/widgets.cpp,640
+Visuals/Players,Editor Weapon Settings,Empty Color,color,esp.m_player.m_weapon.ammo.empty_color,"[225,55,65,245]",,,Ammo Indicator settings popup open; also shown in Visual Editor right-click settings popup,src/ui/menu/widgets.cpp,641
+Visuals/Players,Editor Health Bar Settings,Position,select,esp.m_player.m_health_bar.position,left (0),0,3,"Health Bar settings popup open; Left=0, Top=1, Bottom=2, Right=3; also shown in Visual Editor right-click settings popup",src/ui/menu/internal.hpp,715
+Visuals/Players,Editor Health Bar Settings,Thickness,slider,esp.m_player.m_health_bar.thickness,3.0,1.0,12.0,Health Bar settings popup open; step 0.5 px; also shown in Visual Editor right-click settings popup,src/ui/menu/internal.hpp,719
+Visuals/Players,Editor Health Bar Settings,Outline,toggle-popup,esp.m_player.m_health_bar.outline,true,,,Health Bar settings popup open; outline popup open; also shown in Visual Editor right-click settings popup,src/ui/menu/internal.hpp,720
+Visuals/Players,Editor Health Bar Settings,Outline Thickness,slider,esp.m_player.m_health_bar.outline_thickness,1.0,0.5,4.0,Outline settings popup open; step 0.5 px; also shown in Visual Editor right-click settings popup,src/ui/menu/internal.hpp,723
+Visuals/Players,Editor Health Bar Settings,Outline Color,color,esp.m_player.m_health_bar.outline_color,"[0,0,0,255]",,,Outline settings popup open; also shown in Visual Editor right-click settings popup,src/ui/menu/internal.hpp,724
+Visuals/Players,Editor Health Bar Settings,Gradient,toggle-popup,esp.m_player.m_health_bar.gradient,true,,,Health Bar settings popup open; gradient popup open; also shown in Visual Editor right-click settings popup,src/ui/menu/internal.hpp,726
+Visuals/Players,Editor Health Bar Settings,Full Color,color,esp.m_player.m_health_bar.full_color,"[215,50,220,255]",,,Gradient settings popup open; also shown in Visual Editor right-click settings popup,src/ui/menu/internal.hpp,729
+Visuals/Players,Editor Health Bar Settings,Low Color,color,esp.m_player.m_health_bar.low_color,"[220,50,50,255]",,,Gradient settings popup open; also shown in Visual Editor right-click settings popup,src/ui/menu/internal.hpp,730
+Visuals/Players,Editor Health Bar Settings,Segments,toggle-popup,esp.m_player.m_health_bar.segments,off (1 segment),,,Health Bar settings popup open; segment popup open; also shown in Visual Editor right-click settings popup,src/ui/menu/internal.hpp,733
+Visuals/Players,Editor Health Bar Settings,Count,slider,esp.m_player.m_health_bar.segments,1,2,10,Segments settings popup open; step 1; toggling on initializes 4; also shown in Visual Editor right-click settings popup,src/ui/menu/internal.hpp,736
+Visuals/Players,Editor Health Bar Settings,Gap,slider,esp.m_player.m_health_bar.segment_gap,2.5,0.0,4.0,Segments settings popup open; step 0.5 px; also shown in Visual Editor right-click settings popup,src/ui/menu/internal.hpp,737
+Visuals/Players,Editor Health Bar Settings,Show Value,toggle-popup,esp.m_player.m_health_bar.show_value,true,,,Health Bar settings popup open; value popup open; also shown in Visual Editor right-click settings popup,src/ui/menu/internal.hpp,743
+Visuals/Players,Editor Health Bar Settings,Text Color,color,esp.m_player.m_health_bar.text_color,"[245,245,250,255]",,,Show Value settings popup open; also shown in Visual Editor right-click settings popup,src/ui/menu/internal.hpp,743
+Visuals/Players,Editor Health Bar Settings,Background Color,color,esp.m_player.m_health_bar.background_color,"[0,17,28,220]",,,Health Bar settings popup open; also shown in Visual Editor right-click settings popup,src/ui/menu/internal.hpp,744
+Visuals/Players,Editor Armor Bar Settings,Position,select,esp.m_player.m_armor_bar.position,bottom (2),0,3,"Armor Bar settings popup open; Left=0, Top=1, Bottom=2, Right=3; also shown in Visual Editor right-click settings popup",src/ui/menu/internal.hpp,715
+Visuals/Players,Editor Armor Bar Settings,Thickness,slider,esp.m_player.m_armor_bar.thickness,3.5,1.0,12.0,Armor Bar settings popup open; step 0.5 px; also shown in Visual Editor right-click settings popup,src/ui/menu/internal.hpp,719
+Visuals/Players,Editor Armor Bar Settings,Outline,toggle-popup,esp.m_player.m_armor_bar.outline,true,,,Armor Bar settings popup open; outline popup open; also shown in Visual Editor right-click settings popup,src/ui/menu/internal.hpp,720
+Visuals/Players,Editor Armor Bar Settings,Outline Thickness,slider,esp.m_player.m_armor_bar.outline_thickness,1.0,0.5,4.0,Outline settings popup open; step 0.5 px; also shown in Visual Editor right-click settings popup,src/ui/menu/internal.hpp,723
+Visuals/Players,Editor Armor Bar Settings,Outline Color,color,esp.m_player.m_armor_bar.outline_color,"[0,0,0,255]",,,Outline settings popup open; also shown in Visual Editor right-click settings popup,src/ui/menu/internal.hpp,724
+Visuals/Players,Editor Armor Bar Settings,Gradient,toggle-popup,esp.m_player.m_armor_bar.gradient,false,,,Armor Bar settings popup open; gradient popup open; also shown in Visual Editor right-click settings popup,src/ui/menu/internal.hpp,726
+Visuals/Players,Editor Armor Bar Settings,Full Color,color,esp.m_player.m_armor_bar.full_color,"[50,80,220,255]",,,Gradient settings popup open; also shown in Visual Editor right-click settings popup,src/ui/menu/internal.hpp,729
+Visuals/Players,Editor Armor Bar Settings,Low Color,color,esp.m_player.m_armor_bar.low_color,"[50,80,220,255]",,,Gradient settings popup open; also shown in Visual Editor right-click settings popup,src/ui/menu/internal.hpp,730
+Visuals/Players,Editor Armor Bar Settings,Segments,toggle-popup,esp.m_player.m_armor_bar.segments,off (1 segment),,,Armor Bar settings popup open; segment popup open; also shown in Visual Editor right-click settings popup,src/ui/menu/internal.hpp,733
+Visuals/Players,Editor Armor Bar Settings,Count,slider,esp.m_player.m_armor_bar.segments,1,2,10,Segments settings popup open; step 1; toggling on initializes 4; also shown in Visual Editor right-click settings popup,src/ui/menu/internal.hpp,736
+Visuals/Players,Editor Armor Bar Settings,Gap,slider,esp.m_player.m_armor_bar.segment_gap,1.0,0.0,4.0,Segments settings popup open; step 0.5 px; also shown in Visual Editor right-click settings popup,src/ui/menu/internal.hpp,737
+Visuals/Players,Editor Armor Bar Settings,Show Value,toggle-popup,esp.m_player.m_armor_bar.show_value,false,,,Armor Bar settings popup open; value popup open; also shown in Visual Editor right-click settings popup,src/ui/menu/internal.hpp,743
+Visuals/Players,Editor Armor Bar Settings,Text Color,color,esp.m_player.m_armor_bar.text_color,"[245,245,250,255]",,,Show Value settings popup open; also shown in Visual Editor right-click settings popup,src/ui/menu/internal.hpp,743
+Visuals/Players,Editor Armor Bar Settings,Background Color,color,esp.m_player.m_armor_bar.background_color,"[10,10,14,220]",,,Armor Bar settings popup open; also shown in Visual Editor right-click settings popup,src/ui/menu/internal.hpp,744
+Visuals/Players,Editor Info Flags Settings,Active Flags,multiselect,esp.m_player.m_info_flags.flags,money|armor|kit|scoped|defusing|flashed|ping|bomb_damage,0,511,"Info Flags settings popup open; nine options: Money, Armor, Defuse Kit, Scoped, Defusing, Flashed, Ping, Distance, Bomb Damage; also shown in Visual Editor right-click settings popup",src/ui/menu/widgets.cpp,653
+Visuals/Players,Editor Info Flags Settings,Edit Flag,select,@ui.player_info_flags.selected_style,Money (0),0,8,Info Flags settings popup open; view-only selection chooses style target; also shown in Visual Editor right-click settings popup,src/ui/menu/widgets.cpp,660
+Visuals/Players,Editor Name Settings,Color,color,esp.m_player.m_name.color.r;esp.m_player.m_name.color.g;esp.m_player.m_name.color.b;esp.m_player.m_name.color.a,"[245,245,250,240]",,,Visual editor Name element shown; right-click popup open,src/ui/menu/visual_editor.cpp,623
+Visuals/Items,Navigation,Items,subtab-button,@ui.visuals.tab.items,,,,Always; selects the corresponding visuals subtab,src/ui/menu/visuals_page.cpp,512
+Visuals/Items,Settings,Enable Item ESP,toggle,esp.m_item.enabled,true,,,,src/ui/menu/visuals_page.cpp,189
+Visuals/Items,Settings,Max Distance,slider,esp.m_item.max_distance,40.0,5.0,150.0,step 1,src/ui/menu/visuals_page.cpp,190
+Visuals/Items,Settings,Show Icon,toggle-color,esp.m_item.m_icon.enabled;esp.m_item.m_icon.color,"true;[255,255,255,220]",,,Inline color picker popup,src/ui/menu/visuals_page.cpp,191
+Visuals/Items,Settings,Show Item Name,toggle,esp.m_item.m_name.enabled,false,,,,src/ui/menu/visuals_page.cpp,194
+Visuals/Items,Filters,Rifles,toggle,esp.m_item.m_filters.rifles,true,,,,src/ui/menu/visuals_page.cpp,199
+Visuals/Items,Filters,SMGs,toggle,esp.m_item.m_filters.smgs,true,,,,src/ui/menu/visuals_page.cpp,200
+Visuals/Items,Filters,Snipers,toggle,esp.m_item.m_filters.snipers,true,,,,src/ui/menu/visuals_page.cpp,201
+Visuals/Items,Filters,Pistols,toggle,esp.m_item.m_filters.pistols,true,,,,src/ui/menu/visuals_page.cpp,202
+Visuals/Items,Filters,Grenades,toggle,esp.m_item.m_filters.grenades,true,,,,src/ui/menu/visuals_page.cpp,203
+Visuals/Items,Filters,Utility,toggle,esp.m_item.m_filters.utility,true,,,,src/ui/menu/visuals_page.cpp,204
+Visuals/Projectiles,Navigation,Projectiles,subtab-button,@ui.visuals.tab.projectiles,,,,Always; selects the corresponding visuals subtab,src/ui/menu/visuals_page.cpp,512
+Visuals/Projectiles,Visual Elements,Enable Projectiles,toggle,esp.m_projectile.enabled,true,,,,src/ui/menu/visuals_page.cpp,214
+Visuals/Projectiles,Visual Elements,Display Mode,select,esp.m_projectile.display_mode,Indicator (0),0,1,"Indicator=0, Text Only=1",src/ui/menu/visuals_page.cpp,216
+Visuals/Projectiles,Visual Elements,Show Icon / Show Text,toggle,esp.m_projectile.show_icon,true,,,"Always; label is Show Text in Text Only mode, otherwise Show Icon",src/ui/menu/visuals_page.cpp,217
+Visuals/Projectiles,Visual Elements,Effect Timer / Effect Timer Ring,toggle,esp.m_projectile.show_timer_ring,true,,,"Always; label is Effect Timer in Text Only mode, otherwise Effect Timer Ring",src/ui/menu/visuals_page.cpp,219
+Visuals/Projectiles,Visual Elements,Inferno Bounds,toggle,esp.m_projectile.show_inferno_bounds,true,,,,src/ui/menu/visuals_page.cpp,222
+Visuals/Projectiles,Colors,HE Grenade,color,esp.m_projectile.color_he,"[220,150,150,220]",,,,src/ui/menu/visuals_page.cpp,227
+Visuals/Projectiles,Colors,Flashbang,color,esp.m_projectile.color_flash,"[230,220,150,220]",,,,src/ui/menu/visuals_page.cpp,228
+Visuals/Projectiles,Colors,Smoke,color,esp.m_projectile.color_smoke,"[160,200,180,220]",,,,src/ui/menu/visuals_page.cpp,229
+Visuals/Projectiles,Colors,Molotov,color,esp.m_projectile.color_molotov,"[220,170,130,220]",,,,src/ui/menu/visuals_page.cpp,230
+Visuals/Projectiles,Colors,Decoy,color,esp.m_projectile.color_decoy,"[200,200,200,200]",,,,src/ui/menu/visuals_page.cpp,231
+Visuals/Projectiles,Indicator,Timer Full,color,esp.m_projectile.timer_high_color,"[255,255,255,255]",,,,src/ui/menu/visuals_page.cpp,236
+Visuals/Projectiles,Indicator,Timer Low,color,esp.m_projectile.timer_low_color,"[220,100,100,255]",,,,src/ui/menu/visuals_page.cpp,237
+Visuals/Projectiles,Indicator,Indicator Background,color,esp.m_projectile.indicator_background,"[15,16,22,185]",,,,src/ui/menu/visuals_page.cpp,238
+Visuals/Projectiles,Inferno Gradient,Gradient Width,slider,esp.m_projectile.inferno_gradient_width,34.0,8.0,80.0,step 1 px,src/ui/menu/visuals_page.cpp,243
+Visuals/Projectiles,Inferno Gradient,Gradient Opacity,slider,esp.m_projectile.inferno_gradient_opacity,45.0,0.0,100.0,step 1%,src/ui/menu/visuals_page.cpp,244
+Visuals/Bomb,Navigation,Bomb,subtab-button,@ui.visuals.tab.bomb,,,,Always; selects the corresponding visuals subtab,src/ui/menu/visuals_page.cpp,512
+Visuals/Bomb,States,Enable Bomb ESP,toggle,esp.m_bomb.enabled,true,,,,src/ui/menu/visuals_page.cpp,254
+Visuals/Bomb,States,Display Mode,select,esp.m_bomb.display_mode,Indicator (0),0,1,"Indicator=0, Text Only=1",src/ui/menu/visuals_page.cpp,256
+Visuals/Bomb,States,Show Carrier,toggle-color,esp.m_bomb.show_active_bomb;esp.m_bomb.active_bomb_color,"true;[255,200,50,255]",,,Inline color picker popup,src/ui/menu/visuals_page.cpp,257
+Visuals/Bomb,States,Show Planted,toggle-popup,esp.m_bomb.show_planted_bomb,true,,,Always; popup open reveals planted/defusing colors,src/ui/menu/visuals_page.cpp,258
+Visuals/Bomb,Planted Bomb,Planted Color,color,esp.m_bomb.bomb_color_t,"[255,180,50,255]",,,Show Planted settings popup open,src/ui/menu/visuals_page.cpp,261
+Visuals/Bomb,Planted Bomb,Defusing Color,color,esp.m_bomb.bomb_color_ct,"[50,180,255,255]",,,Show Planted settings popup open,src/ui/menu/visuals_page.cpp,262
+Visuals/Bomb,States,World Timer / World Timer Ring,toggle,esp.m_bomb.show_timer,true,,,"Always; label is World Timer in Text Only mode, otherwise World Timer Ring",src/ui/menu/visuals_page.cpp,264
+Visuals/Bomb,States,Bomb Info Panel,toggle-popup,esp.m_bomb.show_info_panel,true,,,Always; popup open reveals timer/panel colors,src/ui/menu/visuals_page.cpp,266
+Visuals/Bomb,Bomb Info Panel,Timer Color,color,esp.m_bomb.timer_text_color,"[255,220,100,255]",,,Bomb Info Panel settings popup open,src/ui/menu/visuals_page.cpp,269
+Visuals/Bomb,Bomb Info Panel,Panel Background,color,esp.m_bomb.panel_background,"[12,13,18,225]",,,Bomb Info Panel settings popup open,src/ui/menu/visuals_page.cpp,270
+Visuals/Bomb,Safe Zone,Safe Zone Contour,toggle-popup,esp.m_bomb.show_safe_zone,true,,,Always; popup open reveals contour controls,src/ui/menu/visuals_page.cpp,276
+Visuals/Bomb,Safe Zone,Zone Color,color,esp.m_bomb.safe_zone_color,"[70,235,105,240]",,,Safe Zone Contour settings popup open,src/ui/menu/visuals_page.cpp,279
+Visuals/Bomb,Safe Zone,Gradient Bands,slider,esp.m_bomb.safe_zone_bands,1,1,8,Safe Zone Contour settings popup open; step 1,src/ui/menu/visuals_page.cpp,280
+Visuals/Bomb,Safe Zone,Band Step,slider,esp.m_bomb.safe_zone_band_step,4.0,4.0,40.0,Safe Zone Contour settings popup open; step 1 HP,src/ui/menu/visuals_page.cpp,281
+Visuals/Bomb,Safe Zone,Render Radius,slider,esp.m_bomb.safe_zone_draw_radius,1200.0,200.0,2500.0,Safe Zone Contour settings popup open; step 10 u,src/ui/menu/visuals_page.cpp,282
+Visuals/Radar,Navigation,Radar,subtab-button,@ui.visuals.tab.radar,,,,Always; selects the corresponding visuals subtab,src/ui/menu/visuals_page.cpp,512
+Visuals/Radar,Radar Players,Overlay Enemy Markers,toggle-popup,esp.m_radar.enabled,true,,,Always; popup open reveals activation settings,src/ui/menu/visuals_page.cpp,294
+Visuals/Radar,Radar Players,Activation,select,esp.m_radar.activation_mode,Always On (0),0,2,"Overlay Enemy Markers settings popup open; Always On=0, Hold=1, Toggle=2",src/ui/menu/visuals_page.cpp,299
+Visuals/Radar,Radar Players,Key,keybind,esp.m_radar.activation_key,0,,,Only when activation_mode is Hold (1) or Toggle (2),src/ui/menu/visuals_page.cpp,304
+Visuals/Radar,Radar Players,Player Names,toggle-color,esp.m_radar.show_names;esp.m_radar.name_color,"true;[245,245,250,255]",,,Inline color picker popup,src/ui/menu/visuals_page.cpp,306
+Visuals/Radar,Radar Players,Player Health,toggle-color,esp.m_radar.show_health;esp.m_radar.health_color,"true;[95,230,125,255]",,,Inline color picker popup,src/ui/menu/visuals_page.cpp,307
+Visuals/Radar,Radar Players,Player Armor,toggle-color,esp.m_radar.show_armor;esp.m_radar.armor_color,"true;[80,155,255,255]",,,Inline color picker popup,src/ui/menu/visuals_page.cpp,308
+Visuals/Radar,Radar Players,Player Weapon,toggle-color,esp.m_radar.show_weapon;esp.m_radar.weapon_color,"true;[205,212,225,245]",,,Inline color picker popup,src/ui/menu/visuals_page.cpp,309
+Visuals/Radar,Player Style,Enemy Marker,color,esp.m_radar.enemy_color,"[255,64,64,255]",,,,src/ui/menu/visuals_page.cpp,314
+Visuals/Radar,Player Style,View Direction,color,esp.m_radar.direction_color,"[255,255,255,255]",,,,src/ui/menu/visuals_page.cpp,315
+Visuals/Radar,Player Style,Status Text,color,esp.m_radar.status_color,"[225,230,240,245]",,,,src/ui/menu/visuals_page.cpp,316
+Visuals/Radar,Player Style,Marker Scale,slider,esp.m_radar.marker_scale,1.0,0.5,2.0,step 0.05,src/ui/menu/visuals_page.cpp,317
+Visuals/Radar,Player Style,Text Outline,toggle-popup,esp.m_radar.text_outline,true,,,Always; popup open reveals outline style,src/ui/menu/visuals_page.cpp,318
+Visuals/Radar,Text Outline,Outline Color,color,esp.m_radar.text_outline_color,"[0,0,0,230]",,,Text Outline settings popup open,src/ui/menu/visuals_page.cpp,321
+Visuals/Radar,Text Outline,Outline Thickness,slider,esp.m_radar.text_outline_thickness,1.0,0.5,3.0,Text Outline settings popup open; step 0.5 px,src/ui/menu/visuals_page.cpp,322
+Visuals/Radar,Radar Grenades,Grenade Markers,toggle-popup,esp.m_radar.show_projectiles,true,,,Always; popup open reveals grenade colors and scale,src/ui/menu/visuals_page.cpp,330
+Visuals/Radar,Grenade Markers,HE Color,color,esp.m_radar.he_color,"[255,105,80,255]",,,Grenade Markers settings popup open,src/ui/menu/visuals_page.cpp,333
+Visuals/Radar,Grenade Markers,Flash Color,color,esp.m_radar.flash_color,"[250,245,180,255]",,,Grenade Markers settings popup open,src/ui/menu/visuals_page.cpp,334
+Visuals/Radar,Grenade Markers,Smoke Color,color,esp.m_radar.smoke_color,"[180,190,205,255]",,,Grenade Markers settings popup open,src/ui/menu/visuals_page.cpp,335
+Visuals/Radar,Grenade Markers,Molotov Color,color,esp.m_radar.molotov_color,"[255,145,55,255]",,,Grenade Markers settings popup open,src/ui/menu/visuals_page.cpp,336
+Visuals/Radar,Grenade Markers,Decoy Color,color,esp.m_radar.decoy_color,"[140,190,255,255]",,,Grenade Markers settings popup open,src/ui/menu/visuals_page.cpp,337
+Visuals/Radar,Grenade Markers,Information Scale,slider,esp.m_radar.information_scale,0.75,0.5,1.5,Grenade Markers settings popup open; step 0.05,src/ui/menu/visuals_page.cpp,338
+Visuals/Radar,Radar Grenades,Grenade Trajectories,toggle-popup,esp.m_radar.show_trajectories,true,,,Always; popup open reveals trajectory style,src/ui/menu/visuals_page.cpp,340
+Visuals/Radar,Grenade Trajectories,Line Thickness,slider,esp.m_radar.trajectory_thickness,1.5,0.5,6.0,Grenade Trajectories settings popup open; step 0.25 px,src/ui/menu/visuals_page.cpp,343
+Visuals/Radar,Grenade Trajectories,End Point Size,slider,esp.m_radar.trajectory_endpoint_size,3.0,1.0,10.0,Grenade Trajectories settings popup open; step 0.5 px,src/ui/menu/visuals_page.cpp,344
+Visuals/Radar,Radar Grenades,Grenade Zones,toggle-popup,esp.m_radar.show_grenade_zones,true,,,Always; popup open reveals zone style,src/ui/menu/visuals_page.cpp,346
+Visuals/Radar,Grenade Zones,Fill Opacity,slider,esp.m_radar.zone_fill_alpha,15.0,0.0,100.0,Grenade Zones settings popup open; step 1%,src/ui/menu/visuals_page.cpp,349
+Visuals/Radar,Grenade Zones,Outline Opacity,slider,esp.m_radar.zone_outline_alpha,59.0,0.0,100.0,Grenade Zones settings popup open; step 1%,src/ui/menu/visuals_page.cpp,350
+Visuals/Radar,Grenade Zones,Outline Thickness,slider,esp.m_radar.zone_outline_thickness,1.0,0.5,5.0,Grenade Zones settings popup open; step 0.25 px,src/ui/menu/visuals_page.cpp,351
+Visuals/Effects,Navigation,Effects,subtab-button,@ui.visuals.tab.effects,,,,Always; selects the corresponding visuals subtab,src/ui/menu/visuals_page.cpp,512
+Visuals/Effects,Bullet Effects,Enable Bullet Tracers,toggle-popup,misc.m_bullet_tracers.enabled,false,,,Always; popup open reveals tracer controls,src/ui/menu/visuals_page.cpp,363
+Visuals/Effects,Bullet Tracers,Appearance,settings-popup,@ui.bullet_tracers.appearance,,,,Bullet Tracers settings popup open; nested appearance popup,src/ui/menu/visuals_page.cpp,367
+Visuals/Effects,Tracer Appearance,Tracer Color,color,misc.m_bullet_tracers.color,"[192,203,229,200]",,,Appearance settings popup open,src/ui/menu/visuals_page.cpp,370
+Visuals/Effects,Tracer Appearance,Thickness,slider,misc.m_bullet_tracers.thickness,1.5,1.0,10.0,Appearance settings popup open; step 0.25,src/ui/menu/visuals_page.cpp,371
+Visuals/Effects,Tracer Appearance,Bloom Effect,toggle,misc.m_bullet_tracers.bloom,true,,,Appearance settings popup open,src/ui/menu/visuals_page.cpp,372
+Visuals/Effects,Bullet Tracers,Lifetime,settings-popup,@ui.bullet_tracers.lifetime,,,,Bullet Tracers settings popup open; nested lifetime popup,src/ui/menu/visuals_page.cpp,374
+Visuals/Effects,Tracer Lifetime,Fade Duration,slider,misc.m_bullet_tracers.duration,2.0,1.0,10.0,Lifetime settings popup open; step 0.1 s,src/ui/menu/visuals_page.cpp,377
+Visuals/Effects,Tracer Lifetime,Max Tracers,slider,misc.m_bullet_tracers.max_count,40,1,100,Lifetime settings popup open; step 1,src/ui/menu/visuals_page.cpp,378
+Visuals/Effects,Bullet Tracers,Draw Trajectory Line,toggle,misc.m_bullet_tracers.draw_line,true,,,Bullet Tracers settings popup open,src/ui/menu/visuals_page.cpp,380
+Visuals/Effects,Bullet Tracers,Impact Cubes,toggle-popup,misc.m_bullet_tracers.draw_cubes,true,,,Bullet Tracers settings popup open; nested settings popup,src/ui/menu/visuals_page.cpp,381
+Visuals/Effects,Impact Cubes,Cube Size,slider,misc.m_bullet_tracers.cube_half,1.25,0.5,5.0,Impact Cubes settings popup open; step 0.25,src/ui/menu/visuals_page.cpp,384
+Visuals/Effects,Impact Cubes,Cube Edge Color,color,misc.m_bullet_tracers.cube_edge_color,"[192,203,229,230]",,,Impact Cubes settings popup open,src/ui/menu/visuals_page.cpp,385
+Visuals/Effects,Impact Cubes,Cube Face Alpha,slider,misc.m_bullet_tracers.cube_face_alpha,38.0,0.0,160.0,Impact Cubes settings popup open; step 1,src/ui/menu/visuals_page.cpp,386
+Visuals/Effects,Bullet Tracers,Distance Fade,settings-popup,@ui.bullet_tracers.distance_fade,,,,Bullet Tracers settings popup open; nested distance-fade popup,src/ui/menu/visuals_page.cpp,389
+Visuals/Effects,Distance Fade,Fade Near,slider,misc.m_bullet_tracers.fade_near,45.0,5.0,200.0,Distance Fade settings popup open; step 1 u,src/ui/menu/visuals_page.cpp,392
+Visuals/Effects,Distance Fade,Fade Far,slider,misc.m_bullet_tracers.fade_far,160.0,50.0,500.0,Distance Fade settings popup open; step 1 u,src/ui/menu/visuals_page.cpp,393
+Visuals/Effects,Bullet Effects,World Hitmarker,toggle-popup,misc.m_hitmarker.enabled,true,,,Always; popup open reveals hitmarker settings,src/ui/menu/visuals_page.cpp,398
+Visuals/Effects,Hitmarker,Marker Color,color,misc.m_hitmarker.color,"[245,247,250,255]",,,World Hitmarker settings popup open,src/ui/menu/visuals_page.cpp,401
+Visuals/Effects,Hitmarker,Geometry,settings-popup,@ui.hitmarker.geometry,,,,World Hitmarker settings popup open; nested geometry popup,src/ui/menu/visuals_page.cpp,402
+Visuals/Effects,Hitmarker Geometry,Marker Size,slider,misc.m_hitmarker.size,8.0,3.0,18.0,Geometry settings popup open; step 0.5,src/ui/menu/visuals_page.cpp,405
+Visuals/Effects,Hitmarker Geometry,Center Gap,slider,misc.m_hitmarker.gap,3.0,0.0,10.0,Geometry settings popup open; step 0.5,src/ui/menu/visuals_page.cpp,406
+Visuals/Effects,Hitmarker Geometry,Marker Thickness,slider,misc.m_hitmarker.thickness,1.5,1.0,4.0,Geometry settings popup open; step 0.25,src/ui/menu/visuals_page.cpp,407
+Visuals/Effects,Hitmarker,Marker Duration,slider,misc.m_hitmarker.duration,0.55,0.15,1.5,World Hitmarker settings popup open; step 0.05 s,src/ui/menu/visuals_page.cpp,410
+Visuals/Effects,Bullet Effects,Hit Sound,toggle-popup,misc.m_hitsound.enabled,true,,,Always; popup open reveals sound/damage controls,src/ui/menu/visuals_page.cpp,415
+Visuals/Effects,Hit Sound,Sound,select,misc.m_hitsound.style,Flesh (4),0,4,"Hit Sound settings popup open; Soft=0, Glass=1, Pluck=2, Crisp=3, Flesh=4",src/ui/menu/visuals_page.cpp,418
+Visuals/Effects,Hit Sound,Volume,slider-percent,misc.m_hitsound.volume,0.55,0,100,Hit Sound settings popup open; slider shows percent 0–100 step 1 and stores fraction 0–1,src/ui/menu/visuals_page.cpp,419
+Visuals/Effects,Hit Sound,Preview,action-button,@action.hitsound.preview,,,,Hit Sound settings popup open; plays selected style at configured volume,src/ui/menu/visuals_page.cpp,420
+Visuals/Effects,Hit Sound,Floating Damage,toggle-popup,misc.m_hitsound.show_damage,true,,,Hit Sound settings popup open; nested damage settings popup,src/ui/menu/visuals_page.cpp,422
+Visuals/Effects,Floating Damage,Damage Color,color,misc.m_hitsound.damage_color,"[255,108,112,255]",,,Floating Damage settings popup open,src/ui/menu/visuals_page.cpp,426
+Visuals/Effects,Floating Damage,Damage Size,slider,misc.m_hitsound.damage_size,13.0,8.0,28.0,Floating Damage settings popup open; step 0.5,src/ui/menu/visuals_page.cpp,427
+Visuals/Effects,Floating Damage,Damage Duration,slider,misc.m_hitsound.damage_duration,0.75,0.15,2.0,Floating Damage settings popup open; step 0.05 s,src/ui/menu/visuals_page.cpp,428
+Visuals/Effects,Floating Damage,Damage Rise,slider,misc.m_hitsound.damage_rise,30.0,0.0,100.0,Floating Damage settings popup open; step 1 px,src/ui/menu/visuals_page.cpp,429
+Visuals/Effects,No Flash,Enable Visual No Flash,toggle-popup,esp.m_no_flash.enabled,true,,,Always; popup open reveals world style controls,src/ui/menu/visuals_page.cpp,440
+Visuals/Effects,No Flash,Style,select,esp.m_no_flash.style,Shaded (0),0,2,"Settings popup open; Shaded=0, Shaded + Lines=1, Lines=2",src/ui/menu/visuals_page.cpp,443
+Visuals/Effects,No Flash,Shadows,toggle,esp.m_no_flash.shadows,true,,,Settings popup open,src/ui/menu/visuals_page.cpp,444
+Visuals/Effects,No Flash,Render Distance,slider,esp.m_no_flash.max_distance,1000.0,200.0,6000.0,Settings popup open; step 10,src/ui/menu/visuals_page.cpp,445
+Visuals/Effects,No Flash,Dimming Overlay Color,color,esp.m_no_flash.background_color,"[0,0,0,255]",,,Settings popup open,src/ui/menu/visuals_page.cpp,446
+Visuals/Effects,No Flash,Surface Color,color,esp.m_no_flash.surface_color,"[178,186,198,255]",,,Settings popup open,src/ui/menu/visuals_page.cpp,447
+Visuals/Effects,No Flash,Line Color,color,esp.m_no_flash.line_color.r;esp.m_no_flash.line_color.g;esp.m_no_flash.line_color.b;esp.m_no_flash.line_color.a,"[210,215,225,70]",,,Settings popup open,src/ui/menu/visuals_page.cpp,448
+Visuals/Effects,No Flash,Line Width,slider,esp.m_no_flash.line_width,1.0,0.5,4.0,Settings popup open; step 0.1 px,src/ui/menu/visuals_page.cpp,449
+Visuals/Effects,No Smoke,Enable Visual No Smoke,toggle-popup,esp.m_no_smoke.enabled,false,,,Always; popup open reveals world style controls,src/ui/menu/visuals_page.cpp,457
+Visuals/Effects,No Smoke,Style,select,esp.m_no_smoke.style,Shaded (0),0,2,"Settings popup open; Shaded=0, Shaded + Lines=1, Lines=2",src/ui/menu/visuals_page.cpp,460
+Visuals/Effects,No Smoke,Shadows,toggle,esp.m_no_smoke.shadows,true,,,Settings popup open,src/ui/menu/visuals_page.cpp,461
+Visuals/Effects,No Smoke,Render Distance,slider,esp.m_no_smoke.max_distance,4000.0,500.0,8000.0,Settings popup open; step 10,src/ui/menu/visuals_page.cpp,462
+Visuals/Effects,No Smoke,Surface Color,color,esp.m_no_smoke.surface_color,"[172,186,204,215]",,,Settings popup open,src/ui/menu/visuals_page.cpp,463
+Visuals/Effects,No Smoke,Line Color,color,esp.m_no_smoke.line_color.r;esp.m_no_smoke.line_color.g;esp.m_no_smoke.line_color.b;esp.m_no_smoke.line_color.a,"[200,215,230,70]",,,Settings popup open,src/ui/menu/visuals_page.cpp,464
+Visuals/Effects,No Smoke,Line Width,slider,esp.m_no_smoke.line_width,1.0,0.5,4.0,Settings popup open; step 0.1 px,src/ui/menu/visuals_page.cpp,465
+Visuals/Crosshair,Navigation,Crosshair,subtab-button,@ui.visuals.tab.crosshair,,,,Always; selects the corresponding visuals subtab,src/ui/menu/visuals_page.cpp,512
+Visuals/Crosshair,Crosshair Settings,Enable Crosshair,toggle,esp.m_crosshair.enabled,false,,,,src/ui/menu/visuals_page.cpp,476
+Visuals/Crosshair,Crosshair Settings,Draw Dot,toggle,esp.m_crosshair.dot,true,,,,src/ui/menu/visuals_page.cpp,477
+Visuals/Crosshair,Crosshair Settings,Draw Lines,toggle-popup,esp.m_crosshair.lines,true,,,Always; popup open reveals line settings,src/ui/menu/visuals_page.cpp,478
+Visuals/Crosshair,Crosshair Lines,T-Style,toggle,esp.m_crosshair.t_style,false,,,Draw Lines settings popup open,src/ui/menu/visuals_page.cpp,481
+Visuals/Crosshair,Crosshair Lines,Length,slider,esp.m_crosshair.length,5.0,1.0,50.0,Draw Lines settings popup open; step 0.5,src/ui/menu/visuals_page.cpp,482
+Visuals/Crosshair,Crosshair Lines,Gap,slider,esp.m_crosshair.gap,3.0,0.0,50.0,Draw Lines settings popup open; step 0.5,src/ui/menu/visuals_page.cpp,483
+Visuals/Crosshair,Crosshair Settings,Thickness,slider,esp.m_crosshair.thickness,1.0,1.0,10.0,step 0.25,src/ui/menu/visuals_page.cpp,485
+Visuals/Crosshair,Colors,Draw Outline,toggle-popup,esp.m_crosshair.outline,true,,,Always; popup open reveals outline controls,src/ui/menu/visuals_page.cpp,490
+Visuals/Crosshair,Crosshair Outline,Outline Color,color,esp.m_crosshair.outline_color,"[0,0,0,255]",,,Draw Outline settings popup open,src/ui/menu/visuals_page.cpp,493
+Visuals/Crosshair,Crosshair Outline,Outline Thickness,slider,esp.m_crosshair.outline_thickness,1.0,0.5,3.0,Draw Outline settings popup open; step 0.5,src/ui/menu/visuals_page.cpp,494
+Visuals/Crosshair,Colors,Primary Color,color,esp.m_crosshair.color,"[255,255,255,255]",,,,src/ui/menu/visuals_page.cpp,496
+Visuals/Crosshair,Colors,Penetration Indicator,toggle-popup,esp.m_crosshair.penetration_enabled,false,,,Always; popup open reveals penetration controls,src/ui/menu/visuals_page.cpp,497
+Visuals/Crosshair,Penetration Indicator,Can Penetrate,color,esp.m_crosshair.penetration_color_yes,"[0,255,0,255]",,,Penetration Indicator settings popup open,src/ui/menu/visuals_page.cpp,500
+Visuals/Crosshair,Penetration Indicator,Cannot Penetrate,color,esp.m_crosshair.penetration_color_no,"[255,0,0,255]",,,Penetration Indicator settings popup open,src/ui/menu/visuals_page.cpp,501
+Visuals/Crosshair,Penetration Indicator,Min Damage,slider,esp.m_crosshair.penetration_min_damage,90.0,1.0,200.0,Penetration Indicator settings popup open; step 1,src/ui/menu/visuals_page.cpp,502
+Visuals/Players,Info Flags Settings,Money Color,color,esp.m_player.m_info_flags.money.color.r;esp.m_player.m_info_flags.money.color.g;esp.m_player.m_info_flags.money.color.b;esp.m_player.m_info_flags.money.color.a,"[60,210,100,255]",,,Info Flags Settings popup open; Edit Flag is Money,src/ui/menu/widgets.cpp,662
+Visuals/Players,Info Flags Settings,Armor Color,color,esp.m_player.m_info_flags.armor.color.r;esp.m_player.m_info_flags.armor.color.g;esp.m_player.m_info_flags.armor.color.b;esp.m_player.m_info_flags.armor.color.a,"[60,120,220,255]",,,Info Flags Settings popup open; Edit Flag is Armor,src/ui/menu/widgets.cpp,662
+Visuals/Players,Info Flags Settings,Defuse Kit Color,color,esp.m_player.m_info_flags.kit.color.r;esp.m_player.m_info_flags.kit.color.g;esp.m_player.m_info_flags.kit.color.b;esp.m_player.m_info_flags.kit.color.a,"[180,180,200,255]",,,Info Flags Settings popup open; Edit Flag is Defuse Kit,src/ui/menu/widgets.cpp,662
+Visuals/Players,Info Flags Settings,Scoped Color,color,esp.m_player.m_info_flags.scoped.color.r;esp.m_player.m_info_flags.scoped.color.g;esp.m_player.m_info_flags.scoped.color.b;esp.m_player.m_info_flags.scoped.color.a,"[240,240,245,255]",,,Info Flags Settings popup open; Edit Flag is Scoped,src/ui/menu/widgets.cpp,662
+Visuals/Players,Info Flags Settings,Defusing Color,color,esp.m_player.m_info_flags.defusing.color.r;esp.m_player.m_info_flags.defusing.color.g;esp.m_player.m_info_flags.defusing.color.b;esp.m_player.m_info_flags.defusing.color.a,"[220,60,60,255]",,,Info Flags Settings popup open; Edit Flag is Defusing,src/ui/menu/widgets.cpp,662
+Visuals/Players,Info Flags Settings,Flashed Color,color,esp.m_player.m_info_flags.flashed.color.r;esp.m_player.m_info_flags.flashed.color.g;esp.m_player.m_info_flags.flashed.color.b;esp.m_player.m_info_flags.flashed.color.a,"[200,200,210,255]",,,Info Flags Settings popup open; Edit Flag is Flashed,src/ui/menu/widgets.cpp,662
+Visuals/Players,Info Flags Settings,Ping Color,color,esp.m_player.m_info_flags.ping.color.r;esp.m_player.m_info_flags.ping.color.g;esp.m_player.m_info_flags.ping.color.b;esp.m_player.m_info_flags.ping.color.a,"[98,217,109,255]",,,Info Flags Settings popup open; Edit Flag is Ping,src/ui/menu/widgets.cpp,662
+Visuals/Players,Info Flags Settings,Distance Color,color,esp.m_player.m_info_flags.distance.color.r;esp.m_player.m_info_flags.distance.color.g;esp.m_player.m_info_flags.distance.color.b;esp.m_player.m_info_flags.distance.color.a,"[130,130,145,255]",,,Info Flags Settings popup open; Edit Flag is Distance,src/ui/menu/widgets.cpp,662
+Visuals/Players,Info Flags Settings,Bomb Damage Color,color,esp.m_player.m_info_flags.bomb_damage.color.r;esp.m_player.m_info_flags.bomb_damage.color.g;esp.m_player.m_info_flags.bomb_damage.color.b;esp.m_player.m_info_flags.bomb_damage.color.a,"[255,120,120,255]",,,Info Flags Settings popup open; Edit Flag is Bomb Damage,src/ui/menu/widgets.cpp,662
+Visuals/Players,Info Flags Settings,Money Scale,slider,esp.m_player.m_info_flags.money.scale,1.0,0.55,2.0,Info Flags Settings popup open; Edit Flag is Money; step 0.05x,src/ui/menu/widgets.cpp,663
+Visuals/Players,Info Flags Settings,Armor Scale,slider,esp.m_player.m_info_flags.armor.scale,1.0,0.55,2.0,Info Flags Settings popup open; Edit Flag is Armor; step 0.05x,src/ui/menu/widgets.cpp,663
+Visuals/Players,Info Flags Settings,Defuse Kit Scale,slider,esp.m_player.m_info_flags.kit.scale,1.0,0.55,2.0,Info Flags Settings popup open; Edit Flag is Defuse Kit; step 0.05x,src/ui/menu/widgets.cpp,663
+Visuals/Players,Info Flags Settings,Scoped Scale,slider,esp.m_player.m_info_flags.scoped.scale,1.0,0.55,2.0,Info Flags Settings popup open; Edit Flag is Scoped; step 0.05x,src/ui/menu/widgets.cpp,663
+Visuals/Players,Info Flags Settings,Defusing Scale,slider,esp.m_player.m_info_flags.defusing.scale,1.0,0.55,2.0,Info Flags Settings popup open; Edit Flag is Defusing; step 0.05x,src/ui/menu/widgets.cpp,663
+Visuals/Players,Info Flags Settings,Flashed Scale,slider,esp.m_player.m_info_flags.flashed.scale,1.0,0.55,2.0,Info Flags Settings popup open; Edit Flag is Flashed; step 0.05x,src/ui/menu/widgets.cpp,663
+Visuals/Players,Info Flags Settings,Ping Scale,slider,esp.m_player.m_info_flags.ping.scale,1.0,0.55,2.0,Info Flags Settings popup open; Edit Flag is Ping; step 0.05x,src/ui/menu/widgets.cpp,663
+Visuals/Players,Info Flags Settings,Distance Scale,slider,esp.m_player.m_info_flags.distance.scale,1.0,0.55,2.0,Info Flags Settings popup open; Edit Flag is Distance; step 0.05x,src/ui/menu/widgets.cpp,663
+Visuals/Players,Info Flags Settings,Bomb Damage Scale,slider,esp.m_player.m_info_flags.bomb_damage.scale,1.0,0.55,2.0,Info Flags Settings popup open; Edit Flag is Bomb Damage; step 0.05x,src/ui/menu/widgets.cpp,663
+Visuals/Players,Editor Info Flags Settings,Money Color,color,esp.m_player.m_info_flags.money.color.r;esp.m_player.m_info_flags.money.color.g;esp.m_player.m_info_flags.money.color.b;esp.m_player.m_info_flags.money.color.a,"[60,210,100,255]",,,Editor Info Flags Settings popup open; Edit Flag is Money,src/ui/menu/widgets.cpp,662
+Visuals/Players,Editor Info Flags Settings,Armor Color,color,esp.m_player.m_info_flags.armor.color.r;esp.m_player.m_info_flags.armor.color.g;esp.m_player.m_info_flags.armor.color.b;esp.m_player.m_info_flags.armor.color.a,"[60,120,220,255]",,,Editor Info Flags Settings popup open; Edit Flag is Armor,src/ui/menu/widgets.cpp,662
+Visuals/Players,Editor Info Flags Settings,Defuse Kit Color,color,esp.m_player.m_info_flags.kit.color.r;esp.m_player.m_info_flags.kit.color.g;esp.m_player.m_info_flags.kit.color.b;esp.m_player.m_info_flags.kit.color.a,"[180,180,200,255]",,,Editor Info Flags Settings popup open; Edit Flag is Defuse Kit,src/ui/menu/widgets.cpp,662
+Visuals/Players,Editor Info Flags Settings,Scoped Color,color,esp.m_player.m_info_flags.scoped.color.r;esp.m_player.m_info_flags.scoped.color.g;esp.m_player.m_info_flags.scoped.color.b;esp.m_player.m_info_flags.scoped.color.a,"[240,240,245,255]",,,Editor Info Flags Settings popup open; Edit Flag is Scoped,src/ui/menu/widgets.cpp,662
+Visuals/Players,Editor Info Flags Settings,Defusing Color,color,esp.m_player.m_info_flags.defusing.color.r;esp.m_player.m_info_flags.defusing.color.g;esp.m_player.m_info_flags.defusing.color.b;esp.m_player.m_info_flags.defusing.color.a,"[220,60,60,255]",,,Editor Info Flags Settings popup open; Edit Flag is Defusing,src/ui/menu/widgets.cpp,662
+Visuals/Players,Editor Info Flags Settings,Flashed Color,color,esp.m_player.m_info_flags.flashed.color.r;esp.m_player.m_info_flags.flashed.color.g;esp.m_player.m_info_flags.flashed.color.b;esp.m_player.m_info_flags.flashed.color.a,"[200,200,210,255]",,,Editor Info Flags Settings popup open; Edit Flag is Flashed,src/ui/menu/widgets.cpp,662
+Visuals/Players,Editor Info Flags Settings,Ping Color,color,esp.m_player.m_info_flags.ping.color.r;esp.m_player.m_info_flags.ping.color.g;esp.m_player.m_info_flags.ping.color.b;esp.m_player.m_info_flags.ping.color.a,"[98,217,109,255]",,,Editor Info Flags Settings popup open; Edit Flag is Ping,src/ui/menu/widgets.cpp,662
+Visuals/Players,Editor Info Flags Settings,Distance Color,color,esp.m_player.m_info_flags.distance.color.r;esp.m_player.m_info_flags.distance.color.g;esp.m_player.m_info_flags.distance.color.b;esp.m_player.m_info_flags.distance.color.a,"[130,130,145,255]",,,Editor Info Flags Settings popup open; Edit Flag is Distance,src/ui/menu/widgets.cpp,662
+Visuals/Players,Editor Info Flags Settings,Bomb Damage Color,color,esp.m_player.m_info_flags.bomb_damage.color.r;esp.m_player.m_info_flags.bomb_damage.color.g;esp.m_player.m_info_flags.bomb_damage.color.b;esp.m_player.m_info_flags.bomb_damage.color.a,"[255,120,120,255]",,,Editor Info Flags Settings popup open; Edit Flag is Bomb Damage,src/ui/menu/widgets.cpp,662
+Visuals/Players,Editor Info Flags Settings,Money Scale,slider,esp.m_player.m_info_flags.money.scale,1.0,0.55,2.0,Editor Info Flags Settings popup open; Edit Flag is Money; step 0.05x,src/ui/menu/widgets.cpp,663
+Visuals/Players,Editor Info Flags Settings,Armor Scale,slider,esp.m_player.m_info_flags.armor.scale,1.0,0.55,2.0,Editor Info Flags Settings popup open; Edit Flag is Armor; step 0.05x,src/ui/menu/widgets.cpp,663
+Visuals/Players,Editor Info Flags Settings,Defuse Kit Scale,slider,esp.m_player.m_info_flags.kit.scale,1.0,0.55,2.0,Editor Info Flags Settings popup open; Edit Flag is Defuse Kit; step 0.05x,src/ui/menu/widgets.cpp,663
+Visuals/Players,Editor Info Flags Settings,Scoped Scale,slider,esp.m_player.m_info_flags.scoped.scale,1.0,0.55,2.0,Editor Info Flags Settings popup open; Edit Flag is Scoped; step 0.05x,src/ui/menu/widgets.cpp,663
+Visuals/Players,Editor Info Flags Settings,Defusing Scale,slider,esp.m_player.m_info_flags.defusing.scale,1.0,0.55,2.0,Editor Info Flags Settings popup open; Edit Flag is Defusing; step 0.05x,src/ui/menu/widgets.cpp,663
+Visuals/Players,Editor Info Flags Settings,Flashed Scale,slider,esp.m_player.m_info_flags.flashed.scale,1.0,0.55,2.0,Editor Info Flags Settings popup open; Edit Flag is Flashed; step 0.05x,src/ui/menu/widgets.cpp,663
+Visuals/Players,Editor Info Flags Settings,Ping Scale,slider,esp.m_player.m_info_flags.ping.scale,1.0,0.55,2.0,Editor Info Flags Settings popup open; Edit Flag is Ping; step 0.05x,src/ui/menu/widgets.cpp,663
+Visuals/Players,Editor Info Flags Settings,Distance Scale,slider,esp.m_player.m_info_flags.distance.scale,1.0,0.55,2.0,Editor Info Flags Settings popup open; Edit Flag is Distance; step 0.05x,src/ui/menu/widgets.cpp,663
+Visuals/Players,Editor Info Flags Settings,Bomb Damage Scale,slider,esp.m_player.m_info_flags.bomb_damage.scale,1.0,0.55,2.0,Editor Info Flags Settings popup open; Edit Flag is Bomb Damage; step 0.05x,src/ui/menu/widgets.cpp,663
+Visuals/Players,Details,Chams Visible,toggle-popup,esp.m_chams.visible.enabled,true,,,Always; Chams settings popup; opens the corresponding material settings,src/ui/menu/visuals_page.cpp,132
+Visuals/Players,Details,Chams Occluded,toggle-popup,esp.m_chams.invisible.enabled,true,,,Always; Chams settings popup; opens the corresponding material settings,src/ui/menu/visuals_page.cpp,134
+Visuals/Players,On Hit Appearance,Enable Appearance,toggle,esp.m_chams.on_shot.appearance.enabled,true,,,new control (no old UI); shown while On Hit Chams is enabled; independently gates ghost material drawing,,
+Visuals/Players,Bounding Box,Outline,toggle,esp.m_player.m_box.outline,false,,,new control (no old UI); shown when player box is enabled; applies the existing box colors,,
+Visuals/Players,Skeleton,Thickness,slider,esp.m_player.m_skeleton.thickness,1.0,,,new control (no old UI); shown when skeleton is enabled; range owner decision (no decoder clamp found),,
+Visuals/Players,Skeleton,Occluded Color,color,esp.m_player.m_skeleton.occluded_color,"[255,255,255,255]",0,255,new control (no old UI); shown when skeleton is enabled; used when player is occluded,,
+Visuals/Players,Head Circle,Thickness,slider,esp.m_player.m_head_circle.thickness,1.0,,,new control (no old UI); shown when head circle is enabled; range owner decision (no decoder clamp found),,
+Visuals/Players,View Line,Length,slider,esp.m_player.m_view_line.length,50.0,,,new control (no old UI); shown when view line is enabled; range owner decision (no decoder clamp found),,
+Visuals/Players,View Line,Thickness,slider,esp.m_player.m_view_line.thickness,1.0,,,new control (no old UI); shown when view line is enabled; range owner decision (no decoder clamp found),,
+Visuals/Players,Threat Hitboxes,Head Hitbox,toggle,esp.m_player.m_threat_module.head_hitbox,true,,,new control (no old UI); shown when Threat Hitboxes is enabled,,
+Visuals/Players,Threat Hitboxes,Body Hitbox,toggle,esp.m_player.m_threat_module.body_hitbox,true,,,new control (no old UI); shown when Threat Hitboxes is enabled,,
+Visuals/Players,Threat Hitboxes,Limb Hitbox,toggle,esp.m_player.m_threat_module.limb_hitbox,true,,,new control (no old UI); shown when Threat Hitboxes is enabled,,
+Visuals/Players,Threat Hitboxes,Limb Color,color,esp.m_player.m_threat_module.limb_color,"[255,255,255,50]",0,255,new control (no old UI); shown when Threat Hitboxes and Limb Hitbox are enabled,,
+Visuals/Players,Threat Hitboxes,Outline Alpha,slider,esp.m_player.m_threat_module.outline_alpha,220.0,,,new control (no old UI); shown when Threat Hitboxes is enabled; range owner decision (no decoder clamp found),,
+Visuals/Players,Threat Hitboxes,Outline Thickness,slider,esp.m_player.m_threat_module.outline_thickness,1.0,,,new control (no old UI); shown when Threat Hitboxes is enabled; range owner decision (no decoder clamp found),,

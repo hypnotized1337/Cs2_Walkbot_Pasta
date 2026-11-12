@@ -57,12 +57,53 @@ void synchronize_menu_palette()
     k_border = menu_color(palette.border);
     k_border_light = k_border;
     k_border_light.w = std::min(1.0f, k_border.w * 2.0f);
+#if defined(VESTA_ASTRAL_MENU)
+    const auto astral_palette = astral::make_custom_palette(k_accent, k_accent);
+    k_bg_base = astral_palette.window_bg;
+    k_bg_panel = astral_palette.panel;
+    k_bg_card = astral_palette.card;
+    k_bg_popup = astral_palette.popup;
+    k_bg_hover = astral_palette.frame_hover;
+    k_text_main = astral_palette.text;
+    k_text_muted = astral_palette.text_dim;
+    k_border = astral_palette.popup_border;
+    k_border_light = astral_palette.frame_active;
+    k_line = astral_palette.frame;
+#endif
+
 }
+
+#if defined(VESTA_ASTRAL_MENU)
+astral_style_scope::astral_style_scope() : m_saved(ImGui::GetStyle())
+{
+    astral::widgets::set_accent(k_accent, k_accent);
+    astral::widgets::init_style();
+    auto& style = ImGui::GetStyle();
+    style.FontScaleDpi = m_saved.FontScaleDpi;
+    style.FontScaleMain = m_saved.FontScaleMain;
+    style.Alpha = m_saved.Alpha;
+    style.DisabledAlpha = m_saved.DisabledAlpha;
+    style.ScrollbarSize = 3.0f;
+    const auto& palette = astral::widgets::get().pal;
+    style.Colors[ImGuiCol_ScrollbarBg] = {0, 0, 0, 0};
+    style.Colors[ImGuiCol_ScrollbarGrab] = palette.accent;
+    style.Colors[ImGuiCol_ScrollbarGrabHovered] = palette.accent_top;
+    style.Colors[ImGuiCol_ScrollbarGrabActive] = palette.accent_end;
+    style.Colors[ImGuiCol_Separator] = palette.frame;
+    style.Colors[ImGuiCol_SeparatorHovered] = palette.accent_top;
+    style.Colors[ImGuiCol_SeparatorActive] = palette.accent;
+}
+
+astral_style_scope::~astral_style_scope()
+{
+    ImGui::GetStyle() = m_saved;
+}
+#endif
 
 [[nodiscard]] float current_menu_scale(const float display_width, const float display_height)
 {
     const auto requested = std::clamp(config::general_settings.menu_scale, 0.50f, 1.50f);
-    const auto fit = std::min(display_width / k_menu_width, display_height / k_menu_height);
+    const auto fit = std::min(display_width / k_menu_width, display_height / k_menu_surface_height);
     return std::min(requested, std::max(0.35f, fit));
 }
 
@@ -73,16 +114,18 @@ void synchronize_menu_palette()
 
 [[nodiscard]] ImVec2 initial_menu_layout_position(const float display_width, const float display_height)
 {
-    return {(display_width - k_menu_width) * 0.5f, (display_height - k_menu_height) * 0.5f};
+    return {(display_width - k_menu_width) * 0.5f, (display_height - k_menu_surface_height) * 0.5f};
 }
 
 [[nodiscard]] bool belongs_to_menu(ImGuiWindow* window)
 {
-    for (auto* current = window; current; current = current->ParentWindow)
+    for (auto* current = window; current;
+         current = current->ParentWindow ? current->ParentWindow
+                                        : (current->Flags & ImGuiWindowFlags_Tooltip) ? current->ParentWindowInBeginStack : nullptr)
     {
         const auto name = std::string_view{current->Name ? current->Name : ""};
-        if (name == "##vesta_native_menu" || name == "##esp_visual_editor" || name == "##vesta_guide" ||
-            name == "##vesta_guide_dim")
+        if (name == "##vesta_native_menu" || name == "##vesta_astral_menu" || name == "##esp_visual_editor" ||
+            name == "##vesta_guide" || name == "##vesta_guide_dim")
             return true;
     }
     return false;
@@ -270,6 +313,13 @@ void add_linear_gradient_rounded(ImDrawList* draw, ImVec2 min, ImVec2 max, ImU32
 
 void push_menu_font(render::draw::font* font)
 {
+#if defined(VESTA_ASTRAL_MENU)
+    if (auto* inter = astral::widgets::get().fonts.regular)
+    {
+        ImGui::PushFont(inter, astral::widgets::get().m.font_body);
+        return;
+    }
+#endif
     if (font && font->im_font)
     {
         ImGui::PushFont(font->im_font, font->font_size);
@@ -328,6 +378,14 @@ std::size_t utf8_decode(const char* begin, const char* end, unsigned int& out)
 
 void draw_section_title(ImDrawList* draw, ImVec2 position, float line_end_x, std::string_view title, bool uppercase)
 {
+#if defined(VESTA_ASTRAL_MENU)
+    static_cast<void>(uppercase);
+    const auto& context = astral::widgets::get();
+    draw->PushClipRect(position, {line_end_x, position.y + 24.0f}, true);
+    draw->AddText(context.fonts.bold, 18.0f, position, packed(context.pal.text), title.data(), title.data() + title.size());
+    draw->PopClipRect();
+#else
+
     const auto* title_wrapper = render::fonts().menu_semibold_13;
     auto* title_font = title_wrapper && title_wrapper->im_font ? title_wrapper->im_font : ImGui::GetFont();
     const auto title_size = title_wrapper && title_wrapper->im_font ? title_wrapper->font_size : ImGui::GetFontSize();
@@ -361,6 +419,7 @@ void draw_section_title(ImDrawList* draw, ImVec2 position, float line_end_x, std
         draw->AddRectFilledMultiColor(line_start, {line_end_x, line_start.y + 1.0f}, packed(k_border_light),
                                       IM_COL32(255, 255, 255, 0), IM_COL32(255, 255, 255, 0), packed(k_border_light));
     }
+#endif
 }
 
 void begin_row(const char* label, float control_width)
@@ -589,6 +648,42 @@ selected_info_flag_style(config::visual_profile::player::info_flags& flags, int 
 
 void card_in_column(const char* id, const char* title, int rows, int column, callback_ref callback)
 {
+#if defined(VESTA_ASTRAL_MENU)
+    column = std::clamp(column, 0, 1);
+    const auto& context = astral::widgets::get();
+    constexpr float header_height = 32.0f;
+    const auto target_height = header_height + 22.0f + static_cast<float>(rows) * k_row_height;
+    const auto card_id = ImGui::GetID(id);
+    auto [it, inserted] = g_card_height_animations.try_emplace(card_id, target_height);
+    if (!inserted)
+        it->second = approach(it->second, target_height, 0.16f);
+    const auto card_height = std::ceil(it->second);
+    const auto card_min = ImVec2{g_cards_origin.x + column * (g_cards_width + 12.0f),
+                                g_cards_origin.y + g_cards_y[column]};
+    const auto card_max = card_min + ImVec2{g_cards_width, card_height};
+    auto* draw = ImGui::GetWindowDrawList();
+    draw->AddRectFilled(card_min, card_max, packed(context.pal.panel), 6.0f);
+    draw->AddRectFilled(card_min, {card_max.x, card_min.y + header_height}, packed(context.pal.card), 6.0f,
+                        ImDrawFlags_RoundCornersTop);
+    const auto* translated = render::localization::tr(title);
+    const auto title_width = astral::draw::text_width(context.fonts.bold, 18.0f, translated);
+    draw->PushClipRect(card_min, {card_max.x, card_min.y + header_height}, true);
+    astral::draw::text_cap_centered(draw, context.fonts.bold, 18.0f,
+                                   card_min.x + (g_cards_width - title_width) * 0.5f,
+                                   card_min.y + header_height * 0.5f, packed(context.pal.text), translated);
+    draw->PopClipRect();
+    ImGui::SetCursorScreenPos(card_min + ImVec2{0, header_height});
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{14, 11});
+    ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2{8, 10});
+    ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, 6.0f);
+    ImGui::BeginChild(id, {g_cards_width, card_height - header_height}, ImGuiChildFlags_AlwaysUseWindowPadding,
+                      ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoBackground);
+    callback();
+    ImGui::EndChild();
+    ImGui::PopStyleVar(3);
+    g_cards_y[column] += card_height + 12.0f;
+#else
+
     column = std::clamp(column, 0, 1);
     const auto card_id = ImGui::GetID(id);
     const auto card_min =
@@ -636,6 +731,7 @@ void card_in_column(const char* id, const char* title, int rows, int column, cal
     ImGui::PopStyleVar(3);
     ImGui::PopStyleColor(2);
     g_cards_y[column] += card_height + 14.0f;
+#endif
 }
 
 void card(const char* id, const char* title, int rows, callback_ref callback)
@@ -645,6 +741,31 @@ void card(const char* id, const char* title, int rows, callback_ref callback)
 
 bool tab_button(const char* label, bool active)
 {
+#if defined(VESTA_ASTRAL_MENU)
+    const auto* text = render::localization::tr(label);
+    const auto& palette = astral::widgets::get().pal;
+    const auto size = ImVec2{ImGui::CalcTextSize(text).x + 20.0f, 28.0f};
+    const auto clicked = ImGui::InvisibleButton(label, size);
+    pointer_cursor_if_hovered();
+    const auto id = ImGui::GetItemID();
+    const auto hot = animate_state(g_hover_animations, id, ImGui::IsItemHovered(), 0.12f);
+    const auto selected = animate_selection(id, active);
+    const auto down = astral::widgets::animate(id, "press", ImGui::IsItemActive() ? 1.0f : 0.0f, 18.0f, 0.0f);
+    const auto min = ImGui::GetItemRectMin();
+    const auto max = ImGui::GetItemRectMax();
+    auto* draw = ImGui::GetWindowDrawList();
+    draw->AddRectFilled(min, max, packed(mix(palette.card, palette.frame_hover, hot)), 4.0f);
+    if (selected > 0.01f)
+    {
+        auto tint = palette.accent;
+        tint.w = 0.18f * selected;
+        draw->AddRectFilled(min, max, packed(tint), 4.0f);
+    }
+    draw->AddText({min.x + 10.0f, min.y + (size.y - ImGui::GetTextLineHeight()) * 0.5f + down},
+                  packed(mix(palette.text_dim, palette.accent, std::max(hot * 0.5f, selected))), text);
+    return clicked;
+#else
+
     // Source-style section tab: bare text with a single underline. Keeping the hit box slightly wider than the ink
     // makes the short labels comfortable without reintroducing the old pill backgrounds.
     const auto* text = render::localization::tr(label);
@@ -668,6 +789,7 @@ bool tab_button(const char* label, bool active)
                       packed(mix(k_text_muted, k_text_main, active_t)), 1.5f);
     }
     return clicked;
+#endif
 }
 
 ImVec2 svg_point(ImVec2 center, float x, float y)
@@ -786,13 +908,18 @@ bool nav_button(const char* label, bool active, int icon, const float width, con
     const auto min = ImGui::GetItemRectMin();
     const auto max = ImGui::GetItemRectMax();
     auto* draw = ImGui::GetWindowDrawList();
+#if defined(VESTA_ASTRAL_MENU)
+    constexpr auto rounding = 4.0f;
+#else
+    constexpr auto rounding = 14.0f;
+#endif
     if (active_t > 0.01f)
-        soft_shadow(draw, min, max, 14.0f, {0.0f, 5.0f}, 10.0f, {k_accent.x, k_accent.y, k_accent.z, 1.0f},
+        soft_shadow(draw, min, max, rounding, {0.0f, 5.0f}, 10.0f, {k_accent.x, k_accent.y, k_accent.z, 1.0f},
                     active_t * 0.70f * alpha);
     const auto idle = ImVec4{k_bg_hover.x, k_bg_hover.y, k_bg_hover.z, k_bg_hover.w * hover_t};
     auto background = mix(idle, k_accent, active_t);
     background.w *= alpha;
-    draw->AddRectFilled(min, max, packed(background), 14.0f);
+    draw->AddRectFilled(min, max, packed(background), rounding);
     auto ink = mix(k_text_muted, ImVec4{1, 1, 1, 1}, std::max(hover_t, active_t));
     ink.w *= alpha;
     const auto color = packed(ink);
@@ -806,7 +933,11 @@ void begin_cards(const char* id)
 {
     ImGui::PushID(id);
     g_cards_origin = ImGui::GetCursorScreenPos();
+#if defined(VESTA_ASTRAL_MENU)
+    g_cards_width = (ImGui::GetContentRegionAvail().x - 12.0f) * 0.5f;
+#else
     g_cards_width = (ImGui::GetContentRegionAvail().x - 16.0f) * 0.5f;
+#endif
     g_cards_y[0] = g_cards_y[1] = 0.0f;
     g_cards_index = 0;
 }
@@ -815,7 +946,11 @@ void end_cards()
 {
     const auto content_height = std::max(g_cards_y[0], g_cards_y[1]);
     ImGui::SetCursorScreenPos(g_cards_origin);
+#if defined(VESTA_ASTRAL_MENU)
+    ImGui::Dummy({g_cards_width * 2.0f + 12.0f, std::max(0.0f, content_height - 12.0f)});
+#else
     ImGui::Dummy({g_cards_width * 2.0f + 16.0f, std::max(0.0f, content_height - 14.0f)});
+#endif
     ImGui::PopID();
 }
 } // namespace ui::menu::detail

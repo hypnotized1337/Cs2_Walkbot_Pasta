@@ -21,3 +21,13 @@ Third-party components remain under the licenses named below.
 Library revisions are pinned and fetched by CMake from the upstream projects.
 Notices for embedded audio assets remain in `src/resources/sounds/LICENSE.md`. The Inter license text is embedded
 with the loader sources in `loader/assets/fonts/OFL.txt`.
+
+## Astral menu presentation
+
+The menu presentation adapts Astral-Remake by kdt255 (https://github.com/kdt255/Astral-Remake),
+from the https://github.com/hypnotized1337/Astral-Remake fork. Its first-party
+UI and icon code is MIT + Commons Clause, not Apache-2.0; see
+[`third_party/astral/LICENSE`](third_party/astral/LICENSE) and the accompanying
+[notices](third_party/astral/THIRD_PARTY_NOTICES.md). The Commons Clause restricts selling
+the covered software. Embedded Inter SemiBold/Bold use the
+[SIL Open Font License 1.1](third_party/inter/OFL.txt). Vesta retains its pinned host dependencies.

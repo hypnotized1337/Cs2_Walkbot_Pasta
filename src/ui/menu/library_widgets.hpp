@@ -48,6 +48,10 @@ bool pill_button(const char* id, const char* label, float width, tone kind = ton
 bool hint_input(const char* id, const char* hint, char* buffer, std::size_t size, float width,
                 ImGuiInputTextFlags flags = 0);
 
+// Shared interaction helpers for custom-drawn menu rows and guide controls.
+bool styled_button(const char* label, ImVec2 size, bool accent = false);
+bool hit_region(const char* id, ImVec2 size);
+
 // One entry of an action menu. An entry with `confirm` turns into "Click again to confirm" on the first click and
 // is chosen only on the second.
 struct menu_action

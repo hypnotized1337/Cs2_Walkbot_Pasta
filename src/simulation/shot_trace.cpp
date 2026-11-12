@@ -3,6 +3,7 @@
 #include <foundation/identity.hpp>
 #include <game/memory/bound_services.hpp>
 #include <simulation/shot_trace.hpp>
+#include <platform/windows/data_paths.hpp>
 #include <simulation/shot_clock_evidence.hpp>
 #include <game/memory/compatibility.hpp>
 #include <nlohmann/json.hpp>
@@ -701,17 +702,13 @@ void initialize()
                                path.resize(copied);
                                queue.directory = path;
                                queue.explicit_directory = true;
-                               if (!queue.directory.is_absolute())
-                                   return;
                            }
                            else
                            {
-                               wchar_t path[32768]{};
-                               const auto copied =
-                                   GetModuleFileNameW(nullptr, path, static_cast<DWORD>(std::size(path)));
-                               if (!copied || copied >= std::size(path))
+                               const auto locations = platform::windows::data_storage::resolve_current_user();
+                               if (locations.error || locations.destination.research_logs.empty())
                                    return;
-                               queue.directory = std::filesystem::path(path).parent_path();
+                               queue.directory = locations.destination.research_logs / L"shots";
                            }
                            std::filesystem::create_directories(queue.directory);
                            queue.stop_path = queue.directory.parent_path() / L"STOP";
