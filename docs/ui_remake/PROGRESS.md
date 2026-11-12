@@ -1,76 +1,103 @@
-# UI remake progress
+# UI remake progress — Stage 1 ready for approval
 
-## Current checkpoint
+## Checkpoint
 
 Test branch: `ui-remake-test`. Base revision: `83b616b`.
-The owner reported a successful Windows compile on 2026-11-11, with `vesta_uitest` created
-and the original `vesta` untouched. This is owner-reported verification; no local Windows build ran.
-Stage 0 is accepted. Stage 1 inventory is in progress; no skin/widgets/pages have been ported.
-Commit message for this checkpoint: `isolate test config path`.
-See [ISOLATION.md](ISOLATION.md) for all changed source files/lines, exact paths and manual checks.
+Stage 0 is accepted; Stage 1 inventory and reference audit are complete for review.
+**Stage 2 has not started.** No skin, widget, page or gameplay implementation was changed
+in Stage 1. The original checkout remains clean.
 
-## Done
+The owner reported a successful Windows compile and creation of `vesta_uitest` without
+changing `vesta` on 2026-11-11. That is owner-reported Stage 0 verification, not a local
+build or proof of a future UI. Storage isolation remains as documented in `ISOLATION.md`.
 
-- Separate test worktree and local reference clone; original checkout source is unchanged.
-- Runtime/migration/log roots changed to `%TEMP%\vesta_uitest`.
-- Named-config registry preference isolated, with a default test-only named-config folder.
-- Named-config operations and explicit diagnostic paths fenced to the test data tree.
-- Resolver rejects a test-root junction/symlink redirected elsewhere, including for default logs.
-- Production trace environment variables no longer influence test tracing.
-- Diagnostic report saves to test logs; displayed paths/comments updated.
-- Static source checks completed; owner subsequently confirmed Windows compile and isolation.
-- Added repeatable UI call-site scanner and `source_calls.csv` (466 syntactic sites, not control count).
-- Proposed Astral tab layout/Automation slice and initial decision list written; final inventory in progress.
+## Review files
 
-## Owner action now
+- `controls.csv`: **768 rows = 735 existing + 33 proposed**.
+  Proposed rows are labeled `new control (no old UI)`; 3 are blocked inactive options,
+  30 are proposals for already-consumed settings. Nothing proposed is implemented yet.
+- `config_keys.csv`: **982 serialized JSON leaf/template paths**: 106 global combat,
+  79 combat override, 565 ESP, 232 Misc. **858** have old-menu bindings; **124** do not.
+- `external_settings.csv`: **2** separately persisted menu/exit hotkeys.
+- `schema/no_menu_controls.md`, `schema_notes.md`, `parts/*_unexposed.*`: complete
+  unexposed-leaf list, current/legacy schema distinctions and runtime classifications.
+- `other_surfaces.md`: HUDs, guide, notices, popups, input, native chooser and non-JSON state.
+- `ASTRAL_AUDIT.md`, `FEATURE_MAPPING.csv` (**39 feature-family rows**),
+  `feature_mapping.md`: reference compatibility, exclusions and old-to-proposed placement.
+- `PROPOSED_LAYOUT.md`, `NEEDS_DECISION.md`: transplant plan and explicit behavior gaps.
+- `README.md`: counting conventions and regeneration instructions.
 
-Compilation checkpoint passed per owner report. Next action: review the completed Stage 1
-inventory, decision list and proposed layout, then approve the Astral vertical slice.
-Copy your old config to `%TEMP%\vesta_uitest\configs\current.cfg` with the app closed,
-or place a named copy in `%TEMP%\vesta_uitest\configs\named`.
-Do not run the separate production loader. Do not replace your working executable.
+### Existing control rows by page
 
-## Next
+| Page | Existing rows |
+|---|---:|
+| Aimbot | 141 |
+| Automation | 8 |
+| Configs | 15 |
+| Guide | 8 |
+| Misc/General | 17 |
+| Misc/Overlay | 37 |
+| Navigation | 11 |
+| Triggerbot | 52 |
+| Visuals/Bomb | 16 |
+| Visuals/Crosshair | 16 |
+| Visuals/Effects | 48 |
+| Visuals/Items | 11 |
+| Visuals/Players | 242 |
+| Visuals/Projectiles | 16 |
+| Visuals/Radar | 29 |
+| Walkbot | 68 |
+| **Total** | **735** |
 
-1. Finish Stage 1 as files, one page/settings group at a time with commits:
-   `controls.csv`, `config_keys.csv`, `other_surfaces.md`, reference compatibility/mapping,
-   proposed page layout, and the explicit needs-decision list.
-2. Add repeatable extraction and completeness checking; no zero-missing claim until validated.
-3. Obtain the owner's approval of the full inventory, decisions and page layout before Stage 2.
-4. Port skin, then widgets, then complete pages, with a compile checkpoint after each stage.
-5. Owner performs visual/in-game checks and copied-config round trip.
+Visuals totals **378** existing rows; Misc General/Overlay totals **54**. Counts include
+navigation, popup entries and shared/dynamic templates as explained in `README.md`; they
+are not independent feature counts or a count of every runtime-generated instance.
+`source_calls.csv` contains **484 syntactic call sites**, not 484 controls.
 
-## Inventory row counts
+## Proposed presentation and first slice
 
-No CSV files have been written yet: 0 recorded rows for each of Aimbot, Triggerbot, Visuals,
-Walkbot, Automation, Misc and Configs; 0 recorded saved-key rows. These are pending counts,
-NOT a count of actual product controls. The earlier chat summaries are incomplete source notes,
-not the required final inventory.
+Transplant Astral's window/title bar, horizontal tabs, panel geometry, widgets, Inter
+SemiBold/Bold fonts, icons and animations—not just its colors. Keep Vesta's existing
+renderer/input lifecycle, pinned ImGui, config keys, accent/DPI behavior, debug defaults,
+`PASTA(retard)` branding and all functional controls/surfaces.
 
-## Decisions already made
+Top-level tabs: **Aimbot, Triggerbot, Visuals, Walkbot, Automation, Misc, Configs**.
+First vertical slice: **Automation**, plus the reusable Astral chrome/widget layer.
+Keep the unported legacy pages reachable until their replacements pass their checkpoints.
+Reference-only Skins/Scripts and showcase behavior do not become fake product features.
 
-- Continue without local Windows build; do not install/emulate MSVC.
-- Work only in the test worktree. The owner authorized pushing the isolation commit to
-  `origin/ui-remake-test`; it is published. Never push or merge into the production branch.
-- Keep existing config keys and gameplay behavior; port visual layer only after Stage 1 approval.
-- Add controls in the NEW menu for saved user-facing values missing old UI; label inventory rows
-  `new control (no old UI)`. Confirmed requested examples: item ammo, shotgun/heavy filters,
-  projectile default color, spectator avatars, auto-stop options.
-- Do not expose internal/legacy settings without the owner's decision.
-- Preserve the required debug defaults/labels, accent/DPI behavior and Walkbot dependency rules.
+## Decisions still required
 
-## Needs owner's decision
+1. Implement spectator avatars and the two inactive Auto Stop options in a separately
+   approved behavior task, or retain their keys without misleading controls?
+2. When Walkbot is disabled, preserve stored automation preferences (current behavior)
+   or clear them? No forced-clearing change is authorized yet.
+3. Add explicit Configs Export? Import/save/folder operations exist; export does not.
+4. Accept the documented compatibility/derived/inactive-field policy and review the
+   proposed numeric ranges before affected pages are ported. Keep all saved keys.
+5. Preserve reference notices/credit and review Commons Clause restrictions before
+   distributing a derived product.
 
-No additional decision is needed for storage isolation. The complete internal/legacy-key list is
-pending the key-by-key audit; do not treat earlier no-control summaries as definitive classifications.
-Existing code appears to retain Walkbot automation values when disabled rather than clearing them;
-resolve the exact behavior against the user's forced-off requirement during Stage 1.
-Configs export was requested but no explicit existing export widget was found in the preliminary audit;
-record the actual behavior and proposed control in Stage 1 before page work.
+## Verification
 
-## Verification limits
+- Schema extraction and inventory assembly pass: no unmatched saved control bindings,
+  duplicate exact control rows or duplicate saved key paths; existing source references
+  and their line ranges validate. External hotkey persistence is checked separately.
+- Scanner, extractor and assembler run twice with identical output hashes for all three
+  generated CSVs. `git diff --check` passes.
+- Source-backed reviews cover page bindings, popup helpers, runtime consumers for the
+  unexposed setting families, reference APIs and license notices.
+- These are static inventory checks, **not** proof that every future feature works.
+  No Windows build, new-menu screenshot, interaction or config round trip ran here.
+  Stage 1 only changes documentation and inventory scripts; no new compile is needed.
 
-The reference uses different ImGui internals/version; keep Vesta's pinned version unless approved.
-No baseline build ran in this Linux sandbox. The owner confirmed the Windows build and root
-isolation. No new-menu visual/gameplay/round-trip check has run.
-The owner explicitly replaced that build gate with per-stage Windows compilation on their PC.
+## Handoff and publication
+
+Inventory groups are committed locally on `ui-remake-test`. Only the previously authorized
+isolation commit was pushed; this documentation work has not been pushed or merged.
+No original checkout or production branch changes were made.
+
+**Next action: owner review/approval of Stage 1 and the layout/slice, with the decisions
+above resolved or explicitly deferred. Stop here until approval.** Then provide the exact
+source-file list at each implementation checkpoint and wait for the owner's Windows compile
+feedback. Do not run the production loader or replace the working executable.

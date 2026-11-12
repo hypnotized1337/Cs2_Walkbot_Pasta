@@ -30,15 +30,43 @@ Walkbot? The latter changes existing config behavior and must be explicit. No ch
 ## 3. Explicit config export
 
 The old Configs page/library exposes load, save/create, overwrite, rename, duplicate,
-delete, refresh, import, folder selection/opening, search and list interaction. No explicit
+delete, import, folder selection/opening and list interaction, with automatic refresh. No explicit
 export action was found. **Decision:** approve an Export operation that copies a selected
 config to a user-chosen destination within the isolated test data tree, without changing
 its contents. Keep existing save/import behavior. No placeholder export button will be added.
 
 ## 4. Legacy/derived/internal saved keys
 
-The final key-by-key classification is appended after the serialized-key crosswalk is
-assembled. Legacy aliases must not become misleading duplicate controls. The recommended
+The complete unexposed leaf list is `schema/no_menu_controls.md`. Classification and
+source evidence are in `schema_notes.md` and `parts/{combat,visuals,misc}_unexposed.md`. Legacy aliases must not become misleading duplicate controls. The recommended
 policy is to retain serialized compatibility fields, expose the canonical active setting,
 and document derived/position/version values instead of treating them as ordinary toggles.
 Approval of that policy does not authorize dropping keys or undocumented omissions.
+
+Concrete cases needing that policy:
+- Keep combat wall/prediction/RCS/Auto Stop compatibility values and duplicate flash aliases
+  hidden; expose only their canonical active controls. FOV migration/derived fields stay hidden.
+- Preserve HUD layout/version/legacy-position fields and watermark orientation through existing
+  drag, hover-wheel, edge-orientation and migration behavior, not duplicate numeric controls.
+- Additional inactive visual settings: chams glow layers, item-name color, player hitbox group,
+  offscreen-arrow thickness, and threat-module maximum distance. Retain keys without dead
+  controls unless a separate behavior task is approved.
+- Active unexposed visual thickness/length/outline settings lack decoder clamps. Their proposed
+  rows are recorded, but numeric widget ranges require review before the affected page is ported;
+  do not silently add new loading clamps or change stored values.
+
+
+
+## 5. Reference distribution conditions
+
+The reference is MIT + Commons Clause, with kdt255 credit and separate Inter/third-party
+notices. Preserve these with any copied code/assets. Its no-sale condition needs review
+before distributing a derived product; no reference code or assets have been copied yet.
+See `ASTRAL_AUDIT.md`. This is a licensing constraint, not a gameplay change request.
+
+## Approval scope
+
+Approve the proposed seven-tab layout and Automation-first slice separately from any new
+behavior. Approving a UI port does not authorize implementing inactive settings, deleting
+compatibility keys, clearing stored preferences, or adding an export operation. Those
+remain explicit decisions above. Proposed rows do not count as implemented controls.
