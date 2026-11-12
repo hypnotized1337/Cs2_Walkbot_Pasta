@@ -86,7 +86,7 @@ void menu_t::draw_astral(float display_width, float display_height)
 
     static constexpr const char* labels[]{"Aimbot", "Triggerbot", "Visuals", "Walk Bot", "Automation", "Misc", "Configs"};
     static constexpr astral::icon_id icons[]{astral::icon_id::mouse, astral::icon_id::crosshair, astral::icon_id::eye,
-        astral::icon_id::person, astral::icon_id::gear_small, astral::icon_id::gear, astral::icon_id::list};
+        astral::icon_id::person, astral::icon_id::lightning, astral::icon_id::gear, astral::icon_id::list};
     for (int i = 0; i < 7; ++i)
     {
         ImGui::PushID(i);

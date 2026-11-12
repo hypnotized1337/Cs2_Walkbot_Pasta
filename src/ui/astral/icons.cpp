@@ -73,6 +73,7 @@ constexpr design k_design[static_cast<std::size_t>(icon_id::count)] = {
     { 16.0f, 16.0f }, // search
     { 16.0f, 16.0f }, // gear_small
     { 16.0f, 18.0f }, // person
+    { 16.0f, 18.0f }, // lightning
 };
 
 [[nodiscard]] float gear_sdf(vec2 p, float cx, float body, float tooth_center, vec2 tooth_half, float hole) noexcept
@@ -151,6 +152,14 @@ constexpr design k_design[static_cast<std::size_t>(icon_id::count)] = {
         d = combine(d, segment(p, { 8.0f, 7.0f }, { 13.0f, 9.0f }, 0.85f));
         d = combine(d, segment(p, { 8.0f, 11.0f }, { 4.0f, 17.0f }, 0.85f));
         return combine(d, segment(p, { 8.0f, 11.0f }, { 12.0f, 17.0f }, 0.85f));
+    }
+    case icon_id::lightning: {
+        float d = segment(p, { 10.5f, 1.0f }, { 3.0f, 10.0f }, 0.9f);
+        d = combine(d, segment(p, { 3.0f, 10.0f }, { 9.0f, 10.0f }, 0.9f));
+        d = combine(d, segment(p, { 9.0f, 10.0f }, { 5.5f, 17.0f }, 0.9f));
+        d = combine(d, segment(p, { 5.5f, 17.0f }, { 13.0f, 7.0f }, 0.9f));
+        d = combine(d, segment(p, { 13.0f, 7.0f }, { 7.0f, 7.0f }, 0.9f));
+        return combine(d, segment(p, { 7.0f, 7.0f }, { 10.5f, 1.0f }, 0.9f));
     }
     case icon_id::count:
     default:
