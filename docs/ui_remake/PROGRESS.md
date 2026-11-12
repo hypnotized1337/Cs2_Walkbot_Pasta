@@ -211,3 +211,44 @@ The extracted library-widget implementation also passed syntax checks with Astra
 and off. These checks use temporary platform stubs and do not replace a Windows/MSVC build.
 Native screenshots and live overlay interaction remain unverified in this Linux
 workspace. Stop for owner compile/visual feedback before another page group.
+
+## Astral readability overlays checkpoint
+
+Built on `ce1a1fc`, retaining the owner's namespace aliases unchanged. UI changes
+are limited to `src/ui/overlay/hud.cpp`:
+
+- Source of truth: Binds is implemented in `reference/menu/src/astral/ui.cpp`
+  (`DrawBindsOverlay`); watermark in `reference/menu/src/astral/menu.cpp`
+  (`Menu::Overlays`). Spectators has only a setting/checkbox, so its renderer is
+  adapted from the supplied screenshot and the same panel treatment.
+- Adapted the reference's #252935 body, 6px corners, 10px list insets, 22px rows,
+  shallow header and watermark accent strip. Screenshot-style centered headers,
+  restrained header color and whitespace-separated watermark fields replace the
+  reference's saturated header and pipe-separated demo fields. Surfaces stay
+  dark and translucent with a readability floor.
+- Kept the high-resolution font resources and existing logical sizes: 19px rows,
+  21px titles, 25px watermark brand before live DPI/panel scaling. Headers use the
+  existing high-resolution bold font. The compact treatment comes from spacing,
+  not reduced text size.
+- Retained every current watermark field/toggle (PASTA, FPS, ping, loss, CPU),
+  warning colors, spectator count/names and actual bind states. No username/time
+  fields were imported from the demo. No branding elsewhere was changed.
+- Preserved visibility: Spectators still shows its empty header/count when enabled;
+  Binds hides when empty outside the menu and retains the menu-open placeholder.
+  Config serialization, collection, samplers and unrelated overlays are unchanged.
+- Saved positions/anchors and dragging remain. The watermark is now always a
+  single line; its legacy vertical config key still loads/saves unchanged. Panels
+  choose the nearest non-overlapping position when they collide, including near
+  the bottom edge and during dragging, without rewriting idle saved anchors.
+
+Verification: temporary extracted ImGui helpers compiled and passed all 16 watermark
+field combinations, scaling, live-accent and multi-panel/bottom-edge placement checks.
+Source comparisons confirmed unrelated HUD renderers, samplers and bind collection
+are unchanged; `git diff --check` passed. No full Windows build or app run was possible.
+
+Owner comparison: compare body/header colors, transparency over bright/dark scenes,
+centered Binds/Spectators titles, right-aligned states/counts, row spacing and rounded
+edges against the three supplied pictures. Toggle each watermark field and verify
+none disappears, change accent and DPI live, and drag/resize near each corner to
+check separation and retained anchors. Check empty lists and menu-open previews.
+The screenshots are tiny; no pixel-match claim is made.
