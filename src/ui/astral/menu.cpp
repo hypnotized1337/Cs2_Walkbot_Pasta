@@ -7,6 +7,7 @@
 #include <ui/astral/icons.hpp>
 #include <ui/astral/widgets.hpp>
 #include <render/fonts.hpp>
+#include <render/presentation.hpp>
 #include <render/text/localization.hpp>
 
 namespace ui
