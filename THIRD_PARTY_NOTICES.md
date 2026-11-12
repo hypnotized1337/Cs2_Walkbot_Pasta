@@ -24,8 +24,8 @@ with the loader sources in `loader/assets/fonts/OFL.txt`.
 
 ## Astral menu presentation
 
-The test menu adapts Astral-Remake by kdt255 (https://github.com/kdt255/Astral-Remake),
-from the supplied reference https://github.com/hypnotized1337/Astral-Remake. Its first-party
+The menu presentation adapts Astral-Remake by kdt255 (https://github.com/kdt255/Astral-Remake),
+from the https://github.com/hypnotized1337/Astral-Remake fork. Its first-party
 UI and icon code is MIT + Commons Clause, not Apache-2.0; see
 [`third_party/astral/LICENSE`](third_party/astral/LICENSE) and the accompanying
 [notices](third_party/astral/THIRD_PARTY_NOTICES.md). The Commons Clause restricts selling
