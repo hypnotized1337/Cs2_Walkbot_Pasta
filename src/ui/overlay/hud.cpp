@@ -514,6 +514,7 @@ struct hud_state
     int panel_frame{-1};
     panel_bounds watermark_bounds{};
     panel_bounds spectator_bounds{};
+    panel_bounds keybind_bounds{};
     ui::notices::dismissals closed_notices;
     std::uint64_t loading_serial{};
     std::chrono::steady_clock::time_point loading_since{};
@@ -526,6 +527,7 @@ struct hud_state
         panel_frame = frame;
         watermark_bounds = {};
         spectator_bounds = {};
+        keybind_bounds = {};
     }
 };
 
@@ -884,12 +886,12 @@ void panels::draw_spectator_list(bool interactive)
 
 namespace
 {
-void draw_compact_panel(const char* title, const std::vector<compact_panel_row>& rows,
+panel_bounds draw_compact_panel(const char* title, const std::vector<compact_panel_row>& rows,
                         config::general_profile::screen_layout& layout, panel_drag& drag, const bool interactive,
                         const panel_bounds* const avoid, const std::size_t avoid_count)
 {
     if (rows.empty() && !interactive)
-        return;
+        return {};
     const auto dpi_scale = readability_dpi_scale();
     layout.scale = std::clamp(layout.scale, 0.55f, 2.0f);
     const auto metric = dpi_scale * layout.scale;
@@ -946,6 +948,7 @@ void draw_compact_panel(const char* title, const std::vector<compact_panel_row>&
                                row.active ? hud_accent() : hud_muted(), row.state.c_str());
             y += text_size + gap;
         }
+    return {position, maximum, true};
 }
 } // namespace
 
@@ -1285,7 +1288,7 @@ void panels::draw_keybind_list(const bool interactive)
     state.begin_panel_frame();
     const auto title = std::string{render::localization::tr("Binds")};
     const panel_bounds avoid[]{state.watermark_bounds, state.spectator_bounds};
-    draw_compact_panel(title.c_str(), rows, cfg.layout, state.keybinds, interactive, avoid, std::size(avoid));
+    state.keybind_bounds = draw_compact_panel(title.c_str(), rows, cfg.layout, state.keybinds, interactive, avoid, std::size(avoid));
 }
 
 void panels::draw_bomb_info(bool interactive)
@@ -1309,112 +1312,90 @@ void panels::draw_bomb_info(bool interactive)
         state.local_health = 100;
     }
 
-    const auto dpi_scale = overlay_dpi_scale();
+    auto& hud = *m_state;
+    hud.begin_panel_frame();
+    auto& drag = hud.bomb;
+    const auto dpi_scale = readability_dpi_scale();
     layout.scale = std::clamp(layout.scale, 0.55f, 2.0f);
-    const auto user_scale = layout.scale;
-    const auto metric_scale = dpi_scale * user_scale;
-    const auto& fonts = render::fonts();
-    const auto label = resolve_font(fonts.menu_semibold_13, user_scale);
-    auto* title_font = label.font;
-    auto* text_font = label.font;
-    const auto title_size = label.size;
-    const auto text_size = label.size;
-    auto* icon_font = resolve_font(fonts.weapons_15, 1.0f).font;
-    const auto icon_size = 18.0f * user_scale;
-    const ImVec2 panel_size{238.0f * metric_scale, 86.0f * metric_scale};
-
-    const screen_ui_space ui_space{};
-    const auto display = ui_space.display();
-    const auto position_scale = ui_space.position_scale();
-    migrate_screen_layout(layout, panel_size, display, dpi_scale, position_scale);
-    auto position = resolve_screen_layout(layout, panel_size, display, dpi_scale, position_scale);
-    position =
-        clamp_to_display(m_state->bomb.update(interactive, position, panel_size, &layout.scale), panel_size, display);
-    if (m_state->bomb.active())
-        capture_screen_layout(layout, position, panel_size, display, dpi_scale, position_scale);
-
-    const ImVec2 draw_min = position;
-    const ImVec2 draw_max{position.x + panel_size.x, position.y + panel_size.y};
-    auto* draw = ImGui::GetForegroundDrawList();
-    const auto rounding = 12.0f * metric_scale;
-    const auto background = IM_COL32(cfg.panel_background.r, cfg.panel_background.g, cfg.panel_background.b,
-                                     std::min<int>(cfg.panel_background.a, 150));
-    draw_panel_shadow(draw, draw_min, draw_max, rounding, 1.4f * metric_scale, 28.0f);
-    draw->AddRectFilled(draw_min, draw_max, background, rounding);
-    draw->AddRect(draw_min, draw_max, k_wm_border, rounding, ImDrawFlags_None, std::max(1.0f, metric_scale));
-
-    const auto bomb_color = cfg.bomb_color_t;
-    const auto bomb_u32 = IM_COL32(bomb_color.r, bomb_color.g, bomb_color.b, bomb_color.a);
-    const auto danger_amount = std::clamp(1.0f - state.time_remaining / 10.0f, 0.0f, 1.0f);
-    const auto mix = [danger_amount](std::uint8_t from, std::uint8_t to)
-    { return static_cast<int>(from + (to - from) * danger_amount); };
-    const auto timer_color = IM_COL32(mix(cfg.timer_text_color.r, 238), mix(cfg.timer_text_color.g, 68),
-                                      mix(cfg.timer_text_color.b, 68), cfg.timer_text_color.a);
-
-    draw->PushClipRect(draw_min, draw_max, true);
-    const auto center = ImVec2{draw_min.x + 43.0f * metric_scale, draw_min.y + panel_size.y * 0.5f};
-    const auto bomb_fraction = std::clamp(state.time_remaining / std::max(1.0f, state.timer_length), 0.0f, 1.0f);
-    const auto defuse_fraction =
-        state.being_defused ? std::clamp(state.defuse_remaining / std::max(0.1f, state.defuse_length), 0.0f, 1.0f)
-                            : 0.0f;
-    const auto defuse_color = state.defuse_success ? IM_COL32(cfg.bomb_color_ct.r, cfg.bomb_color_ct.g,
-                                                              cfg.bomb_color_ct.b, cfg.bomb_color_ct.a)
-                                                   : IM_COL32(255, 92, 62, 255);
-    const auto bomb_radius = 21.0f * metric_scale;
-    const auto ring_width = std::max(1.6f, 2.2f * metric_scale);
-    constexpr auto start = -std::numbers::pi_v<float> * 0.5f;
-    draw->AddCircle(center, bomb_radius, IM_COL32(0, 0, 0, 145), 48, ring_width);
-    if (bomb_fraction > 0.002f)
-    {
-        draw->PathArcTo(center, bomb_radius, start, start + 2.0f * std::numbers::pi_v<float> * bomb_fraction, 48);
-        draw->PathStroke(timer_color, 0, ring_width);
-    }
-    if (state.being_defused && defuse_fraction > 0.002f)
-    {
-        draw->PathArcTo(center, bomb_radius, start, start + 2.0f * std::numbers::pi_v<float> * defuse_fraction, 48);
-        draw->PathStroke(defuse_color, 0, ring_width * 1.35f);
-    }
-
-    const auto* icon = state.being_defused ? "r" : "o";
-    const auto icon_color = state.being_defused ? defuse_color : bomb_u32;
-    const auto icon_extent = icon_font->CalcTextSizeA(icon_size, FLT_MAX, 0.0f, icon);
-    draw->AddText(icon_font, icon_size, {center.x - icon_extent.x * 0.5f, center.y - icon_extent.y * 0.5f}, icon_color,
-                  icon);
-
-    const auto divider_x = draw_min.x + 79.0f * metric_scale;
-    draw->AddLine({divider_x, draw_min.y + 12.0f * metric_scale}, {divider_x, draw_max.y - 12.0f * metric_scale},
-                  k_wm_border, std::max(1.0f, metric_scale));
-    const auto text_x = divider_x + 14.0f * metric_scale;
-    const auto line_height = 22.0f * metric_scale;
-    const auto first_y = draw_min.y + 9.0f * metric_scale;
-    const auto draw_row = [&](float y, const char* label, const std::string& value, ImU32 value_color)
-    {
-        draw->AddText(title_font, title_size, {text_x, y}, k_wm_muted, label);
-        const auto label_width = title_font->CalcTextSizeA(title_size, FLT_MAX, 0.0f, label).x;
-        draw->AddText(text_font, text_size, {text_x + label_width + 5.0f * metric_scale, y}, value_color,
-                      value.c_str());
-    };
-
-    const auto site_value = std::string(state.bomb_site == 1 ? "B" : "A");
+    const auto metric = dpi_scale * layout.scale;
+    const auto font = resolve_hud_font(render::fonts().hud_text_40, k_hud_text_size * metric);
+    const auto title_font = resolve_hud_font(render::fonts().menu_brand_30, k_hud_title_size * metric);
+    const auto pad_x = k_hud_pad_x * metric;
+    const auto pad_y = k_hud_pad_y * metric;
+    const auto row_height = font.size + k_hud_row_gap * metric;
+    const auto title = render::localization::tr("Bomb Timer");
+    const auto timer_fraction = std::clamp(state.time_remaining / std::max(state.timer_length, 0.1f), 0.0f, 1.0f);
+    const auto warning = IM_COL32(235, 90, 90, 255);
+    const auto timer_color = timer_fraction < 0.25f ? warning : hud_accent();
     auto hp_value = std::string("--");
-    auto hp_color = k_wm_muted;
+    auto hp_color = hud_muted();
     if (state.predicted_damage >= 0 && state.local_health > 0)
     {
-        if (state.predicted_damage >= state.local_health)
-        {
-            hp_value = "LETHAL";
-            hp_color = IM_COL32(238, 68, 68, 255);
-        }
-        else
-        {
-            hp_value = std::to_string(std::max(0, state.local_health - state.predicted_damage));
-            hp_color = IM_COL32(110, 225, 135, 255);
-        }
+        const auto lethal = state.predicted_damage >= state.local_health;
+        hp_value = lethal ? "LETHAL" : std::to_string(std::max(0, state.local_health - state.predicted_damage));
+        hp_color = lethal ? warning : IM_COL32(110, 225, 135, 255);
     }
-    const auto time_value = std::format("{:.1f} sec", state.time_remaining);
-    draw_row(first_y, "Site:", site_value, bomb_u32);
-    draw_row(first_y + line_height, "HP:", hp_value, hp_color);
-    draw_row(first_y + line_height * 2.0f, "Time:", time_value, timer_color);
+    struct bomb_row
+    {
+        const char* label;
+        std::string value;
+        ImU32 color;
+    };
+    const std::array rows{
+        bomb_row{"Site:", state.bomb_site == 1 ? "B" : "A", hud_accent()},
+        bomb_row{"HP:", hp_value, hp_color},
+        bomb_row{"Time:", std::format("{:.1f} sec", state.time_remaining), timer_color},
+        bomb_row{"Defuse:", std::format("{:.1f} sec", state.defuse_remaining),
+                 state.defuse_remaining > state.time_remaining ? warning : hud_accent()}};
+    const auto row_count = state.being_defused ? 4 : 3;
+    auto inner_width = std::max(170.0f * metric, text_width(title_font.font, title_font.size, title));
+    for (int index = 0; index < row_count; ++index)
+        inner_width = std::max(inner_width, text_width(font.font, font.size, rows[index].label) +
+                              24.0f * metric + text_width(font.font, font.size, rows[index].value.c_str()));
+    const auto header_height = title_font.size + pad_y * 2.0f;
+    const auto bar_height = 3.0f * metric;
+    const auto bar_gap = 3.0f * metric;
+    const auto bar_count = state.being_defused && state.defuse_length > 0.0f ? 2 : 1;
+    const ImVec2 panel_size{inner_width + pad_x * 2.0f,
+                           pad_y * 2.0f + title_font.size + k_hud_title_gap * metric +
+                           row_count * row_height - k_hud_row_gap * metric + bar_count * (bar_height + bar_gap)};
+    const screen_ui_space ui_space{};
+    const auto display = ui_space.display(), position_scale = ui_space.position_scale();
+    migrate_screen_layout(layout, panel_size, display, dpi_scale, position_scale);
+    auto position = resolve_screen_layout(layout, panel_size, display, dpi_scale, position_scale);
+    position = clamp_to_display(drag.update(interactive, position, panel_size), panel_size, display);
+    const panel_bounds avoid[]{hud.watermark_bounds, hud.spectator_bounds, hud.keybind_bounds};
+    position = avoid_panel_overlap(position, panel_size, display, avoid, std::size(avoid), 8.0f * metric);
+    if (drag.active())
+        capture_screen_layout(layout, position, panel_size, display, dpi_scale, position_scale);
+    const ImVec2 maximum{position.x + panel_size.x, position.y + panel_size.y};
+    auto* draw = ImGui::GetForegroundDrawList();
+    draw_readability_surface(draw, position, maximum, metric, header_height);
+    draw->PushClipRect(position, maximum, true);
+    draw_readability_text(draw, title_font.font, title_font.size,
+                           {position.x + (panel_size.x - text_width(title_font.font, title_font.size, title)) * 0.5f,
+                            position.y + pad_y}, IM_COL32_WHITE, title);
+    auto y = position.y + pad_y + title_font.size + k_hud_title_gap * metric;
+    for (int index = 0; index < row_count; ++index)
+    {
+        const auto& row = rows[index];
+        draw_readability_text(draw, font.font, font.size, {position.x + pad_x, y}, k_astral_hud_text, row.label);
+        draw_readability_text(draw, font.font, font.size,
+                               {maximum.x - pad_x - text_width(font.font, font.size, row.value.c_str()), y},
+                               row.color, row.value.c_str());
+        y += row_height;
+    }
+    const auto progress = [&](const float fraction, const ImU32 color)
+    {
+        const ImVec2 min{position.x + pad_x, y}, max{maximum.x - pad_x, y + bar_height};
+        draw->AddRectFilled(min, max, IM_COL32(58, 62, 76, 255), metric);
+        if (fraction > 0.0f)
+            draw->AddRectFilled(min, {min.x + inner_width * fraction, max.y}, color, metric);
+        y += bar_height + bar_gap;
+    };
+    progress(timer_fraction, timer_color);
+    if (bar_count == 2)
+        progress(1.0f - std::clamp(state.defuse_remaining / state.defuse_length, 0.0f, 1.0f), rows[3].color);
     draw->PopClipRect();
 }
 
