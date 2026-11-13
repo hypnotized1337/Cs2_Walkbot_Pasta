@@ -4,7 +4,6 @@ PASTA is a Windows x64 external assist for Counter-Strike 2. It reads game memor
 
 ![PASTA menu hero](docs/images/hero.png)
 
-> The images in this README are clearly labelled placeholders until you replace them using [docs/SCREENSHOTS.md](docs/SCREENSHOTS.md). They are not mockups of the menu.
 
 ## Features
 
