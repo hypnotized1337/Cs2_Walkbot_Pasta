@@ -602,13 +602,40 @@ void set_accent(const ImVec4& custom_start, const ImVec4& custom_end)
     context_t& c = g_ctx;
     c.accent_start = custom_start;
     c.accent_end = custom_end;
-    c.pal = make_custom_palette(custom_start, custom_end);
+    const auto accent = make_custom_palette(custom_start, custom_end);
+    // Accent changes are live and frequent; keep the configured surfaces and text roles intact.
+    c.pal.accent = accent.accent;
+    c.pal.accent_top = accent.accent_top;
+    c.pal.accent_bottom = accent.accent_bottom;
+    c.pal.accent_end = accent.accent_end;
+    c.pal.title_left = accent.title_left;
+    c.pal.title_right = accent.title_right;
     ImGuiStyle& style = ImGui::GetStyle();
     style.Colors[ImGuiCol_TextSelectedBg] = draw::fade(c.pal.accent, 0.35f);
     style.Colors[ImGuiCol_NavCursor] = c.pal.accent;
     style.Colors[ImGuiCol_CheckMark] = c.pal.accent;
     style.Colors[ImGuiCol_SliderGrab] = c.pal.accent;
     style.Colors[ImGuiCol_InputTextCursor] = c.pal.accent;
+}
+
+void set_surfaces(const palette_t& surfaces)
+{
+    context_t& c = g_ctx;
+    c.pal.window_bg = surfaces.window_bg;
+    c.pal.card = surfaces.card;
+    c.pal.panel = surfaces.panel;
+    c.pal.frame = surfaces.frame;
+    c.pal.frame_hover = surfaces.frame_hover;
+    c.pal.frame_active = surfaces.frame_active;
+    c.pal.dropdown = surfaces.dropdown;
+    c.pal.popup = surfaces.popup;
+    c.pal.popup_border = surfaces.popup_border;
+    c.pal.tooltip = surfaces.tooltip;
+    c.pal.text = surfaces.text;
+    c.pal.text_soft = surfaces.text_soft;
+    c.pal.text_hover = surfaces.text_hover;
+    c.pal.text_dim = surfaces.text_dim;
+    c.pal.grip = surfaces.grip;
 }
 
 void set_scale(float scale)

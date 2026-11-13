@@ -64,7 +64,7 @@ void menu_t::draw_astral(float display_width, float display_height)
     g_menu_min = min;
     g_menu_max = max;
     auto* draw = ImGui::GetWindowDrawList();
-    draw->AddRectFilled(min, max, IM_COL32(20, 20, 20, 255), 6.0f);
+    draw->AddRectFilled(min, max, packed(k_bg_base), 6.0f);
     const auto accent = k_accent;
     const auto saved_style = ImGui::GetStyle();
     astral::widgets::set_accent(accent, accent);

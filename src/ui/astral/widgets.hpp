@@ -78,6 +78,8 @@ struct context_t {
 
 void set_scale(float scale);   // rebuilds icons; call outside a frame
 void set_accent(const ImVec4& custom_start, const ImVec4& custom_end);
+// Replaces the surface/text roles without touching the user's accent. Called every frame by the menu palette sync.
+void set_surfaces(const palette_t& surfaces);
 void begin_frame();            // update frame time; call after ImGui::NewFrame()
 void shutdown();              // after the renderer backend shut down, before ImGui::DestroyContext()
 void init_style();
@@ -129,6 +131,7 @@ using context_t = widgets::context_t;
 [[nodiscard]] inline context_t& get() { return widgets::get(); }
 inline void set_scale(float scale) { widgets::set_scale(scale); }
 inline void set_accent(const ImVec4& start, const ImVec4& end) { widgets::set_accent(start, end); }
+inline void set_surfaces(const palette_t& surfaces) { widgets::set_surfaces(surfaces); }
 inline void begin_frame() { widgets::begin_frame(); }
 inline void shutdown() { widgets::shutdown(); }
 inline void init_style() { widgets::init_style(); }

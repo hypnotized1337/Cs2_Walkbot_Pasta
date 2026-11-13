@@ -58,17 +58,26 @@ void synchronize_menu_palette()
     k_border_light = k_border;
     k_border_light.w = std::min(1.0f, k_border.w * 2.0f);
 #if defined(VESTA_ASTRAL_MENU)
-    const auto astral_palette = astral::make_custom_palette(k_accent, k_accent);
-    k_bg_base = astral_palette.window_bg;
-    k_bg_panel = astral_palette.panel;
-    k_bg_card = astral_palette.card;
-    k_bg_popup = astral_palette.popup;
-    k_bg_hover = astral_palette.frame_hover;
-    k_text_main = astral_palette.text;
-    k_text_muted = astral_palette.text_dim;
-    k_border = astral_palette.popup_border;
-    k_border_light = astral_palette.frame_active;
-    k_line = astral_palette.frame;
+    // The Astral shell has its own semantic roles. Feed the live user palette into them instead of rebuilding
+    // make_custom_palette(), whose surface defaults would silently discard the Surfaces controls every frame.
+    astral::palette_t surfaces{};
+    surfaces.window_bg = k_bg_base;
+    surfaces.panel = k_bg_panel;
+    surfaces.card = k_bg_card;
+    surfaces.popup = k_bg_popup;
+    surfaces.frame = k_bg_panel;
+    surfaces.frame_hover = k_bg_hover;
+    surfaces.frame_active = mix(k_bg_hover, k_accent, 0.08f);
+    surfaces.dropdown = k_bg_popup;
+    surfaces.popup_border = k_border;
+    surfaces.tooltip = k_bg_popup;
+    surfaces.text = k_text_main;
+    surfaces.text_soft = k_text_main;
+    surfaces.text_hover = k_text_main;
+    surfaces.text_dim = k_text_muted;
+    surfaces.grip = k_text_muted;
+    astral::widgets::set_surfaces(surfaces);
+    k_line = k_border_light;
 #endif
 
 }
