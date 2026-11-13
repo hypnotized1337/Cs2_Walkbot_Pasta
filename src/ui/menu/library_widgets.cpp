@@ -22,13 +22,11 @@ constexpr float k_tile_rounding = 2.0f;
 constexpr float k_small_height = 24.0f;
 #ifdef VESTA_ASTRAL_MENU
 constexpr float k_control_rounding = 4.0f;
-constexpr float k_section_rounding = 6.0f;
 constexpr float k_card_header_height = 32.0f;
 constexpr float k_card_vertical_padding = 11.0f;
 #else
 constexpr float k_control_rounding = 2.0f;
 constexpr float k_card_vertical_padding = 10.0f;
-constexpr float k_section_rounding = 5.0f;
 #endif
 
 struct library_colors_t
@@ -147,14 +145,17 @@ void wide_card(const char* id, const char* title, const callback_ref body, const
 {
     // A fixed window inside the page: from the top of the free space to the bottom of the page.
     const auto top = std::max(g_cards_y[0], g_cards_y[1]);
+#ifdef VESTA_ASTRAL_MENU
+    const auto width = g_cards_width * 2.0f + 12.0f;
+#else
     const auto width = g_cards_width * 2.0f + 16.0f;
+#endif
     const auto page_bottom = ImGui::GetWindowPos().y + ImGui::GetWindowHeight();
     const auto height = std::max(160.0f, page_bottom - (g_cards_origin.y + top) - 1.0f);
     const auto body_min = ImVec2{g_cards_origin.x, g_cards_origin.y + top};
-    const auto body_max = body_min + ImVec2{width, height};
     ImGui::SetCursorScreenPos(body_min);
     ImGui::PushStyleColor(ImGuiCol_ChildBg, library_colors().card);
-    ImGui::PushStyleColor(ImGuiCol_Border, library_colors().outline);
+    ImGui::PushStyleColor(ImGuiCol_Border, library_colors().border);
     ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, 6.0f);
     ImGui::PushStyleVar(ImGuiStyleVar_ChildBorderSize, 1.0f);
     ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, {14.0f, k_card_vertical_padding});
@@ -163,37 +164,37 @@ void wide_card(const char* id, const char* title, const callback_ref body, const
     const auto right = ImGui::GetWindowPos().x + ImGui::GetWindowContentRegionMax().x;
     auto* title_font = ImGui::GetFont();
     auto* draw = ImGui::GetWindowDrawList();
-    draw->AddRect(body_min + ImVec2{1.0f, 1.0f}, body_max - ImVec2{1.0f, 1.0f}, packed(library_colors().border), k_section_rounding, 0, 1.0f);
     const auto title_size = ImGui::GetFontSize();
 #ifdef VESTA_ASTRAL_MENU
     constexpr auto header_height = k_card_header_height;
+    constexpr auto header_gap = 10.0f;
+#else
+    constexpr auto header_height = 26.0f;
+    constexpr auto header_gap = 4.0f;
 #endif
     auto title_text = std::string{render::localization::tr(title)};
     for (auto& character : title_text)
         if (character >= 'A' && character <= 'Z')
             character = static_cast<char>(character - 'A' + 'a');
-    const auto title_width = title_font->CalcTextSizeA(title_size, FLT_MAX, 0.0f, title_text.c_str()).x;
 #ifdef VESTA_ASTRAL_MENU
     const auto title_y = title_pos.y + (header_height - title_size) * 0.5f;
-    const auto divider_y = title_pos.y + header_height * 0.5f;
     const auto actions_y = title_pos.y + (header_height - k_small_height) * 0.5f;
 #else
     const auto title_y = title_pos.y - 4.0f;
-    const auto divider_y = title_pos.y + 18.0f;
     const auto actions_y = title_pos.y + (title_size - k_small_height) * 0.5f;
 #endif
-    draw->AddText(title_font, title_size,
-                  {ImGui::GetWindowPos().x + (width - title_width) * 0.5f, title_y}, packed(library_colors().text),
+    draw->PushClipRect(title_pos, {right - actions_width - 10.0f, title_pos.y + header_height}, true);
+    draw->AddText(title_font, title_size, {title_pos.x, title_y}, packed(library_colors().text),
                   title_text.c_str());
-    draw->AddLine({ImGui::GetWindowPos().x + 3.0f, divider_y}, {right - actions_width - 10.0f, divider_y},
-                  packed(library_colors().line), 1.0f);
+    draw->PopClipRect();
+    // The separator belongs below the header, not through the title or the action buttons.
+    const auto divider_y = title_pos.y + header_height - 1.0f;
+    draw->AddLine({title_pos.x, divider_y}, {right, divider_y}, packed(library_colors().line), 1.0f);
     ImGui::SetCursorScreenPos({right - actions_width, actions_y});
     actions();
-    ImGui::SetCursorScreenPos(title_pos);
-    ImGui::Dummy({0.0f, title_size});
-#ifndef VESTA_ASTRAL_MENU
-    ImGui::Dummy({0.0f, 3.0f});
-#endif
+    // Keep the body below the full header. Starting it after only the text height made the action row and the first
+    // input row overlap, which clipped the buttons at the card edge.
+    ImGui::SetCursorScreenPos({title_pos.x, title_pos.y + header_height + header_gap});
     body();
     ImGui::EndChild();
     ImGui::PopStyleVar(3);

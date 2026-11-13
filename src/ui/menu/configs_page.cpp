@@ -21,8 +21,8 @@ namespace
 using config::config_library;
 using outcome = config_library::outcome;
 
-constexpr float k_tile_height = 60.0f;
-constexpr float k_tile_gap = 6.0f;
+constexpr float k_tile_height = 64.0f;
+constexpr float k_tile_gap = 8.0f;
 
 // What the Configs page keeps between frames: the name being typed, the tile being renamed and the last result.
 struct page_state
@@ -109,7 +109,7 @@ void header_actions()
 }
 
 // Under the name field: the result of the last save, import or folder change, otherwise the folder path.
-void status_line(const float width)
+void status_line()
 {
     const auto& notice = config::library().last_notice();
     const auto notice_fresh = notice.at != std::chrono::steady_clock::time_point{} &&
@@ -131,12 +131,10 @@ void status_line(const float width)
     }
     else if (const auto& folder = config::library().folder())
         text = display_path(*folder);
-    ImGui::PushStyleColor(ImGuiCol_Text, color);
-    ImGui::PushClipRect(ImGui::GetCursorScreenPos(),
-                        ImGui::GetCursorScreenPos() + ImVec2{width, ImGui::GetTextLineHeight()}, true);
-    ImGui::TextUnformatted(text.empty() ? " " : text.c_str());
-    ImGui::PopClipRect();
-    ImGui::PopStyleColor();
+    else
+        text = render::localization::tr("No folder selected");
+    // Ellipsis plus the full path tooltip; the helper also keeps the line from spilling over the panel edge.
+    clipped_row_text(text.empty() ? std::string_view{" "} : std::string_view{text}, color);
 }
 
 void empty_state(const char* message, const bool offer_folder)
@@ -245,7 +243,7 @@ bool config_tile(const config::library_entry& entry, const float width)
         ImFont* font = ImGui::GetFont();
         const auto size = ImGui::GetFontSize();
         draw->PushClipRect({text_x, min.y}, {text_right, max.y}, true);
-        draw->AddText(font, size, {text_x, min.y + 8.0f}, packed(broken ? k_text_muted : k_text_main),
+        draw->AddText(font, size, {text_x, min.y + 10.0f}, packed(broken ? k_text_muted : k_text_main),
                       entry.name.c_str());
 
         std::string subtitle{};
@@ -267,7 +265,7 @@ bool config_tile(const config::library_entry& entry, const float width)
             subtitle +=
                 entry.legacy ? std::string(render::localization::tr("Old format")) : format_date(entry.saved_at);
         }
-        draw->AddText({text_x, min.y + 33.0f}, packed(color), subtitle.c_str());
+        draw->AddText({text_x, min.y + 37.0f}, packed(color), subtitle.c_str());
         draw->PopClipRect();
     }
 
@@ -280,10 +278,11 @@ void config_list(const float width)
     auto& library = config::library();
     library.refresh();
     ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4{0, 0, 0, 0});
+    ImGui::PushStyleColor(ImGuiCol_ScrollbarBg, ImVec4{0, 0, 0, 0});
     ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, {0.0f, 0.0f});
     ImGui::PushStyleVar(ImGuiStyleVar_ScrollbarSize, 4.0f);
     ImGui::BeginChild("##config_list", {width, std::max(80.0f, ImGui::GetContentRegionAvail().y)}, false);
-    const auto tile_width = width - (ImGui::GetScrollMaxY() > 0.0f ? 10.0f : 0.0f);
+    const auto tile_width = ImGui::GetContentRegionAvail().x;
 
     if (!library.folder())
         empty_state("No folder selected", true);
@@ -305,7 +304,7 @@ void config_list(const float width)
     }
     ImGui::EndChild();
     ImGui::PopStyleVar(2);
-    ImGui::PopStyleColor();
+    ImGui::PopStyleColor(2);
 }
 } // namespace
 
@@ -316,18 +315,19 @@ void draw_config_library()
         [&]
         {
             const auto width = ImGui::GetContentRegionAvail().x;
-            constexpr float save_width = 82.0f;
+            constexpr float save_width = 90.0f;
+            constexpr float row_gap = 8.0f;
             const auto has_folder = config::library().folder().has_value();
             if (hint_input("##new_config", "New config", g_page.new_name, sizeof(g_page.new_name),
-                           width - save_width - 8.0f))
+                           std::max(120.0f, width - save_width - row_gap)))
                 save_new();
-            ImGui::SameLine(0.0f, 8.0f);
+            ImGui::SameLine(0.0f, row_gap);
             ImGui::BeginDisabled(!has_folder || g_page.new_name[0] == '\0');
             if (pill_button("##save_new", "Save", save_width, tone::accent, 24.0f))
                 save_new();
             ImGui::EndDisabled();
-            ImGui::Dummy({0.0f, 2.0f});
-            status_line(width);
+            ImGui::Dummy({0.0f, 7.0f});
+            status_line();
             ImGui::Dummy({0.0f, 6.0f});
             config_list(width);
         },
