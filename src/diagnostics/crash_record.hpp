@@ -8,7 +8,7 @@ namespace diagnostics
 // symbolization, no heap use and no ordinary locks inside the handler. The exception
 // is then passed on, so system crash reporting behaves as before. Nothing is sent.
 //
-// Call once from the process owner. An empty directory selects %TEMP%\vesta\logs.
+// Call once from the process owner. An empty directory selects Documents\PASTA\logs, with the old %TEMP%\vesta\logs fallback.
 // Returns false if the location could not be prepared; the process continues without it.
 // Startup check: if a crash record exists, move it to crash.previous.log (replacing an older
 // one) and return true, so one crash is reported once. Never throws.

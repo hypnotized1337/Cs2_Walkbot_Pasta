@@ -29,7 +29,11 @@ int fail_startup(app::startup_failure failure)
     std::wstring message{text.what};
     message += L"\n\n";
     message += text.action;
-    message += L"\n\nDetails: %TEMP%\\vesta\\logs";
+    if (const auto& logs = platform::windows::runtime_storage::paths().logs; !logs.empty())
+    {
+        message += L"\n\nDetails: ";
+        message += logs.wstring();
+    }
     ::MessageBoxW(nullptr, message.c_str(), L"PASTA", MB_OK | MB_ICONERROR);
     return 1;
 }

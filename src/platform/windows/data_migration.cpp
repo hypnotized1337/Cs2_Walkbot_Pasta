@@ -9,7 +9,7 @@ namespace platform::windows::data_storage
 {
 namespace
 {
-constexpr std::string_view marker_text = "vesta-data-migration=1\n";
+constexpr std::string_view marker_text = "pasta-data-migration=1\n";
 // User files are shallow; the bound keeps recursion and stack use
 // independent of hostile or corrupted trees. Deeper trees fail before publish.
 constexpr unsigned maximum_tree_depth = 32;
@@ -23,9 +23,11 @@ class migration final
     };
 
 public:
-    migration(const locations& target, const std::filesystem::path* source, std::stop_token stop)
+    migration(const locations& target, const std::filesystem::path* source,
+              const std::filesystem::path* legacy_named_configs, std::stop_token stop)
         : m_target(target)
         , m_explicit_source(source)
+        , m_legacy_named_configs(legacy_named_configs)
         , m_stop(stop)
     {
     }
@@ -44,7 +46,7 @@ public:
         }
         if (!resolve_source() || !validate_source() || !ensure_areas())
             return m_result;
-        const auto lock_path = m_target.root / L".migration-v1.lock";
+        const auto lock_path = m_target.root / L".pasta-migration-v1.lock";
         foundation::unique_handle gate(::CreateFileW(lock_path.c_str(), GENERIC_READ | GENERIC_WRITE, 0, nullptr,
                                                      OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL | FILE_FLAG_OPEN_REPARSE_POINT,
                                                      nullptr));
@@ -58,14 +60,23 @@ public:
         // Another preparer may have published the marker since the first read.
         if (inspect_marker() != marker_state::missing)
             return m_result;
-        const auto marker_path = m_target.root / L".migration-v1.complete";
-        // One reserved same-volume staging file, protected by the exclusive gate.
-        // A previous interrupted staging file is validated before reuse.
-        m_pending = m_target.root / L".migration-v1.pending";
-        if (!copy_file(m_source / L"hotkeys.cfg", m_target.configs / L"hotkeys.cfg"))
-            return m_result;
-        if (!tree(m_source / L"config_cache", m_target.configs, 0) ||
+        // The marker lives with configs, not root: the fallback layout and Documents\PASTA share the same TEMP root,
+        // and a fallback marker must not suppress a later migration to the preferred folder.
+        const auto marker_path = m_target.configs / L".pasta-migration-v1.complete";
+        // One reserved staging file, protected by the exclusive gate. Documents can be on another volume, so the
+        // moves also allow copy-and-delete. A previous interrupted staging file is validated before reuse.
+        m_pending = m_target.root / L".pasta-migration-v1.pending";
+        // The current layout keeps configs and logs in subfolders; the flat hotkeys name covers older Vesta installs.
+        // Read the typed folder first so a stale flat copy cannot win over the current configs/hotkeys.cfg.
+        if (!tree(m_source / L"configs", m_target.configs, 0) ||
+            !tree(m_source / L"logs", m_target.logs, 0) ||
+            !tree(m_source / L"config_cache", m_target.configs, 0) ||
+            !copy_file(m_source / L"hotkeys.cfg", m_target.configs / L"hotkeys.cfg") ||
             !tree(m_source / L"chams_cache", m_target.mesh_cache, 0))
+            return m_result;
+        // Named configs used to live in the old registry default, outside the temporary data directory.
+        if (m_legacy_named_configs != nullptr && !m_legacy_named_configs->empty() &&
+            !tree(*m_legacy_named_configs, m_target.configs, 0))
             return m_result;
         if (cancelled())
             return m_result;
@@ -156,9 +167,9 @@ private:
             return false;
         }
         const auto expected = locations::under(m_target.root);
-        if (m_target.configs != expected.configs || m_target.cache != expected.cache ||
-            m_target.logs != expected.logs ||
-            m_target.mesh_cache != expected.mesh_cache || m_target.research_logs != expected.research_logs)
+        if (m_target.configs.empty() || !m_target.configs.is_absolute() || m_target.logs.empty() ||
+            !m_target.logs.is_absolute() || m_target.cache != expected.cache ||
+            m_target.mesh_cache != expected.mesh_cache || m_target.research_logs != m_target.logs / L"research")
         {
             fail(migration_stage::validate_paths, ERROR_INVALID_PARAMETER);
             return false;
@@ -168,7 +179,7 @@ private:
     // Complete, absent and invalid/unreadable markers are distinct states.
     marker_state inspect_marker()
     {
-        const auto marker = m_target.root / L".migration-v1.complete";
+        const auto marker = m_target.configs / L".pasta-migration-v1.complete";
         foundation::unique_handle file(::CreateFileW(marker.c_str(), GENERIC_READ, FILE_SHARE_READ, nullptr,
                                                      OPEN_EXISTING, FILE_FLAG_OPEN_REPARSE_POINT, nullptr));
         if (!valid_handle(file.get()))
@@ -331,8 +342,12 @@ private:
             const auto filename = it->path().filename();
             // Only the concrete pending name written by the existing product is temporary; other user files
             // remain data.
-            const bool config_pending = from == m_source / L"config_cache" && filename == L"current.cfg.tmp";
-            if (config_pending)
+            const auto& filename_text = filename.native();
+            const bool config_pending = filename == L"current.cfg.tmp" &&
+                                        (from == m_source / L"configs" || from == m_source / L"config_cache");
+            const bool migration_state = filename_text.starts_with(L".pasta-migration-v1.") ||
+                                         filename_text.starts_with(L".migration-v1.");
+            if (config_pending || migration_state)
                 continue;
             const auto child_attributes = ::GetFileAttributesW(it->path().c_str());
             if (child_attributes == INVALID_FILE_ATTRIBUTES)
@@ -481,7 +496,8 @@ private:
         if (cancelled())
             return false;
         // No REPLACE_EXISTING: even a concurrent destination writer wins.
-        if (!::MoveFileExW(m_pending.c_str(), to.c_str(), MOVEFILE_WRITE_THROUGH))
+        // Documents and %TEMP% can be on different volumes; COPY_ALLOWED keeps the no-overwrite move semantics.
+        if (!::MoveFileExW(m_pending.c_str(), to.c_str(), MOVEFILE_WRITE_THROUGH | MOVEFILE_COPY_ALLOWED))
         {
             const auto error = ::GetLastError();
             if (error == ERROR_ALREADY_EXISTS || error == ERROR_FILE_EXISTS)
@@ -527,7 +543,7 @@ private:
         }
         if (cancelled())
             return false;
-        if (!::MoveFileExW(m_pending.c_str(), marker.c_str(), MOVEFILE_WRITE_THROUGH))
+        if (!::MoveFileExW(m_pending.c_str(), marker.c_str(), MOVEFILE_WRITE_THROUGH | MOVEFILE_COPY_ALLOWED))
         {
             fail(migration_stage::marker, ::GetLastError());
             return false;
@@ -536,6 +552,7 @@ private:
     }
     const locations& m_target;
     const std::filesystem::path* m_explicit_source;
+    const std::filesystem::path* m_legacy_named_configs;
     std::filesystem::path m_source;
     bool m_in_place{};
     std::filesystem::path m_pending;
@@ -547,7 +564,7 @@ migration_result prepare(const locations& destination, std::stop_token stop) noe
 {
     try
     {
-        return migration(destination, nullptr, stop).run();
+        return migration(destination, nullptr, nullptr, stop).run();
     }
     catch (...)
     {
@@ -555,11 +572,12 @@ migration_result prepare(const locations& destination, std::stop_token stop) noe
     }
 }
 migration_result migrate(const locations& destination, const std::filesystem::path& legacy,
-                         std::stop_token stop) noexcept
+                         const std::filesystem::path& legacy_named_configs, std::stop_token stop) noexcept
 {
     try
     {
-        return migration(destination, &legacy, stop).run();
+        return migration(destination, &legacy, legacy_named_configs.empty() ? nullptr : &legacy_named_configs, stop)
+            .run();
     }
     catch (...)
     {

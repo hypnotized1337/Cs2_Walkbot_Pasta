@@ -1,6 +1,9 @@
 #include <stdafx.hpp>
+#include <platform/windows/data_paths.hpp>
 #include <platform/windows/user_settings.hpp>
 
+#include <array>
+#include <cwchar>
 #include <shellapi.h>
 
 namespace platform::windows
@@ -60,6 +63,42 @@ bool write_config_folder(const std::filesystem::path& folder) noexcept
     {
         return false;
     }
+}
+
+bool is_legacy_config_folder(const std::filesystem::path& folder) noexcept
+{
+    try
+    {
+        if (folder.empty() || !folder.is_absolute())
+            return false;
+        const auto normalize = [](std::filesystem::path value)
+        {
+            value = value.lexically_normal();
+            return value.native();
+        };
+        const auto selected = normalize(folder);
+        const auto matches = [&](const std::filesystem::path& candidate)
+        { return ::_wcsicmp(selected.c_str(), normalize(candidate).c_str()) == 0; };
+
+        const auto documents = data_storage::known_documents_directory();
+        if (!documents.empty() && matches(documents / L"VESTA"))
+            return true;
+
+        std::array<wchar_t, 32768> buffer{};
+        const DWORD length = ::GetEnvironmentVariableW(L"USERPROFILE", buffer.data(), static_cast<DWORD>(buffer.size()));
+        return length != 0 && static_cast<std::size_t>(length) < buffer.size() &&
+               matches(std::filesystem::path(std::wstring(buffer.data(), length)) / L"Documents" / L"VESTA");
+    }
+    catch (...)
+    {
+        return false;
+    }
+}
+
+std::optional<std::filesystem::path> legacy_config_folder() noexcept
+{
+    const auto folder = read_config_folder();
+    return folder && is_legacy_config_folder(*folder) ? folder : std::nullopt;
 }
 
 std::error_code move_to_recycle_bin(const std::filesystem::path& path) noexcept

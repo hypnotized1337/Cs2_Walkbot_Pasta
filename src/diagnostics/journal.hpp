@@ -12,7 +12,7 @@ namespace diagnostics
 {
 struct journal_options
 {
-    // Empty selects %TEMP%\vesta\logs on the writer.
+    // Empty selects Documents\PASTA\logs on the writer, with the old %TEMP%\vesta\logs fallback.
     std::filesystem::path directory;
     std::size_t file_bytes{64 * 1024};
     std::wstring writer_gate{L"Local\\VestaDiagnosticJournal-v1"};

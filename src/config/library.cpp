@@ -74,7 +74,20 @@ const std::optional<std::filesystem::path>& config_library::folder()
     if (!m_folder_read)
     {
         m_folder_read = true;
-        m_folder = platform::windows::read_config_folder();
+        const auto stored = platform::windows::read_config_folder();
+        // Keep a folder the user explicitly chose. An absent value or the old Documents\VESTA default follows the new
+        // PASTA configs folder created during storage startup. If Documents is unavailable, keep the old default folder
+        // when it still exists so its named configs are not hidden by the temporary fallback.
+        std::error_code error;
+        if (stored && !platform::windows::is_legacy_config_folder(*stored))
+            m_folder = stored;
+        else if (stored && platform::windows::runtime_storage::using_legacy_defaults() &&
+                 std::filesystem::is_directory(*stored, error))
+            m_folder = stored;
+        else if (const auto& configs = platform::windows::runtime_storage::paths().configs; !configs.empty())
+            m_folder = configs;
+        else
+            m_folder = stored;
     }
     return m_folder;
 }

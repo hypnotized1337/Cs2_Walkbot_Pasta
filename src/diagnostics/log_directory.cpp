@@ -1,14 +1,15 @@
 #include <diagnostics/log_directory.hpp>
-#include <windows.h>
+#include <platform/windows/data_paths.hpp>
+#include <platform/windows/storage.hpp>
 
 namespace diagnostics
 {
 std::filesystem::path default_logs_directory()
 {
-    wchar_t buffer[MAX_PATH + 2]{};
-    const DWORD length = ::GetTempPathW(static_cast<DWORD>(std::size(buffer)), buffer);
-    if (length == 0 || length >= std::size(buffer))
-        return {};
-    return std::filesystem::path(buffer) / L"vesta" / L"logs";
+    // Storage is initialized after the journal opens, so use its live choice once available. Before that, resolution
+    // creates Documents\PASTA\logs or falls back to %TEMP%\vesta\logs if Documents is not writable.
+    if (const auto& logs = platform::windows::runtime_storage::paths().logs; !logs.empty())
+        return logs;
+    return platform::windows::data_storage::resolve_current_user().destination.logs;
 }
 } // namespace diagnostics

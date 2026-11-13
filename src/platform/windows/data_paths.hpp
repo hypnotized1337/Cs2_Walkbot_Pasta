@@ -15,6 +15,8 @@ namespace platform::windows::data_storage
 [[nodiscard]] std::filesystem::path plain_path(const std::filesystem::path& path);
 struct locations
 {
+    // root holds disposable cache and walk-bot routes in %TEMP%\vesta. configs and logs are user-facing and live in
+    // Documents\PASTA by default; they can point outside root.
     std::filesystem::path root, configs, cache, logs, mesh_cache, research_logs;
     [[nodiscard]] static locations under(std::filesystem::path root);
 };
@@ -23,10 +25,19 @@ struct resolved_locations
     locations destination;
     // Optional explicit import source; empty selects lazy default preparation.
     std::filesystem::path legacy;
+    // The old registry-selected named-config folder, only when it is the old Documents\VESTA default.
+    std::filesystem::path legacy_named_configs;
+    // Set when Documents\PASTA could not be prepared and the old %TEMP%\vesta layout is being kept.
+    bool used_legacy{};
+    std::uint32_t preferred_error{};
     std::uint32_t error{};
 };
-// Resolves the data root %TEMP%\vesta (the owner keeps cache and configuration temporary). The old flat
-// layout in the same directory is imported in place by prepare(). Does not create files/directories.
+// The real Documents known folder (OneDrive redirection included), with the loader's %USERPROFILE%\Documents
+// fallback. It does not create the folder.
+[[nodiscard]] std::filesystem::path known_documents_directory() noexcept;
+// Resolves configs/logs in Documents\PASTA and cache/walk-bot data in %TEMP%\vesta. Creates the two user-facing
+// folders so a fresh installation works without the loader; if that fails, keeps the old %TEMP%\vesta folders and
+// reports that through used_legacy/preferred_error.
 [[nodiscard]] resolved_locations resolve_current_user() noexcept;
 
 enum class migration_stage : std::uint8_t
@@ -59,5 +70,6 @@ struct migration_result
 // A completed destination remains independent of TEMP/legacy availability.
 [[nodiscard]] migration_result prepare(const locations& destination, std::stop_token stop = {}) noexcept;
 [[nodiscard]] migration_result migrate(const locations& destination, const std::filesystem::path& legacy,
+                                       const std::filesystem::path& legacy_named_configs = {},
                                        std::stop_token stop = {}) noexcept;
 } // namespace platform::windows::data_storage

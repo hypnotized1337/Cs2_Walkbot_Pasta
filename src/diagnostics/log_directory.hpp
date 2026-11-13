@@ -3,7 +3,7 @@
 
 namespace diagnostics
 {
-// %TEMP%\vesta\logs: the same folder the application's typed storage uses for logs. Only builds the path;
-// it never touches the disk. Empty if the system cannot report a temporary directory.
+// Documents\PASTA\logs, or %TEMP%\vesta\logs when Documents is unavailable. Creates the folder through the shared
+// storage resolver so the journal and the application logging agree. Empty only if neither location exists.
 [[nodiscard]] std::filesystem::path default_logs_directory();
 } // namespace diagnostics

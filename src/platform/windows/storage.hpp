@@ -14,6 +14,9 @@ namespace platform::windows::runtime_storage
 [[nodiscard]] data_storage::migration_result initialize();
 [[nodiscard]] data_storage::migration_result initialize(data_storage::resolved_locations locations);
 [[nodiscard]] const data_storage::locations& paths() noexcept;
+// True when Documents\\PASTA could not be used and the old %TEMP%\\vesta layout is active. The Configs page then keeps
+// an explicitly stored old default folder instead of hiding its named configs.
+[[nodiscard]] bool using_legacy_defaults() noexcept;
 
 } // namespace platform::windows::runtime_storage
 

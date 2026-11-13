@@ -8,7 +8,7 @@
 namespace config
 {
 
-// The live configuration: every change is kept in %TEMP%\vesta\configs\current.cfg. It is not one of the named
+// The live configuration: every change is kept in Documents\PASTA\configs\current.cfg by default. It is not one of the named
 // configs in the library (config/library.hpp); loading a named config copies it into the live one.
 struct configuration_store
 {
