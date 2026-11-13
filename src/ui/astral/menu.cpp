@@ -142,7 +142,7 @@ void menu_t::draw_astral(float display_width, float display_height)
 
     draw->AddLine({min.x + 12, max.y - k_footer_height}, {max.x - 12, max.y - k_footer_height}, IM_COL32(40, 40, 40, 255));
     push_menu_font(render::fonts().menu_regular_12);
-    draw->AddText({min.x + 13, max.y - 20}, IM_COL32(157, 157, 157, 255), "vesta");
+    draw->AddText({min.x + 13, max.y - 20}, IM_COL32(157, 157, 157, 255), "pasta");
     const auto* page_name = render::localization::tr(labels[m_page]);
     draw->AddText({max.x - 13 - ImGui::CalcTextSize(page_name).x, max.y - 20}, IM_COL32(157, 157, 157, 255), page_name);
     ImGui::PopFont();

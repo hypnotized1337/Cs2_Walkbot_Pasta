@@ -105,8 +105,9 @@ std::error_code move_to_recycle_bin(const std::filesystem::path& path) noexcept
 {
     try
     {
-        // SHFileOperation takes a list terminated by two NULs.
-        std::wstring from = std::filesystem::absolute(path).native();
+        // SHFileOperation does not accept the extended \\?\ namespace used by the data-path layer.
+        // Convert to a plain absolute path before handing it to the shell.
+        std::wstring from = data_storage::plain_path(std::filesystem::absolute(path)).native();
         from.push_back(L'\0');
         SHFILEOPSTRUCTW operation{};
         operation.wFunc = FO_DELETE;
