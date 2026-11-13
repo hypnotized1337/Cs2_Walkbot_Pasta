@@ -92,11 +92,13 @@ void toggle_control(bool& value)
     const auto checked = astral_animation(id, "toggle_checked", value ? 1.0f : 0.0f);
     const auto rounding = ui::astral::widgets::get().m.checkbox_rounding;
     const auto fill = ui::astral::draw::mix(palette.frame, palette.frame_hover, hover);
+    // Paint the resting frame first. The old white underlay became visible while the accent gradient faded out on
+    // uncheck, flashing a white square. The gradient now blends over the same frame at every point of the animation.
+    draw->AddRectFilled(box_min, box_max, packed(fill), rounding);
     if (checked > 0.01f)
     {
         const auto glow_color = packed(ui::astral::draw::fade(palette.accent, checked * 0.22f));
         ui::astral::draw::glow(draw, box_min, box_max, rounding, glow_color, ui::astral::widgets::px(9.0f));
-        draw->AddRectFilled(box_min, box_max, IM_COL32_WHITE, rounding);
         const auto accent_top = packed(ui::astral::draw::fade(palette.accent_top, checked));
         const auto accent_bottom = packed(ui::astral::draw::fade(palette.accent_bottom, checked));
         ui::astral::draw::rect_gradient(draw, box_min, box_max, accent_top, accent_bottom, rounding,
@@ -105,10 +107,7 @@ void toggle_control(bool& value)
         ui::astral::draw::check(draw, box_min, 16.0f, check_color, 1.6f, checked);
     }
     else
-    {
-        draw->AddRectFilled(box_min, box_max, packed(fill), rounding);
         draw->AddRect(box_min, box_max, packed(palette.popup_border), rounding, 0, 1.0f);
-    }
 #else
     draw->AddRectFilled(box_min, box_max, packed(k_outline_dark));
     const auto inner_min = box_min + ImVec2{1.0f, 1.0f};
@@ -477,19 +476,15 @@ void multiselect_row(const char* label, int& mask, std::span<const std::pair<con
             const auto check_progress = astral_animation(check_id, "multi_checked", selected ? 1.0f : 0.0f);
             const auto check_end = check_min + ImVec2{check_size, check_size};
             const auto check_fill = ui::astral::draw::mix(palette.frame, palette.accent, check_progress);
+            popup_draw->AddRectFilled(check_min, check_end, packed(check_fill), rounding);
             if (check_progress > 0.01f)
             {
                 ui::astral::draw::glow(popup_draw, check_min, check_end, rounding,
                                        packed(ui::astral::draw::fade(palette.accent, check_progress * 0.2f)), 6.0f);
-                popup_draw->AddRectFilled(check_min, check_end, IM_COL32_WHITE, rounding);
                 ui::astral::draw::rect_gradient(popup_draw, check_min, check_end,
                                                 packed(ui::astral::draw::fade(palette.accent_top, check_progress)),
                                                 packed(ui::astral::draw::fade(palette.accent_bottom, check_progress)),
                                                 rounding, ImDrawFlags_RoundCornersAll, false);
-            }
-            else
-            {
-                popup_draw->AddRectFilled(check_min, check_end, packed(check_fill), rounding);
             }
             popup_draw->AddRect(check_min, check_end, packed(palette.popup_border), rounding, 0, 1.0f);
             ui::astral::draw::check(popup_draw, check_min, check_size,
