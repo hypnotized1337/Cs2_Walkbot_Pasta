@@ -12,13 +12,25 @@ PASTA is a Windows x64 external assist for Counter-Strike 2. It reads game memor
 | Aimbot | Target selection, FOV modes, humanizer, prediction, multi-point aiming, RCS, penetration, and per-weapon-group overrides. |
 | Triggerbot | Hold, always-on, and toggle activation; seed modes; hitboxes; reaction time and hitchance; Auto Stop; penetration; predictive and lethal-only modes. |
 | Visuals | Player ESP, box and bar styles, info flags, chams, skeleton and hitboxes, sound ESP, item and projectile ESP, bomb ESP, radar, tracers, hitmarkers, hit sounds, visual no-flash/no-smoke, and crosshair. |
-| Walk Bot | Navigation-mesh routes and recordings, hunting, obstacle breaking, own aim, autofire, spray mode, rear defense, and the automation group. |
+| Walk Bot | Navigation-mesh routes and recordings, hunting, obstacle breaking, own aim, autofire, and the automation group. |
 | Automation | Auto Accept, Auto Rejoin, and Auto Disconnect for match flow. |
 | Misc | Game binds, language, DPI scale, interface colors, overlay widgets, performance limits, diagnostic report, and logs. |
 | Configs | Import, save, load, overwrite, rename, duplicate, and delete named configurations; choose the config folder. |
 | Overlays | Watermark, active binds, spectator list, and bomb information/timer. |
 
 Combat automation and Auto Buy live on the **Walk Bot** page. Their controls stay disabled while Walk Bot is off.
+
+## What PASTA adds
+
+Added on top of Vesta, all on the Walk Bot page.
+
+- **Spray Mode (Beta):** Holds fire with SMG/rifle/LMG weapons; releases on lock, weapon, or focus loss.
+- **Rear Defense:** Shoots or stabs a visible enemy behind you until it dies or hides.
+- **Auto Crouch:** Holds duck during Aimbot/Triggerbot engagements; releases when the target is lost.
+- **Auto Scope:** Scopes AWP, SSG 08, SCAR-20, G3SG1 while aiming; draws knife after a kill.
+- **Auto Bonus Weapon:** Taps Pickup Key each interval for bonus weapons while Walk Bot runs.
+- **Auto Knife:** Chases a close enemy and swings secondary at stab range; AFK-only by default.
+- **Auto Health Shot:** Below the health threshold, out of combat, injects and redraws a gun.
 
 ## Screenshots
 
