@@ -65,19 +65,20 @@ The main output is `build/bin/pasta.exe`. The build also produces `build/bin/pas
 
 Start Counter-Strike 2, then run `pasta.exe`. Press `Insert` to open or close the menu and `End` to exit PASTA.
 
-The menu key and exit key are saved in `%TEMP%\vesta\configs\hotkeys.cfg`.
+The menu key and exit key are saved in `Documents\PASTA\configs\hotkeys.cfg` by default, or in the config folder selected on the Configs page.
 
 ### Loader
 
-`pasta_loader.exe` installs and launches `pasta.exe`. It requests administrator rights, checks the latest public GitHub release, and installs a newer `pasta.exe` in `%USERPROFILE%\Documents\PASTA` when needed. It starts Steam and Counter-Strike 2 with `-applaunch 730` if the game is not running. It does not inject a DLL or modify the game.
+`pasta_loader.exe` installs and launches `pasta.exe`. It requests administrator rights, checks the latest public GitHub release, and installs a newer `pasta.exe` in `Documents\PASTA` when needed. It uses the Windows Documents folder, including OneDrive redirection. It starts Steam and Counter-Strike 2 with `-applaunch 730` if the game is not running. It does not inject a DLL or modify the game.
 
 ## Customization
 
 - **Accent color:** Misc → Overlay → Interface Colors → Accent.
 - **DPI scale:** Misc → Overlay → Interface → DPI Scale (50% to 150%).
 - **Configs:** choose a folder on the Configs page, then save, load, import, overwrite, rename, duplicate, or delete `.cfg` files. Use **Open folder** to copy a config out; there is no separate Export button.
-- **Live settings:** `%TEMP%\vesta\configs\current.cfg`. Edit it only while PASTA is closed.
-- **Named configs:** the folder selected on the Configs page. The choice is stored at `HKCU\Software\Vesta\ConfigFolder`.
+- **Live settings:** `Documents\PASTA\configs\current.cfg` by default. Edit it only while PASTA is closed.
+- **Named configs:** `Documents\PASTA\configs` by default, or the folder selected on the Configs page. The choice is stored at `HKCU\Software\Vesta\ConfigFolder`.
+- **Logs:** `Documents\PASTA\logs`.
 
 ## Notes and limitations
 
