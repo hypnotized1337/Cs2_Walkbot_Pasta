@@ -83,7 +83,7 @@ The menu key and exit key are saved in `Documents\PASTA\configs\hotkeys.cfg` by 
 ## Notes and limitations
 
 - PASTA is an external program. It reads game memory and draws an overlay; it does not inject or use a driver.
-- Use is at your own risk. No configuration or feature guarantees protection from VAC, VAC Live, cooldowns, or bans.
+- Use is at your own risk. You are responsible for following the terms of the games and services you use it with. No feature or configuration guarantees protection from VAC, VAC Live, cooldowns, or bans.
 - Auto Crouch acts only while an Aimbot or Triggerbot engagement is active.
 - The automation controls on the Walk Bot page are disabled while Walk Bot is off.
 - The Lua runtime, Web Radar, grenade helpers, Bunny Hop, and Edge Jump are not included.
