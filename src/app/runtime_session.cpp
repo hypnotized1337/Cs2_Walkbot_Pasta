@@ -3,6 +3,7 @@
 #include <app/runtime_session.hpp>
 #include <app/context.hpp>
 #include <app/workers.hpp>
+#include <scripting/runtime.hpp>
 #include <app/trace_session.hpp>
 #include <simulation/shot_trace.hpp>
 
@@ -45,6 +46,13 @@ void runtime_session::worker_failed(void* owner, foundation::thread_group::worke
                       error.system ? diagnostics::code_domain::system : diagnostics::code_domain::none,
                       static_cast<std::uint32_t>(error.code), static_cast<diagnostics::subject>(id + 1));
     static_cast<runtime_session*>(owner)->m_context.overlay.request_shutdown();
+}
+
+bool runtime_session::initialize_scripting()
+{
+    auto& scripts = scripting::runtime();
+    m_scripting_constructed = true;
+    return scripts.initialize();
 }
 
 void runtime_session::initialize_trace()
@@ -103,6 +111,8 @@ void runtime_session::quiesce() noexcept
     m_quiesced = true;
     diagnostics::emit(diagnostics::event::runtime_quiesce_begin);
     m_workers.stop_and_join();
+    if (m_scripting_constructed)
+        scripting::runtime().shutdown();
     if (m_trace_started)
     {
         app::trace_session::shutdown();

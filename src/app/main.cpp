@@ -161,6 +161,9 @@ int run(int argc, char** argv)
         }
         // A fresh installation shows the in-game guide once; a returning user is not greeted again.
         config::first_run::evaluate(profile_existed, platform::windows::runtime_storage::paths().configs);
+        if (!session.initialize_scripting())
+            app::context().diagnostics.warning(
+                "Lua runtime storage could not be initialized; scripting is disabled.");
         config::publish_runtime_snapshot();
         session.initialize_trace();
 

@@ -15,9 +15,9 @@ namespace platform::windows::data_storage
 [[nodiscard]] std::filesystem::path plain_path(const std::filesystem::path& path);
 struct locations
 {
-    // root holds disposable cache and walk-bot routes in %TEMP%\vesta. configs and logs are user-facing and live in
-    // Documents\PASTA by default; they can point outside root.
-    std::filesystem::path root, configs, cache, logs, mesh_cache, research_logs;
+    // root holds disposable cache and walk-bot routes in %TEMP%\vesta. configs, scripts, lua and logs are user-facing
+    // and live in Documents\PASTA by default; they can point outside root.
+    std::filesystem::path root, configs, scripts, lua, cache, logs, mesh_cache, research_logs;
     [[nodiscard]] static locations under(std::filesystem::path root);
 };
 struct resolved_locations

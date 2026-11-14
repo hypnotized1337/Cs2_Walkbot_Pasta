@@ -54,6 +54,7 @@
 #include <wrl/client.h>
 #include <shobjidl.h>
 #include <ui/menu/menu.hpp>
+#include <scripting/runtime.hpp>
 
 namespace ui
 {
@@ -477,6 +478,9 @@ void overlay_t::apply_pending_file_request()
         case file_request::choose_config_folder:
             config::library().note(config::library().set_folder(chosen), "Folder selected");
             break;
+        case file_request::import_lua:
+            static_cast<void>(scripting::runtime().import_script(chosen));
+            break;
     }
 }
 
@@ -606,6 +610,7 @@ void overlay_t::build_frame()
     if (game::local_player().valid() && !spectator_suppressed)
         draw_world(draw_list);
 
+    scripting::runtime().render(draw_list, m_render_width, m_render_height);
     // Outlined ESP text queued by the features above goes out as one block.
     render::esp_text::bind(m_context);
     render::esp_text::flush(draw_list.m_im_draw_list);
@@ -1479,8 +1484,16 @@ void overlay_t::request_file(const file_request kind)
                 ofn.lpfnHook = &overlay_t::config_dialog_hook;
                 ofn.Flags = OFN_FILEMUSTEXIST | OFN_PATHMUSTEXIST | OFN_NOCHANGEDIR | OFN_EXPLORER | OFN_ENABLEHOOK |
                             OFN_DONTADDTORECENT;
-                ofn.lpstrFilter = L"PASTA config (*.cfg)\0*.cfg\0";
-                ofn.lpstrTitle = L"Import a PASTA config";
+                if (kind == file_request::import_lua)
+                {
+                    ofn.lpstrFilter = L"Lua script (*.lua)\0*.lua\0";
+                    ofn.lpstrTitle = L"Import a Lua script";
+                }
+                else
+                {
+                    ofn.lpstrFilter = L"PASTA config (*.cfg)\0*.cfg\0";
+                    ofn.lpstrTitle = L"Import a PASTA config";
+                }
                 if (::GetOpenFileNameW(&ofn))
                     chosen = std::wstring{path.c_str()};
             }

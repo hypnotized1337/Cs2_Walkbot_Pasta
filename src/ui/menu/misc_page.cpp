@@ -22,6 +22,7 @@
 #include <d3dcompiler.h>
 
 #include <ui/menu/internal.hpp>
+#include <ui/menu/library_widgets.hpp>
 #include <dxgi.h>
 #include <wrl/client.h>
 #include <ui/menu/card_metrics.hpp>
@@ -275,12 +276,17 @@ void draw_movement_tab()
                    });
 }
 
+void draw_lua_tab()
+{
+    draw_script_library();
+}
+
 } // namespace
 
 void menu_t::draw_misc()
 {
-    static constexpr void (*tab_pages[])(){draw_general_tab, draw_overlay_tab, draw_movement_tab};
-    static constexpr const char* tabs[]{"General", "Overlay", "Movement"};
+    static constexpr void (*tab_pages[])(){draw_general_tab, draw_overlay_tab, draw_movement_tab, draw_lua_tab};
+    static constexpr const char* tabs[]{"General", "Overlay", "Movement", "Lua API"};
     static_assert(std::size(tabs) == std::size(tab_pages));
     ImGui::SetCursorPos({14.0f, 8.0f});
     for (int i = 0; i < static_cast<int>(std::size(tabs)); ++i)

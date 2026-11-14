@@ -44,6 +44,8 @@ locations locations::under(std::filesystem::path root)
     if (value.root.empty())
         return value;
     value.configs = value.root / L"configs";
+    value.scripts = value.root / L"scripts";
+    value.lua = value.root / L"lua";
     value.cache = value.root / L"cache";
     value.logs = value.root / L"logs";
     value.mesh_cache = value.cache / L"chams";
@@ -97,18 +99,31 @@ resolved_locations resolve_current_user() noexcept
         const auto documents = known_documents_directory();
         auto configs = documents.empty() ? std::filesystem::path{}
                                           : extended_path(documents / L"PASTA" / L"configs");
+        auto scripts = documents.empty() ? std::filesystem::path{}
+                                          : extended_path(documents / L"PASTA" / L"scripts");
+        auto lua = documents.empty() ? std::filesystem::path{}
+                                      : extended_path(documents / L"PASTA" / L"lua");
         auto logs = documents.empty() ? std::filesystem::path{}
                                       : extended_path(documents / L"PASTA" / L"logs");
         std::error_code configs_error;
+        std::error_code scripts_error;
+        std::error_code lua_error;
         std::error_code logs_error;
         if (!configs.empty())
             std::filesystem::create_directories(configs, configs_error);
+        if (!scripts.empty())
+            std::filesystem::create_directories(scripts, scripts_error);
+        if (!lua.empty())
+            std::filesystem::create_directories(lua, lua_error);
         if (!logs.empty())
             std::filesystem::create_directories(logs, logs_error);
-        if (!configs.empty() && !logs.empty() && !configs_error && !logs_error)
+        if (!configs.empty() && !scripts.empty() && !lua.empty() && !logs.empty() && !configs_error &&
+            !scripts_error && !lua_error && !logs_error)
         {
             auto destination = legacy;
             destination.configs = std::move(configs);
+            destination.scripts = std::move(scripts);
+            destination.lua = std::move(lua);
             destination.logs = std::move(logs);
             destination.research_logs = destination.logs / L"research";
             result.destination = std::move(destination);
@@ -118,7 +133,9 @@ resolved_locations resolve_current_user() noexcept
 
         result.used_legacy = true;
         result.preferred_error = configs_error ? static_cast<std::uint32_t>(configs_error.value())
-                                  : logs_error   ? static_cast<std::uint32_t>(logs_error.value())
+                                  : scripts_error ? static_cast<std::uint32_t>(scripts_error.value())
+                                  : lua_error     ? static_cast<std::uint32_t>(lua_error.value())
+                                  : logs_error    ? static_cast<std::uint32_t>(logs_error.value())
                                                  : ERROR_PATH_NOT_FOUND;
         // The old layout remains usable when Documents is read-only or unavailable. Migration preparation still
         // creates the typed folders below it.

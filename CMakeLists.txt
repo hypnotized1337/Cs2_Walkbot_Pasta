@@ -158,6 +158,7 @@ set(vesta_sources
     src/ui/menu/misc_page.cpp
     src/ui/menu/walk_bot_page.cpp
     src/ui/menu/configs_page.cpp
+    src/ui/menu/scripts_page.cpp
     src/ui/menu/library_widgets.cpp
     src/ui/menu/guide_page.cpp
     src/platform/windows/open_folder.cpp
@@ -170,6 +171,12 @@ set(vesta_sources
     src/render/text/esp_text.cpp
     src/ui/overlay/window_band.cpp
     src/ui/overlay/window.cpp
+
+    # scripting
+    src/scripting/runtime.cpp
+    src/scripting/sandbox.cpp
+    src/scripting/native_files.cpp
+    src/scripting/radar_asset.cpp
 
     # system
     src/diagnostics/log.cpp
@@ -387,6 +394,20 @@ endif()
 
 include(FetchContent)
 
+# Lua 5.4.8, fetched at configure time and built as a static library. Its MIT license is kept in
+# third_party/lua/LICENSE; no Lua source is vendored in this repository.
+FetchContent_Declare(
+    lua
+    URL https://www.lua.org/ftp/lua-5.4.8.tar.gz
+    URL_HASH SHA256=4f18ddae154e793e46eeab727c59ef1c0c0c2b744e7b94219710d76f530629ae
+    DOWNLOAD_EXTRACT_TIMESTAMP TRUE
+)
+FetchContent_MakeAvailable(lua)
+file(GLOB lua_sources CONFIGURE_DEPENDS "${lua_SOURCE_DIR}/src/*.c")
+list(FILTER lua_sources EXCLUDE REGEX "/(lua|luac|onelua)\\.c$")
+add_library(vesta_lua STATIC ${lua_sources})
+target_include_directories(vesta_lua PUBLIC ${lua_SOURCE_DIR}/src)
+target_link_libraries(${PROJECT_NAME} PRIVATE vesta_lua)
 
 FetchContent_Declare(
     freetype

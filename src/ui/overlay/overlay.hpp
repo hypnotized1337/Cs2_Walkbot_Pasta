@@ -81,6 +81,7 @@ public:
     {
         import_config,
         choose_config_folder,
+        import_lua,
     };
     void request_file(file_request kind);
 

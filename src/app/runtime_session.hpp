@@ -18,6 +18,7 @@ public:
     runtime_session& operator=(const runtime_session&) = delete;
 
     void start_workers();
+    [[nodiscard]] bool initialize_scripting();
     void initialize_trace();
     void quiesce() noexcept;
     [[nodiscard]] foundation::shutdown_action quiesce_action() noexcept;
@@ -32,6 +33,7 @@ private:
     // Destroy/join workers before closing their shared wake event.
     foundation::thread_group m_workers;
     bool m_quiesced{};
+    bool m_scripting_constructed{};
     bool m_trace_started{};
 };
 } // namespace app
