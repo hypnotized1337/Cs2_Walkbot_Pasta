@@ -1,0 +1,9 @@
+{
+  "id": "pasta_api_test",
+  "name": "PASTA Lua API Test",
+  "version": "1.0.0",
+  "author": "PASTA",
+  "api_version": 1,
+  "entry": "main.lua",
+  "description": "Exercises the PASTA Lua API and reports PASS, FAIL, or SKIP for each checked function."
+}
