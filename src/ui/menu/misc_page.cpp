@@ -256,6 +256,64 @@ void draw_overlay_tab()
                    });
 }
 
+void draw_grenades_tab()
+{
+    auto& n = config::general_settings.m_nade_helper;
+    card_in_column(
+        "lineups", "LINEUP HELPER", 2, 0,
+        [&]
+        {
+            toggle_popup_row("Lineup Helper", n.enabled, 4,
+                             [&]
+                             {
+                                 settings_popup_row(
+                                     "Geometry", 5,
+                                     [&]
+                                     {
+                                         slider_row("Draw Distance", n.draw_distance, 200.0f, 4000.0f, "u", 10.0f);
+                                         slider_row("Marker Distance", n.stand_distance, 60.0f, 800.0f, "u", 5.0f);
+                                         slider_row("Stand Radius", n.stand_radius, 6.0f, 64.0f, "u", 1.0f);
+                                         slider_row("Release Radius", n.release_radius, 1.0f, 16.0f, "u", 0.5f);
+                                         slider_row("Height Tolerance", n.height_tolerance, 1.0f, 24.0f, "u", 0.5f);
+                                     });
+                                 settings_popup_row("Display", 2,
+                                                    [&]
+                                                    {
+                                                        toggle_row("Show Throw Type", n.show_action);
+                                                        toggle_row("Show Distance", n.show_distance);
+                                                    });
+                                 settings_popup_row("Plaque Style", 3,
+                                                    [&]
+                                                    {
+                                                        color_row("Background", n.plaque_background);
+                                                        color_row("Text", n.plaque_text);
+                                                        color_row("Accent", n.plaque_accent);
+                                                    });
+                                 settings_popup_row("Marker Style", 3,
+                                                    [&]
+                                                    {
+                                                        color_row("Stand Marker", n.stand_marker);
+                                                        color_row("Stand Marker Active", n.stand_marker_active);
+                                                        color_row("Aim Marker", n.aim_marker);
+                                                    });
+                             });
+            toggle_popup_row("Lineup Aim Assist", n.aim_assist, 3,
+                             [&]
+                             {
+                                 keybind_row("Aim Key", n.aim_key);
+                                 toggle_row("Auto Release", n.auto_release);
+                                 settings_popup_row("Aim Tuning", 3,
+                                                    [&]
+                                                    {
+                                                        slider_row("Smoothing", n.aim_smoothing, 1, 30);
+                                                        slider_row("Lock Threshold", n.aim_threshold, 0.05f, 3.0f, "deg",
+                                                                   0.05f);
+                                                        slider_row("Settle Time", n.lock_time_ms, 0, 250, "ms");
+                                                    });
+                             });
+        });
+}
+
 void draw_movement_tab()
 {
     auto& p = config::general_settings;
@@ -285,8 +343,9 @@ void draw_lua_tab()
 
 void menu_t::draw_misc()
 {
-    static constexpr void (*tab_pages[])(){draw_general_tab, draw_overlay_tab, draw_movement_tab, draw_lua_tab};
-    static constexpr const char* tabs[]{"General", "Overlay", "Movement", "Lua API"};
+    static constexpr void (*tab_pages[])(){draw_general_tab, draw_overlay_tab, draw_movement_tab, draw_grenades_tab,
+                                           draw_lua_tab};
+    static constexpr const char* tabs[]{"General", "Overlay", "Movement", "Grenades", "Lua API"};
     static_assert(std::size(tabs) == std::size(tab_pages));
     ImGui::SetCursorPos({14.0f, 8.0f});
     for (int i = 0; i < static_cast<int>(std::size(tabs)); ++i)

@@ -11,6 +11,7 @@
 #include <config/misc.hpp>
 #include <game/input/bindings.hpp>
 #include <features/misc/auto_stop.hpp>
+#include <features/misc/misc.hpp>
 #include <diagnostics/journal.hpp>
 
 namespace
@@ -188,6 +189,22 @@ std::vector<std::uint16_t> auto_stop_t::counter_keys(const foundation::vec3& vel
 void auto_stop_t::engage(const foundation::vec3& velocity, const float)
 {
     std::scoped_lock control_lock(m_control_mutex);
+    // A lineup throw owns the movement keys for its scripted sequence. Braking on top of it would add counter
+    // keys and gate the same keys under a second owner.
+    if (nade_helper().movement_taken())
+    {
+        if (!m_active && m_synthetic_keys.empty() && m_gated_keys.empty())
+            return;
+        for (const auto key : m_synthetic_keys)
+            (void)platform::windows::bound_input().key(key, false);
+        m_synthetic_keys.clear();
+        if (!m_gated_keys.empty())
+            platform::windows::bound_input().set_movement_gate(
+                platform::windows::input_gateway::gate_owner::auto_stop, {}, false);
+        m_gated_keys.clear();
+        m_active = false;
+        return;
+    }
     const auto set = movement_bindings();
     if (set.all.empty())
         return;

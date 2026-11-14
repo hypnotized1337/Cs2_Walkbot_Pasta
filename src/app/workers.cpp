@@ -512,6 +512,23 @@ void movement(control control)
     features::misc::bhop().release(false);
 }
 
+void nade_helper(control control)
+{
+    constexpr auto active_interval = std::chrono::milliseconds(1);
+    constexpr auto idle_interval = std::chrono::milliseconds(8);
+    ::SetThreadPriority(::GetCurrentThread(), THREAD_PRIORITY_NORMAL);
+
+    while (!control.stopping())
+    {
+        {
+            VESTA_PERF_SCOPE(nade_helper_tick);
+            features::misc::nade_helper().tick();
+        }
+        const auto snapshot = config::get_runtime_snapshot();
+        control.sleep_for(snapshot && snapshot->general.m_nade_helper.enabled ? active_interval : idle_interval);
+    }
+}
+
 void seed_trigger(control control)
 {
     auto latency_priority = false;

@@ -18,6 +18,119 @@
 namespace features::misc
 {
 
+class nade_helper_t
+{
+public:
+    void on_render(render::draw::draw_list& draw_list);
+    void tick();
+    // True while a lineup throw drives the movement keys; other movement features stand back.
+    [[nodiscard]] bool movement_taken() const noexcept { return m_movement_taken.load(std::memory_order_acquire); }
+
+private:
+    enum class throw_phase : std::uint8_t
+    {
+        idle,
+        crouching,
+        priming,
+        running,
+        jumping,
+        complete,
+    };
+
+    using owned_control = input_lifecycle::owned_control;
+
+    // Detached copy of one table row. Strings point into the generated constexpr table, so they outlive any use of
+    // this struct.
+    struct lineup_view
+    {
+        const char* name{};
+        const char* action{};
+        foundation::vec3 position{};
+        float pitch{};
+        float yaw{};
+        std::uint16_t actions{};
+        std::uint16_t run_ticks{};
+        std::uint8_t after_jump_ticks{};
+        float throw_strength{};
+        bool manual{};
+        float distance{};
+    };
+
+    // Pure with respect to feature state: both the render and lineup workers call it so their idea of "nearest
+    // lineup" cannot drift apart.
+    [[nodiscard]] bool collect(const foundation::vec3& player_pos, std::vector<lineup_view>& out) const;
+    [[nodiscard]] static std::uint8_t resolve_kind(std::uintptr_t weapon_vdata);
+    // Index of the lineup nearest the crosshair among those armed at the player's current stand point, or -1 when
+    // none are.
+    [[nodiscard]] int select_armed(const std::vector<lineup_view>& lineups, const foundation::vec3& view_angles) const;
+    [[nodiscard]] bool execution_position_ready(const lineup_view& lineup, const foundation::vec3& player_pos) const;
+    void reset_lock();
+
+    void aim_at(const lineup_view& lineup, const foundation::vec3& view_angles, float& out_error);
+    [[nodiscard]] bool begin_throw(const lineup_view& lineup, std::uintptr_t pawn, std::uintptr_t weapon,
+                                   std::uint32_t tick, std::chrono::steady_clock::time_point now);
+    [[nodiscard]] bool prime_throw(std::uint32_t tick, std::chrono::steady_clock::time_point now);
+    void drive_throw(std::uintptr_t pawn, std::uintptr_t weapon, std::uint32_t tick,
+                     std::chrono::steady_clock::time_point now);
+    void finish_throw(std::uint32_t tick);
+    [[nodiscard]] bool set_control(owned_control& control, bool pressed);
+    void release_movement(bool include_jump = true);
+    void release_attacks();
+    void cancel_throw(bool latch);
+    // False during freeze time, the team intro, a paused match or with the buy menu open.
+    [[nodiscard]] bool gameplay_allows_throw(std::uintptr_t pawn);
+
+    // Human-readable "hold X, do Y, release" for the marker label, built from the parsed movement flags rather
+    // than the raw action text.
+    [[nodiscard]] static std::string throw_instruction(const lineup_view& lineup);
+
+    // Shared plaque primitive: dark rounded panel, white title, dimmed subtitle, accent edge. Anchored by the
+    // top-centre of the box.
+    void draw_text_plaque(render::draw::draw_list& draw_list, float center_x, float top_y, std::string_view title,
+                          std::string_view subtitle, const render::draw::rgba& accent, float alpha) const;
+
+    void draw_plaque(render::draw::draw_list& draw_list, const lineup_view& lineup,
+                     const foundation::vec2& screen) const;
+    void draw_stand_marker(render::draw::draw_list& draw_list, const lineup_view& lineup, bool standing) const;
+    void draw_aim_guidance(render::draw::draw_list& draw_list, const lineup_view& lineup,
+                           const foundation::vec3& eye_pos, bool selected, bool converged) const;
+
+    foundation::vec2 m_aim_error{};
+    foundation::vec2 m_aim_velocity{};
+    std::vector<std::uint16_t> m_gated_keys{};
+    std::vector<lineup_view> m_render_scratch{};
+    std::vector<lineup_view> m_tick_scratch{};
+    lineup_view m_active_lineup{};
+    throw_phase m_throw_phase{throw_phase::idle};
+    owned_control m_forward{};
+    owned_control m_walk{};
+    owned_control m_duck{};
+    owned_control m_jump{};
+    owned_control m_attack{};
+    owned_control m_attack2{};
+    std::uintptr_t m_active_pawn{};
+    std::uintptr_t m_active_weapon{};
+    std::uint32_t m_phase_tick{};
+    std::uint32_t m_run_start_tick{};
+    std::uint32_t m_jump_tick{};
+    std::chrono::steady_clock::time_point m_phase_started{};
+    std::chrono::steady_clock::time_point m_lock_started{};
+    std::chrono::steady_clock::time_point m_last_aim_update{};
+    const char* m_lock_name{};
+    foundation::vec3 m_lock_position{};
+    float m_lock_pitch{};
+    float m_lock_yaw{};
+    bool m_activation_latched{};
+    bool m_release_pending{};
+    std::atomic<bool> m_movement_taken{};
+    std::uintptr_t m_game_rules{};
+    std::chrono::steady_clock::time_point m_next_rules_scan{};
+
+    // Distance the aim marker is projected out from the eye. Only affects where the marker is drawn, never the
+    // angles that are aimed at.
+    static constexpr float k_aim_marker_distance{220.0f};
+};
+
 class auto_accept_t
 {
 public:
@@ -266,6 +379,11 @@ private:
     std::chrono::steady_clock::time_point m_next_rules_check{};
 };
 
+inline nade_helper_t& nade_helper()
+{
+    static nade_helper_t value{};
+    return value;
+}
 inline auto_accept_t& auto_accept()
 {
     static auto_accept_t value{};

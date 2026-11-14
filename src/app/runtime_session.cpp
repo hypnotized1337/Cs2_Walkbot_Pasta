@@ -17,6 +17,7 @@ enum worker_id : foundation::thread_group::worker_id
     game_state,
     movement,
     combat,
+    lineup,
     seed_trigger,
     watchdog,
     profile_timeout,
@@ -88,6 +89,7 @@ void runtime_session::start_workers()
     start(game_state, workers::game);
     start(movement, workers::movement);
     start(combat, workers::combat);
+    start(lineup, workers::nade_helper);
     start(seed_trigger, workers::seed_trigger);
 #if defined(VESTA_ENABLE_CONSOLE) && VESTA_ENABLE_CONSOLE
     start(watchdog, workers::watchdog);

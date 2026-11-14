@@ -115,6 +115,14 @@ void bhop_t::tick()
         return;
     }
 
+    // A lineup throw owns jump and the movement keys for its crouch/run/jump sequence. Tapping jump from Bunny
+    // Hop at the same time would break that sequence.
+    if (nade_helper().movement_taken())
+    {
+        release(false);
+        return;
+    }
+
     if (!game_active || menu_open || text_entry_active || !player_ready || m_jump_key == 0)
     {
         release(false);

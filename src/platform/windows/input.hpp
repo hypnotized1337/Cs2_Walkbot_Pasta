@@ -132,6 +132,7 @@ public:
     {
         auto_stop,
         walk_bot,
+        nade_helper,
         count
     };
     void set_movement_gate(gate_owner owner, std::span<const std::uint16_t> virtual_keys, bool enabled) noexcept;

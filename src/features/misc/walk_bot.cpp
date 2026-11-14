@@ -819,7 +819,7 @@ void walk_bot_t::tick()
 
     const bool ui_open = game_ui_open(player);
     const bool movement_taken =
-        auto_stop().active() || !m_buy_queue.empty() || buy_holds_movement(player);
+        auto_stop().active() || nade_helper().movement_taken() || !m_buy_queue.empty() || buy_holds_movement(player);
     // The player's own movement wins: while gated their keys are seen here, once released the plain key state.
     bool player_moving = false;
     for (const auto* control : {&m_forward, &m_back, &m_left, &m_right})

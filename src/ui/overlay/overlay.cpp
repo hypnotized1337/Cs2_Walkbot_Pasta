@@ -109,8 +109,9 @@ constexpr bool k_use_composition_backend = true;
     return visuals.m_player.enabled || visuals.m_item.enabled || visuals.m_projectile.enabled ||
            visuals.m_bomb.enabled || visuals.m_no_flash.enabled || visuals.m_no_smoke.enabled ||
            visuals.m_crosshair.enabled || (visuals.m_player.enabled && visuals.m_chams.enabled) ||
-           visuals.m_radar.enabled || visuals.m_sound.enabled || misc.m_watermark.enabled || misc.m_spectator_list.enabled ||
-           misc.m_event_log.enabled || misc.m_keybind_list.enabled || misc.m_bullet_tracers.enabled ||
+           visuals.m_radar.enabled || visuals.m_sound.enabled || misc.m_nade_helper.enabled ||
+           misc.m_watermark.enabled || misc.m_spectator_list.enabled || misc.m_event_log.enabled ||
+           misc.m_keybind_list.enabled || misc.m_bullet_tracers.enabled ||
            misc.m_hitmarker.enabled || misc.m_hitsound.enabled || misc.m_hitsound.show_damage ||
            misc.trigger_debug_overlay ||
            (combat.aimbot_enabled && combat.aimbot_draw_fov) || combat.penetration_crosshair;
@@ -575,6 +576,7 @@ void overlay_t::draw_world(render::draw::draw_list& draw_list)
         features::visuals::bomb().on_render(draw_list);
         features::visuals::radar().on_render(draw_list);
         features::visuals::crosshair().on_render(draw_list);
+        features::misc::nade_helper().on_render(draw_list);
         features::misc::walk_bot().on_render(draw_list);
         features::misc::auto_health_shot().on_render(draw_list);
         features::visuals::bullet_impacts().on_render(draw_list);

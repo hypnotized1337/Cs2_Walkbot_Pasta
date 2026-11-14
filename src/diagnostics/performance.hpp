@@ -24,6 +24,7 @@ enum class zone : std::uint8_t
     movement_loop,
     bhop_tick,
     auto_stop_tick,
+    nade_helper_tick,
     seed_trigger_tick,
     seed_plan_build,
     seed_targets_read,

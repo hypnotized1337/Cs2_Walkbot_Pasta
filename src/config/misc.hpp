@@ -82,6 +82,44 @@ struct general_profile
         float damage_rise{30.0f};
     } m_hitsound{};
 
+    // Lineup helper: draws map-specific grenade lineups and can aim and release the selected throw through the
+    // game's own binds. The version gate invalidates old profiles from before the feature was removed, which were
+    // left enabled with the primary mouse button as the activation key.
+    struct nade_helper
+    {
+        static constexpr int k_config_version{1};
+
+        bool enabled{false};
+        int config_version{k_config_version};
+
+        float draw_distance{800.0f};
+        float stand_distance{220.0f};
+        float stand_radius{22.0f};
+        // Broad radius keeps the marker easy to acquire; automatic execution uses the tighter horizontal and
+        // vertical tolerances below.
+        float release_radius{6.0f};
+        float height_tolerance{8.0f};
+
+        bool show_action{true};
+        bool show_distance{true};
+
+        foundation::rgba plaque_background{12, 13, 18, 205};
+        foundation::rgba plaque_text{245, 245, 250, 255};
+        foundation::rgba plaque_accent{120, 170, 255, 255};
+        foundation::rgba stand_marker{120, 170, 255, 235};
+        foundation::rgba stand_marker_active{110, 235, 140, 245};
+        foundation::rgba aim_marker{245, 245, 250, 235};
+
+        bool aim_assist{true};
+        bool auto_release{true};
+        int aim_key{VK_XBUTTON2};
+        int aim_smoothing{18};
+        // Angular error (degrees) at which the aim counts as converged and the marker switches from "aim here" to
+        // "throw now".
+        float aim_threshold{0.35f};
+        int lock_time_ms{45};
+    } m_nade_helper{};
+
     struct watermark
     {
         bool enabled{true};

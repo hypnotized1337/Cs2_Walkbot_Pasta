@@ -1594,6 +1594,78 @@ static void from_json(const json& j, general_profile::hitsound& h)
     h.damage_rise = std::clamp(h.damage_rise, 0.0f, 100.0f);
 }
 
+static void to_json(json& j, const general_profile::nade_helper& n)
+{
+    j = json{{"config_version", general_profile::nade_helper::k_config_version},
+             {"enabled", n.enabled},
+             {"draw_distance", n.draw_distance},
+             {"stand_distance", n.stand_distance},
+             {"stand_radius", n.stand_radius},
+             {"release_radius", n.release_radius},
+             {"height_tolerance", n.height_tolerance},
+             {"show_action", n.show_action},
+             {"show_distance", n.show_distance},
+             {"plaque_background", n.plaque_background},
+             {"plaque_text", n.plaque_text},
+             {"plaque_accent", n.plaque_accent},
+             {"stand_marker", n.stand_marker},
+             {"stand_marker_active", n.stand_marker_active},
+             {"aim_marker", n.aim_marker},
+             {"aim_assist", n.aim_assist},
+             {"auto_release", n.auto_release},
+             {"aim_key", n.aim_key},
+             {"aim_smoothing", n.aim_smoothing},
+             {"aim_threshold", n.aim_threshold},
+             {"lock_time_ms", n.lock_time_ms}};
+}
+
+static void from_json(const json& j, general_profile::nade_helper& n)
+{
+    int version{};
+    read_field(j, "config_version", version);
+    read_field(j, "enabled", n.enabled);
+    read_field(j, "draw_distance", n.draw_distance);
+    read_field(j, "stand_distance", n.stand_distance);
+    read_field(j, "stand_radius", n.stand_radius);
+    read_field(j, "release_radius", n.release_radius);
+    read_field(j, "height_tolerance", n.height_tolerance);
+    read_field(j, "show_action", n.show_action);
+    read_field(j, "show_distance", n.show_distance);
+    read_field(j, "plaque_background", n.plaque_background);
+    read_field(j, "plaque_text", n.plaque_text);
+    read_field(j, "plaque_accent", n.plaque_accent);
+    read_field(j, "stand_marker", n.stand_marker);
+    read_field(j, "stand_marker_active", n.stand_marker_active);
+    read_field(j, "aim_marker", n.aim_marker);
+    read_field(j, "aim_assist", n.aim_assist);
+    read_field(j, "auto_release", n.auto_release);
+    read_field(j, "aim_key", n.aim_key);
+    read_field(j, "aim_smoothing", n.aim_smoothing);
+    read_field(j, "aim_threshold", n.aim_threshold);
+    read_field(j, "lock_time_ms", n.lock_time_ms);
+
+    // Profiles from before the helper was removed had no version and carried the old default enabled state with
+    // the primary mouse button as the activation key. Require one explicit save under the new version before the
+    // helper can start sending input again, and never keep the old left-click default as its activation key.
+    if (version < general_profile::nade_helper::k_config_version)
+    {
+        n.enabled = false;
+        if (n.aim_key == VK_LBUTTON)
+            n.aim_key = VK_XBUTTON2;
+    }
+    n.config_version = general_profile::nade_helper::k_config_version;
+
+    n.draw_distance = std::isfinite(n.draw_distance) ? std::clamp(n.draw_distance, 200.0f, 4000.0f) : 800.0f;
+    n.stand_distance = std::isfinite(n.stand_distance) ? std::clamp(n.stand_distance, 60.0f, 800.0f) : 220.0f;
+    n.stand_radius = std::isfinite(n.stand_radius) ? std::clamp(n.stand_radius, 6.0f, 64.0f) : 22.0f;
+    n.release_radius = std::isfinite(n.release_radius) ? std::clamp(n.release_radius, 1.0f, 16.0f) : 6.0f;
+    n.height_tolerance = std::isfinite(n.height_tolerance) ? std::clamp(n.height_tolerance, 1.0f, 24.0f) : 8.0f;
+    n.aim_smoothing = std::clamp(n.aim_smoothing, 1, 30);
+    n.aim_threshold = std::isfinite(n.aim_threshold) ? std::clamp(n.aim_threshold, 0.05f, 3.0f) : 0.35f;
+    n.lock_time_ms = std::clamp(n.lock_time_ms, 0, 250);
+    n.aim_key = std::clamp(n.aim_key, 0, 255);
+}
+
 static void to_json(json& j, const general_profile::screen_layout& l)
 {
     j = json{{"version", 1},
@@ -2037,6 +2109,7 @@ static void to_json(json& j, const general_profile& m)
              {"m_bullet_tracers", m.m_bullet_tracers},
              {"m_hitmarker", m.m_hitmarker},
              {"m_hitsound", m.m_hitsound},
+             {"m_nade_helper", m.m_nade_helper},
              {"m_watermark", m.m_watermark},
              {"m_spectator_list", m.m_spectator_list},
              {"m_event_log", m.m_event_log},
@@ -2075,6 +2148,7 @@ static void from_json(const json& j, general_profile& m)
     read_field(j, "m_bullet_tracers", m.m_bullet_tracers);
     read_field(j, "m_hitmarker", m.m_hitmarker);
     read_field(j, "m_hitsound", m.m_hitsound);
+    read_field(j, "m_nade_helper", m.m_nade_helper);
     read_field(j, "m_watermark", m.m_watermark);
     read_field(j, "m_spectator_list", m.m_spectator_list);
     read_field(j, "m_event_log", m.m_event_log);
