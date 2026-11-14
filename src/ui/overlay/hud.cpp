@@ -1280,6 +1280,10 @@ void panels::draw_keybind_list(const bool interactive)
     const auto& misc = config::general_settings;
     if (cfg.show_hold && misc.m_auto_stop.enabled && features::misc::auto_stop().active())
         rows.push_back({"Auto Stop", "active", true});
+    // Walk Bot owns jump while it is enabled, so the hold row would otherwise claim a feature that is standing down.
+    if (cfg.show_hold && misc.m_bunny_hop.enabled && !misc.m_walk_bot.enabled &&
+        key_down(misc.m_bunny_hop.activation_key))
+        rows.push_back({"Bunny Hop", "hold", true});
     if (cfg.show_always && config::visual_settings.m_no_flash.enabled)
         rows.push_back({"No Flash", "always", true});
     if (cfg.show_always && config::visual_settings.m_no_smoke.enabled)

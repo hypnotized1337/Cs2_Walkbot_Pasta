@@ -255,12 +255,32 @@ void draw_overlay_tab()
                    });
 }
 
+void draw_movement_tab()
+{
+    auto& p = config::general_settings;
+    const auto jump = game::input_bindings().resolve(game::input_action::jump);
+    const char* hint{};
+    if (!jump)
+        hint = "Jump is not bound; Bunny Hop needs a keyboard jump bind.";
+    else if (jump.device != game::input_device::keyboard)
+        hint = "Jump is on a mouse button; bind it to a keyboard key.";
+
+    card_in_column("bunny_hop", "BUNNY HOP", hint ? 2 : 1, 0,
+                   [&]
+                   {
+                       toggle_popup_row("Enable Bunny Hop", p.m_bunny_hop.enabled, 1,
+                                        [&] { keybind_row("Activation Key", p.m_bunny_hop.activation_key); });
+                       if (hint)
+                           ImGui::TextColored(k_text_muted, "%s", render::localization::tr(hint));
+                   });
+}
+
 } // namespace
 
 void menu_t::draw_misc()
 {
-    static constexpr void (*tab_pages[])(){draw_general_tab, draw_overlay_tab};
-    static constexpr const char* tabs[]{"General", "Overlay"};
+    static constexpr void (*tab_pages[])(){draw_general_tab, draw_overlay_tab, draw_movement_tab};
+    static constexpr const char* tabs[]{"General", "Overlay", "Movement"};
     static_assert(std::size(tabs) == std::size(tab_pages));
     ImGui::SetCursorPos({14.0f, 8.0f});
     for (int i = 0; i < static_cast<int>(std::size(tabs)); ++i)

@@ -22,6 +22,7 @@ enum class zone : std::uint8_t
     ballistics_tick,
     aim_tick,
     movement_loop,
+    bhop_tick,
     auto_stop_tick,
     seed_trigger_tick,
     seed_plan_build,

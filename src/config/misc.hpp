@@ -258,6 +258,14 @@ struct general_profile
         float stop_speed{8.0f};
         float required_shoot_speed{34.0f};
     } m_auto_stop{};
+
+    // Bunny Hop: while the activation key is held, taps the game's jump bind once per new simulation time while the
+    // player is on the ground. Kept off by default; the embedded profile also sets it off.
+    struct bunny_hop
+    {
+        bool enabled{false};
+        int activation_key{VK_SPACE};
+    } m_bunny_hop{};
     // Draws the triggerbot decision trace. Off by default so the trace costs nothing unless it is being diagnosed.
     bool trigger_debug_overlay{false};
 

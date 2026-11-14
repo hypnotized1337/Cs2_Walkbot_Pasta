@@ -2015,6 +2015,22 @@ static void from_json(const json& j, general_profile::auto_bonus& a)
     a.interval_ms = std::clamp(a.interval_ms, 250, 5000);
 }
 
+static void to_json(json& j, const general_profile::bunny_hop& b)
+{
+    j = json{{"enabled", b.enabled}, {"activation_key", b.activation_key}};
+}
+
+static void from_json(const json& j, general_profile::bunny_hop& b)
+{
+    read_field(j, "enabled", b.enabled);
+    // Vesta's early configs stored the key as `key` before `activation_key`.
+    if (j.contains("activation_key"))
+        read_field(j, "activation_key", b.activation_key);
+    else
+        read_field(j, "key", b.activation_key);
+    b.activation_key = std::clamp(b.activation_key, 0, 255);
+}
+
 static void to_json(json& j, const general_profile& m)
 {
     j = json{
@@ -2026,6 +2042,7 @@ static void to_json(json& j, const general_profile& m)
              {"m_event_log", m.m_event_log},
              {"m_keybind_list", m.m_keybind_list},
              {"m_bomb_info", m.m_bomb_info},
+             {"m_bunny_hop", m.m_bunny_hop},
              {"m_game_controls", m.m_game_controls},
              {"m_auto_stop", m.m_auto_stop},
              {"trigger_debug_overlay", m.trigger_debug_overlay},
@@ -2063,6 +2080,7 @@ static void from_json(const json& j, general_profile& m)
     read_field(j, "m_event_log", m.m_event_log);
     read_field(j, "m_keybind_list", m.m_keybind_list);
     read_field(j, "m_bomb_info", m.m_bomb_info);
+    read_field(j, "m_bunny_hop", m.m_bunny_hop);
     read_field(j, "m_game_controls", m.m_game_controls);
     read_field(j, "m_auto_stop", m.m_auto_stop);
     read_field(j, "trigger_debug_overlay", m.trigger_debug_overlay);

@@ -492,6 +492,10 @@ void movement(control control)
         {
             VESTA_PERF_SCOPE(movement_loop);
             {
+                VESTA_PERF_SCOPE(bhop_tick);
+                features::misc::bhop().tick();
+            }
+            {
                 VESTA_PERF_SCOPE(auto_stop_tick);
                 features::misc::auto_stop().tick();
             }
@@ -499,10 +503,13 @@ void movement(control control)
         }
         const auto snapshot = config::get_runtime_snapshot();
         const auto active =
-            snapshot && (snapshot->general.m_auto_stop.enabled || snapshot->general.m_walk_bot.enabled ||
-                         features::misc::auto_stop().active());
+            snapshot && (snapshot->general.m_bunny_hop.enabled || snapshot->general.m_auto_stop.enabled ||
+                         snapshot->general.m_walk_bot.enabled || features::misc::auto_stop().active());
         control.sleep_for(active ? active_interval : idle_interval);
     }
+    // Every other producer is stopping; a key gate left installed would outlive the worker's ownership of the jump
+    // key. The session disconnects the input gateway afterwards, which releases any injected transitions as well.
+    features::misc::bhop().release(false);
 }
 
 void seed_trigger(control control)

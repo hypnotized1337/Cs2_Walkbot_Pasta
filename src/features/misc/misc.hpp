@@ -235,6 +235,33 @@ private:
     std::atomic<int> m_debug_next_ms{};
 };
 
+// Bunny Hop ported from Vesta (features/misc/bhop.cpp, Apache-2.0). Only the Bunny branch is kept: Edge Jump and its
+// collision prediction are deliberately absent. The jump key is owned through the input gateway's key gate, and
+// release() tears that ownership down on every exit path.
+class bhop_t
+{
+public:
+    void tick();
+    // Clears the key gate and the per-ground-sample state. When restore_physical_jump is true and the gate had swallowed
+    // a physical jump press, the player's own jump is put back so leaving the feature does not eat a held key.
+    void release(bool restore_physical_jump = false) noexcept;
+
+private:
+    void reset_sample() noexcept;
+
+    int m_reported_jump_key{-1};
+    std::uint16_t m_jump_key{};
+    bool m_gate_requested{};
+    float m_last_simulation_time{-1.0f};
+    std::uintptr_t m_bunny_pawn{};
+    std::chrono::steady_clock::time_point m_last_bunny_tap{};
+    // Round identity used to release input across a round or map change.
+    std::uintptr_t m_rules_object{};
+    int m_rules_rounds{};
+    bool m_rules_known{};
+    std::chrono::steady_clock::time_point m_next_rules_check{};
+};
+
 inline auto_accept_t& auto_accept()
 {
     static auto_accept_t value{};
@@ -253,6 +280,11 @@ inline auto_bonus_t& auto_bonus()
 inline auto_health_shot_t& auto_health_shot()
 {
     static auto_health_shot_t value{};
+    return value;
+}
+inline bhop_t& bhop()
+{
+    static bhop_t value{};
     return value;
 }
 // Writes the live Auto Accept resolver report for a diagnostic run; 0 when the Panorama registry was readable.
