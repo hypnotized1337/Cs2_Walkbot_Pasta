@@ -285,6 +285,73 @@ public:
     void on_render(render::draw::draw_list& draw_list);
 };
 
+class grenade_prediction_t
+{
+public:
+    void tick();
+    void reset();
+    void on_render(render::draw::draw_list& draw_list);
+
+private:
+    struct held_grenade_snapshot
+    {
+        std::uintptr_t weapon{};
+        std::uintptr_t weapon_vdata{};
+        std::uint16_t item_definition{};
+        bool valid{};
+    };
+
+    struct in_flight_grenade
+    {
+        std::uintptr_t entity{};
+        std::uintptr_t weapon_id{};
+        grenade_path traj{};
+        std::chrono::steady_clock::time_point throw_time{};
+        std::chrono::steady_clock::time_point detonate_time{};
+        std::chrono::steady_clock::time_point last_seen{};
+        bool detonated{false};
+    };
+
+    [[nodiscard]] static held_grenade_snapshot sample_held_grenade();
+    [[nodiscard]] bool preview_allowed(const held_grenade_snapshot& weapon) const;
+    void refresh_weapon_profile(const held_grenade_snapshot& weapon);
+    void sample_throw(const held_grenade_snapshot& weapon, foundation::vec3& origin, foundation::vec3& velocity);
+
+    void reconcile_live_projectiles();
+    [[nodiscard]] static std::uintptr_t weapon_id_for(game::projectile_kind type);
+
+    void draw_path(render::draw::draw_list& draw_list, const grenade_path& trajectory, float alpha,
+                   const config::general_profile::grenades& settings) const;
+
+    std::uintptr_t m_weapon_vdata{};
+    std::uintptr_t m_weapon_id{};
+    float m_throw_velocity{};
+
+    std::vector<in_flight_grenade> m_in_flight{};
+    grenade_path m_preview{};
+    grenade_path m_display_preview{};
+    grenade_trajectory_engine m_trajectory_engine{};
+    std::chrono::steady_clock::time_point m_last_throw_time{};
+    std::chrono::steady_clock::time_point m_last_flight_update{};
+    std::chrono::steady_clock::time_point m_last_preview_update{};
+    std::chrono::steady_clock::time_point m_last_preview_blend{};
+    bool m_was_holding{false};
+    std::shared_ptr<const config::runtime_snapshot> m_config_snapshot{};
+    struct render_snapshot
+    {
+        std::shared_ptr<const config::runtime_snapshot> config;
+        std::vector<in_flight_grenade> flights;
+        grenade_path preview;
+    };
+    void update_state();
+    std::atomic<std::shared_ptr<const render_snapshot>> m_render_snapshot{};
+    foundation::snapshot_pool<render_snapshot> m_render_pool{};
+    bool m_snapshot_active{};
+
+    static constexpr auto throw_cooldown{1.0f};
+    static constexpr auto missing_grace{0.5f};
+};
+
 class bullet_impacts_t
 {
 public:
@@ -497,6 +564,11 @@ inline bomb_t& bomb()
 inline sound_t& sound()
 {
     static sound_t value{};
+    return value;
+}
+inline grenade_prediction_t& grenade_prediction()
+{
+    static grenade_prediction_t value{};
     return value;
 }
 inline bullet_impacts_t& bullet_impacts()

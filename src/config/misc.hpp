@@ -82,6 +82,28 @@ struct general_profile
         float damage_rise{30.0f};
     } m_hitsound{};
 
+    // Trajectory preview: draws the predicted path of the held grenade and of live projectiles. The version gate
+    // invalidates profiles from before the preview was removed, which were left enabled.
+    struct grenades
+    {
+        static constexpr int k_config_version{1};
+
+        bool enabled{false};
+        int config_version{k_config_version};
+        bool local_only{false};
+        foundation::rgba color{255, 255, 255, 200};
+        float thickness{2.0f};
+        bool bloom{true};
+        foundation::rgba bloom_color{120, 170, 255, 58};
+        float bloom_radius{3.0f};
+        bool show_bounces{true};
+        foundation::rgba bounce_color{120, 170, 255, 235};
+        float bounce_size{4.0f};
+        bool show_endpoint{true};
+        foundation::rgba endpoint_color{255, 255, 255, 235};
+        float endpoint_size{8.0f};
+    } m_grenades{};
+
     // Lineup helper: draws map-specific grenade lineups and can aim and release the selected throw through the
     // game's own binds. The version gate invalidates old profiles from before the feature was removed, which were
     // left enabled with the primary mouse button as the activation key.

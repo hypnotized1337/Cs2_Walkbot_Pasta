@@ -57,7 +57,7 @@ std::atomic<std::uint64_t> g_game_iter{0};
     const auto& visuals = snapshot->visual;
     const auto& misc = snapshot->general;
     if (misc.m_bullet_tracers.enabled || misc.m_hitmarker.enabled || misc.m_hitsound.enabled ||
-        misc.m_hitsound.show_damage ||
+        misc.m_hitsound.show_damage || misc.m_grenades.enabled ||
         (visuals.m_crosshair.enabled && visuals.m_crosshair.penetration_enabled))
     {
         return true;
@@ -278,6 +278,10 @@ void game(control control)
                 game::world().run(app::context().menu.is_open());
             }
             {
+                VESTA_PERF_SCOPE(grenade_prediction_tick);
+                features::visuals::grenade_prediction().tick();
+            }
+            {
                 VESTA_PERF_SCOPE(bullet_feedback_tick);
                 features::visuals::bullet_impacts().tick();
             }
@@ -310,7 +314,8 @@ void game(control control)
 
                         g_game_step.store(5, std::memory_order_relaxed);
 
-                                features::visuals::bullet_impacts().reset();
+                        features::visuals::grenade_prediction().reset();
+                        features::visuals::bullet_impacts().reset();
                         map_loader.request(current_map);
                     }
                 }
@@ -351,6 +356,7 @@ void game(control control)
                 game::level().publish({});
                 features::misc::walk_bot().request_reset();
                 features::misc::match_flow().request_reset();
+                features::visuals::grenade_prediction().reset();
                 features::visuals::bullet_impacts().reset();
                 map_loader.request({});
             }

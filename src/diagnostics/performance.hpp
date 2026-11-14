@@ -39,6 +39,7 @@ enum class zone : std::uint8_t
     bindings_refresh,
     player_esp,
     world_visuals,
+    grenade_prediction_tick,
     bullet_feedback_tick,
     bullet_feedback_capture,
     overlay_panels,

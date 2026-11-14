@@ -258,7 +258,8 @@ void draw_overlay_tab()
 
 void draw_grenades_tab()
 {
-    auto& n = config::general_settings.m_nade_helper;
+    auto& p = config::general_settings;
+    auto& n = p.m_nade_helper;
     card_in_column(
         "lineups", "LINEUP HELPER", 2, 0,
         [&]
@@ -311,6 +312,44 @@ void draw_grenades_tab()
                                                         slider_row("Settle Time", n.lock_time_ms, 0, 250, "ms");
                                                     });
                              });
+        });
+
+    card_in_column(
+        "trajectory", "TRAJECTORY", 1, 1,
+        [&]
+        {
+            toggle_popup_row(
+                "Trajectory Preview", p.m_grenades.enabled, 4,
+                [&]
+                {
+                    toggle_row("Local Prediction Only", p.m_grenades.local_only);
+                    settings_popup_row("Line Style", 3,
+                                       [&]
+                                       {
+                                           color_row("Line Color", p.m_grenades.color);
+                                           slider_row("Line Thickness", p.m_grenades.thickness, 0.5f, 8.0f, "px",
+                                                      0.25f);
+                                           toggle_popup_row("Bloom", p.m_grenades.bloom, 2,
+                                                            [&]
+                                                            {
+                                                                color_row("Bloom Color", p.m_grenades.bloom_color);
+                                                                slider_row("Bloom Radius", p.m_grenades.bloom_radius,
+                                                                           0.5f, 12.0f, "px", 0.5f);
+                                                            });
+                                       });
+                    toggle_popup_row("Bounce Points", p.m_grenades.show_bounces, 2,
+                                     [&]
+                                     {
+                                         color_row("Point Color", p.m_grenades.bounce_color);
+                                         slider_row("Point Size", p.m_grenades.bounce_size, 1.0f, 16.0f, "px", 0.5f);
+                                     });
+                    toggle_popup_row("End Point", p.m_grenades.show_endpoint, 2,
+                                     [&]
+                                     {
+                                         color_row("Point Color", p.m_grenades.endpoint_color);
+                                         slider_row("Point Size", p.m_grenades.endpoint_size, 2.0f, 24.0f, "px", 0.5f);
+                                     });
+                });
         });
 }
 

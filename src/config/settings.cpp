@@ -1594,6 +1594,54 @@ static void from_json(const json& j, general_profile::hitsound& h)
     h.damage_rise = std::clamp(h.damage_rise, 0.0f, 100.0f);
 }
 
+static void to_json(json& j, const general_profile::grenades& g)
+{
+    j = json{{"config_version", general_profile::grenades::k_config_version},
+             {"enabled", g.enabled},
+             {"local_only", g.local_only},
+             {"color", g.color},
+             {"thickness", g.thickness},
+             {"bloom", g.bloom},
+             {"bloom_color", g.bloom_color},
+             {"bloom_radius", g.bloom_radius},
+             {"show_bounces", g.show_bounces},
+             {"bounce_color", g.bounce_color},
+             {"bounce_size", g.bounce_size},
+             {"show_endpoint", g.show_endpoint},
+             {"endpoint_color", g.endpoint_color},
+             {"endpoint_size", g.endpoint_size}};
+}
+
+static void from_json(const json& j, general_profile::grenades& g)
+{
+    int version{};
+    read_field(j, "config_version", version);
+    read_field(j, "enabled", g.enabled);
+    read_field(j, "local_only", g.local_only);
+    read_field(j, "color", g.color);
+    read_field(j, "thickness", g.thickness);
+    read_field(j, "bloom", g.bloom);
+    read_field(j, "bloom_color", g.bloom_color);
+    read_field(j, "bloom_radius", g.bloom_radius);
+    read_field(j, "show_bounces", g.show_bounces);
+    read_field(j, "bounce_color", g.bounce_color);
+    read_field(j, "bounce_size", g.bounce_size);
+    read_field(j, "show_endpoint", g.show_endpoint);
+    read_field(j, "endpoint_color", g.endpoint_color);
+    read_field(j, "endpoint_size", g.endpoint_size);
+
+    // The preview was enabled in profiles from before its removal. Require one explicit save under the new
+    // version before it draws or samples again.
+    if (version < general_profile::grenades::k_config_version)
+        g.enabled = false;
+    g.config_version = general_profile::grenades::k_config_version;
+
+    g.thickness = std::isfinite(g.thickness) ? std::clamp(g.thickness, 0.5f, 8.0f) : 2.0f;
+    g.bloom_radius = std::isfinite(g.bloom_radius) ? std::clamp(g.bloom_radius, 0.5f, 12.0f) : 3.0f;
+    g.bounce_size = std::isfinite(g.bounce_size) ? std::clamp(g.bounce_size, 1.0f, 16.0f) : 4.0f;
+    g.endpoint_size = std::isfinite(g.endpoint_size) ? std::clamp(g.endpoint_size, 2.0f, 24.0f) : 8.0f;
+}
+
 static void to_json(json& j, const general_profile::nade_helper& n)
 {
     j = json{{"config_version", general_profile::nade_helper::k_config_version},
@@ -2109,6 +2157,7 @@ static void to_json(json& j, const general_profile& m)
              {"m_bullet_tracers", m.m_bullet_tracers},
              {"m_hitmarker", m.m_hitmarker},
              {"m_hitsound", m.m_hitsound},
+             {"m_grenades", m.m_grenades},
              {"m_nade_helper", m.m_nade_helper},
              {"m_watermark", m.m_watermark},
              {"m_spectator_list", m.m_spectator_list},
@@ -2148,6 +2197,7 @@ static void from_json(const json& j, general_profile& m)
     read_field(j, "m_bullet_tracers", m.m_bullet_tracers);
     read_field(j, "m_hitmarker", m.m_hitmarker);
     read_field(j, "m_hitsound", m.m_hitsound);
+    read_field(j, "m_grenades", m.m_grenades);
     read_field(j, "m_nade_helper", m.m_nade_helper);
     read_field(j, "m_watermark", m.m_watermark);
     read_field(j, "m_spectator_list", m.m_spectator_list);

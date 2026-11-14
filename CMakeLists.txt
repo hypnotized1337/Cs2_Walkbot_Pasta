@@ -112,6 +112,7 @@ set(vesta_sources
     src/features/visuals/bomb.cpp
     src/features/visuals/bullet_impacts.cpp
     src/features/visuals/crosshair.cpp
+    src/features/visuals/grenade_prediction.cpp
 	 src/features/visuals/event_log.cpp
 	src/features/visuals/hitsound.cpp
     src/features/visuals/item.cpp

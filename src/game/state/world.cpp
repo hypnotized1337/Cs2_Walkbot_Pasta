@@ -144,6 +144,7 @@ struct sampling_demand
         snapshot->visual.m_no_smoke.enabled ||
         (radar_active && (snapshot->visual.m_radar.show_projectiles || snapshot->visual.m_radar.show_trajectories ||
                           snapshot->visual.m_radar.show_grenade_zones)) ||
+        snapshot->general.m_grenades.enabled ||
         (snapshot->visual.m_player.active() && snapshot->visual.m_player.m_legit_sync.enabled &&
          snapshot->visual.m_player.m_legit_sync.direct_visible) ||
         (combat.aimbot.enabled && combat.aimbot.checks.smoke) ||
