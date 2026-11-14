@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.20)
-project(vesta VERSION 1.2.3 LANGUAGES C CXX)
+project(vesta VERSION 2.0.0 LANGUAGES C CXX)
 enable_language(RC)
 
 # Dear ImGui, unmodified upstream v1.92.3, fetched at configure time into the dependency cache (build/_deps), not

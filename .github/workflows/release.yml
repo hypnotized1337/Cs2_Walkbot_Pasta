@@ -17,21 +17,126 @@ concurrency:
 
 jobs:
   release:
+    if: ${{ github.event_name != 'push' || github.event.head_commit == null || !contains(github.event.head_commit.message, '[skip release]') }}
     runs-on: windows-2022
     steps:
       - uses: actions/checkout@v5
         with:
           fetch-depth: 0
-      - name: Configure
-        run: cmake --preset release
-      - name: Build
-        run: cmake --build --preset release --parallel
-      - name: Publish release
-        env:
-          GH_TOKEN: ${{ github.token }}
+
+      - name: Determine version
+        id: version
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Stop'
+
+          $project = Get-Content -LiteralPath CMakeLists.txt -Raw
+          if ($project -notmatch 'project\s*\(\s*vesta\s+VERSION\s+([0-9]+\.[0-9]+\.[0-9]+)') {
+            throw 'Could not determine the project version from CMakeLists.txt.'
+          }
+          $currentVersion = $Matches[1]
+          $current = [version]$currentVersion
+
+          # Only stable vX.Y.Z tags count. Old build-number tags are ignored.
+          $latest = $null
+          $latestTag = ''
+          foreach ($tag in @(& git tag --list)) {
+            if ($tag -match '^v?([0-9]+)\.([0-9]+)\.([0-9]+)$') {
+              $candidate = [version]::new([int]$Matches[1], [int]$Matches[2], [int]$Matches[3])
+              if ($null -eq $latest -or $candidate -gt $latest) {
+                $latest = $candidate
+                $latestTag = $tag
+              }
+            }
+          }
+
+          # A manual major/minor bump wins. Otherwise every push advances the
+          # patch from the last stable tag: 1.2.3 -> 1.2.4, 2.0.0 -> 2.0.1.
+          $version = $currentVersion
+          if ($env:GITHUB_EVENT_NAME -eq 'push' -and $null -ne $latest -and $current -le $latest) {
+            $version = '{0}.{1}.{2}' -f $latest.Major, $latest.Minor, ([int]$latest.Build + 1)
+          }
+
+          if ($version -ne $currentVersion -and $env:GITHUB_EVENT_NAME -eq 'push') {
+            $updated = $project -replace '(project\s*\(\s*vesta\s+VERSION\s+)[0-9]+\.[0-9]+\.[0-9]+', ('${1}' + $version)
+            if ($updated -eq $project) {
+              throw "Could not set the project version to $version."
+            }
+            [System.IO.File]::WriteAllText(
+              (Join-Path (Get-Location) 'CMakeLists.txt'),
+              $updated,
+              [System.Text.UTF8Encoding]::new($false))
+
+            & git add CMakeLists.txt
+            & git -c user.name='github-actions[bot]' `
+                  -c user.email='41898282+github-actions[bot]@users.noreply.github.com' `
+                  commit -m "Bump version to $version [skip release]"
+            if ($LASTEXITCODE -ne 0) {
+              throw 'Could not commit the version bump.'
+            }
+
+            # Another push can land while this job is queued. Rebase onto main
+            # before publishing so the version bump never overwrites it.
+            $pushed = $false
+            for ($attempt = 1; $attempt -le 3; $attempt++) {
+              & git fetch origin main
+              if ($LASTEXITCODE -ne 0) {
+                throw 'Could not fetch main.'
+              }
+              & git rebase origin/main
+              if ($LASTEXITCODE -ne 0) {
+                & git rebase --abort 2>$null
+                throw 'The version bump could not be rebased onto main.'
+              }
+              & git push origin HEAD:main
+              if ($LASTEXITCODE -eq 0) {
+                $pushed = $true
+                break
+              }
+              Start-Sleep -Seconds 3
+            }
+            if (-not $pushed) {
+              throw 'Could not push the version bump.'
+            }
+          }
+
+          $sha = (& git rev-parse HEAD).Trim()
+          $utf8 = [System.Text.UTF8Encoding]::new($false)
+          [System.IO.File]::AppendAllText($env:GITHUB_OUTPUT, "version=$version`n", $utf8)
+          [System.IO.File]::AppendAllText($env:GITHUB_OUTPUT, "sha=$sha`n", $utf8)
+          [System.IO.File]::AppendAllText($env:GITHUB_OUTPUT, "previous_tag=$latestTag`n", $utf8)
+          Write-Host "Release version: $version (CMake $currentVersion, latest tag '$latestTag')"
+
+      - name: Configure
+        run: cmake --preset release
+
+      - name: Build
+        run: cmake --build --preset release --parallel
+
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_VERSION: ${{ steps.version.outputs.version }}
+          RELEASE_SHA: ${{ steps.version.outputs.sha }}
+          PREVIOUS_TAG: ${{ steps.version.outputs.previous_tag }}
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+
+          $version = $env:RELEASE_VERSION
+          if (-not $version) {
+            throw 'The release version is empty.'
+          }
+          $sha = $env:RELEASE_SHA
+          if (-not $sha) {
+            $sha = (& git rev-parse HEAD).Trim()
+          }
+          $tag = "v$version"
+          $shortSha = $sha.Substring(0, 7)
+          $runNumber = $env:GITHUB_RUN_NUMBER
+          $runAttempt = [int]$env:GITHUB_RUN_ATTEMPT
+          $runLabel = if ($runAttempt -gt 1) { "$runNumber (attempt $runAttempt)" } else { "$runNumber" }
+
           $assets = @(
             "build/bin/pasta.exe"
             "build/bin/pasta_loader.exe"
@@ -42,37 +147,27 @@ jobs:
             }
           }
 
-          $project = Get-Content -LiteralPath CMakeLists.txt -Raw
-          if ($project -notmatch 'project\s*\(\s*vesta\s+VERSION\s+([0-9]+\.[0-9]+\.[0-9]+)') {
-            throw "Could not determine the project version."
-          }
-          $version = $Matches[1]
-          $sha = $env:GITHUB_SHA
-          $shortSha = $sha.Substring(0, 7)
-          $runNumber = $env:GITHUB_RUN_NUMBER
-          $runAttempt = [int]$env:GITHUB_RUN_ATTEMPT
+          # A handwritten notes file is used when one exists. Otherwise the
+          # release gets the commit list as dash bullets, as before.
+          $notesPath = @(
+            ".github/release-notes/$version.md"
+            ".github/release-notes/$tag.md"
+          ) | Where-Object { Test-Path -LiteralPath $_ } | Select-Object -First 1
 
-          $tag = "v$version-build.$runNumber-$shortSha"
-          if ($runAttempt -gt 1) {
-            $tag += "-retry$runAttempt"
-          }
-
-          $previousTag = & gh release list --limit 1 --json tagName --jq '.[0].tagName'
-          if ($LASTEXITCODE -ne 0) {
-            $previousTag = ""
-          }
-          $changes = $null
-          if ($previousTag -and $previousTag -ne $tag) {
-            $changes = & git log "$previousTag..$sha" --no-merges --pretty=format:"- %s (%h)"
-            if ($LASTEXITCODE -ne 0) {
-              $changes = $null
+          if ($notesPath) {
+            $notesBody = (Get-Content -LiteralPath $notesPath -Raw).Trim()
+            Write-Host "Using release notes: $notesPath"
+          } else {
+            if ($env:PREVIOUS_TAG) {
+              $changes = @(& git log "$($env:PREVIOUS_TAG)..$sha" --no-merges --pretty=format:"- %s (%h)")
+            } else {
+              $changes = @(& git log $sha --no-merges --pretty=format:"- %s (%h)")
             }
-          }
-          if (-not $changes) {
-            $changes = & git log -20 --no-merges --pretty=format:"- %s (%h)" $sha
-          }
-          if (-not $changes) {
-            $changes = @("- No commit messages were found for this release.")
+            $changes = @($changes | Where-Object { $_ -notmatch '\[skip release\]' })
+            if ($changes.Count -eq 0) {
+              $changes = @("- No commit messages were found for this release.")
+            }
+            $notesBody = "## Changes`n`n" + ($changes -join "`n")
           }
 
           $hashLines = @(
@@ -85,14 +180,12 @@ jobs:
           $repositoryUrl = "${{ github.server_url }}/${{ github.repository }}"
           $runUrl = "$repositoryUrl/actions/runs/${{ github.run_id }}"
           $notes = @(
-            "## Changes"
-            ""
-            ($changes -join "`n")
+            $notesBody
             ""
             "## Build"
             ""
             "- Commit: [$shortSha]($repositoryUrl/commit/$sha)"
-            "- Workflow run: [$runNumber]($runUrl)"
+            "- Workflow run: [$runLabel]($runUrl)"
             "- Files: ``pasta.exe`` and ``pasta_loader.exe``"
             ""
             "SHA-256:"
@@ -100,13 +193,38 @@ jobs:
             ""
             "License and third-party notices: [LICENSE]($repositoryUrl/blob/$sha/LICENSE) · [THIRD_PARTY_NOTICES.md]($repositoryUrl/blob/$sha/THIRD_PARTY_NOTICES.md)"
           )
-          $notes -join "`n" | Set-Content -LiteralPath RELEASE_NOTES.md -Encoding utf8
+          [System.IO.File]::WriteAllText(
+            (Join-Path (Get-Location) 'RELEASE_NOTES.md'),
+            ($notes -join "`n"),
+            [System.Text.UTF8Encoding]::new($false))
 
-          gh release create $tag `
-            --target $sha `
-            --title "PASTA $version build $runNumber" `
-            --notes-file RELEASE_NOTES.md `
-            $assets
-          if ($LASTEXITCODE -ne 0) {
-            throw "Failed to create release $tag."
+          & gh release view $tag --json tagName --jq '.tagName' 2>$null | Out-Null
+          $releaseExists = $LASTEXITCODE -eq 0
+
+          & git rev-parse -q --verify "refs/tags/$tag" | Out-Null
+          if ($LASTEXITCODE -eq 0) {
+            $tagSha = (& git rev-list -n 1 $tag).Trim()
+            if ($tagSha -ne $sha) {
+              throw "Tag $tag already exists at $tagSha, not at $sha."
+            }
+          }
+
+          if ($releaseExists) {
+            & gh release upload $tag $assets --clobber
+            if ($LASTEXITCODE -ne 0) {
+              throw "Failed to upload assets to release $tag."
+            }
+            & gh release edit $tag --title "PASTA $version" --notes-file RELEASE_NOTES.md
+            if ($LASTEXITCODE -ne 0) {
+              throw "Failed to update release $tag."
+            }
+          } else {
+            & gh release create $tag `
+              --target $sha `
+              --title "PASTA $version" `
+              --notes-file RELEASE_NOTES.md `
+              $assets
+            if ($LASTEXITCODE -ne 0) {
+              throw "Failed to create release $tag."
+            }
           }
