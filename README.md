@@ -29,11 +29,7 @@ Combat automation and Auto Buy live on the **Walk Bot** page. Their controls sta
 On top of Vesta's combat, visual, and walk-bot core:
 
 - **Astral menu:** A rebuilt interface with top-level Aimbot, Triggerbot, Visuals, Walk Bot, Automation, Misc, and Configs pages, accent-aware cards, animated transitions, and Astral HUD panels.
-- **Lua API and Web Radar:** A sandboxed Lua 5.4 runtime, script packages with autoload and hot reload, script-provided controls, and the restored verified Web Radar package.
-- **Bunny Hop:** Movement assistance from Vesta, with a configurable activation key and a required keyboard jump bind.
-- **Grenade lineup helper:** 12 maps and 1,122 lineups, stand and aim markers, throw details, and optional Mouse5 aim assist with automatic release.
-- **Trajectory preview:** The held grenade's path, live grenade trails, bloom, bounce points, and the end point, with an optional local-only mode.
-- **Walk Bot automation:** Spray Mode, Rear Defense, Auto Crouch, Auto Scope, Auto Bonus Weapon, Auto Knife, Auto Health Shot, Auto Buy, Auto Accept, Auto Rejoin, and Auto Disconnect.
+- **Walk Bot automation:** Spray Mode, Rear Defense, Auto Crouch, Auto Scope, Auto Bonus Weapon, Auto Knife, Auto Health Shot.
 
 ## Screenshots
 
