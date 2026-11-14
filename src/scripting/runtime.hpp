@@ -36,8 +36,8 @@ struct script_info
     bool enabled{};
     bool autoload{};
     bool hot_reload{true};
-    // A built-in, reviewed script recognised by its digest could run outside the sandbox. PASTA ships no trusted
-    // scripts, so every user script is restricted to the Vesta-compatible API (see scripting/sandbox.hpp).
+    // A built-in, reviewed script recognised by its digest can run outside the sandbox. Vesta Web Radar is the
+    // trusted script; every other script is restricted to the Vesta-compatible API (see scripting/sandbox.hpp).
     bool trusted{};
     std::size_t memory_bytes{};
     double last_callback_ms{};

@@ -222,6 +222,19 @@ configure_file(
     @ONLY
 )
 
+# The web radar is the only Lua script allowed outside the sandbox: its digest (text with CRLF folded to LF) is
+# compiled in, so an edited or different file runs restricted. Changing the script needs a new build.
+set(PASTA_RADAR_SCRIPT "${CMAKE_CURRENT_SOURCE_DIR}/lua/scripts/Vesta Web Radar.lua")
+set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS "${PASTA_RADAR_SCRIPT}")
+file(READ "${PASTA_RADAR_SCRIPT}" PASTA_RADAR_TEXT)
+string(REPLACE "\r" "" PASTA_RADAR_TEXT "${PASTA_RADAR_TEXT}")
+string(SHA256 PASTA_RADAR_SHA256 "${PASTA_RADAR_TEXT}")
+configure_file(
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/scripting/trusted_scripts.hpp.in"
+    "${CMAKE_CURRENT_BINARY_DIR}/generated/scripting/trusted_scripts.hpp"
+    @ONLY
+)
+
 # Diagnostic metadata is fixed at configure time, never taken from runtime text.
 if(NOT DEFINED VESTA_BUILD_REVISION)
     execute_process(COMMAND git -C "${CMAKE_CURRENT_SOURCE_DIR}" rev-parse --verify HEAD

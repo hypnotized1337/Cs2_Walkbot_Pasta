@@ -11,8 +11,8 @@ namespace scripting::sandbox
 // SHA-256 of a script's text with CRLF folded to LF, as lowercase hex; empty when the file cannot be read.
 [[nodiscard]] std::string script_digest(const std::filesystem::path& file);
 
-// True only for a script whose digest is one of the trusted scripts built into PASTA. PASTA currently has none, so
-// every script takes the restricted path.
+// True only for a script whose digest is one of the trusted scripts built into PASTA. The only such script is the
+// tracked Vesta Web Radar; every other script takes the restricted path.
 [[nodiscard]] bool trusted(const std::filesystem::path& file);
 
 // The standard library a restricted script sees: base without dofile/loadfile and with text-only `load`,

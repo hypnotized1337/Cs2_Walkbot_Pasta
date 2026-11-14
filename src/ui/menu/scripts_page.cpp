@@ -300,20 +300,24 @@ bool script_tile(const scripting::script_info& script, const float width)
     return changed;
 }
 
-constexpr std::array<const char*, 2> k_header_labels{"Import", "Open folder"};
+constexpr std::array<const char*, 3> k_header_labels{"Refresh", "Import", "Open folder"};
 
 [[nodiscard]] float header_width()
 {
-    return small_button_width(k_header_labels[0], glyph::import) +
-           small_button_width(k_header_labels[1], glyph::folder) + 8.0f;
+    return small_button_width(k_header_labels[0], glyph::none) +
+           small_button_width(k_header_labels[1], glyph::import) +
+           small_button_width(k_header_labels[2], glyph::folder) + 16.0f;
 }
 
 void header_actions()
 {
-    if (small_button("##import", glyph::import, k_header_labels[0]))
+    if (small_button("##refresh", glyph::none, k_header_labels[0]))
+        scripting::runtime().refresh();
+    ImGui::SameLine(0.0f, 8.0f);
+    if (small_button("##import", glyph::import, k_header_labels[1]))
         bound_overlay().request_file(ui::overlay_t::file_request::import_lua);
     ImGui::SameLine(0.0f, 8.0f);
-    if (small_button("##open_folder", glyph::folder, k_header_labels[1]))
+    if (small_button("##open_folder", glyph::folder, k_header_labels[2]))
         static_cast<void>(platform::windows::open_folder(scripting::runtime().scripts_path()));
 }
 } // namespace

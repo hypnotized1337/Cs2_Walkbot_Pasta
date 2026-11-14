@@ -1048,6 +1048,13 @@ bool runtime_t::implementation::script_instance::create_state()
         sandbox::open_restricted(lua, path.parent_path(), owner.modules_root);
     }
     register_api();
+    // The web radar writes its generated page and helper state beside vesta.storage. Create the package's private
+    // directory before the load callback starts the helper, not on the first storage write.
+    if (std::error_code directory_error{};
+        !std::filesystem::create_directories(owner.data_root / std::filesystem::u8path(id), directory_error) &&
+        directory_error)
+        diagnostics::process_log().warning("[lua] cannot create the data folder of {}: {}", name,
+                                           directory_error.message());
     load_storage();
     {
         std::scoped_lock lock(controls_mutex);
