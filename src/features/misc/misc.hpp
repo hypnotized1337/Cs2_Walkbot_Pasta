@@ -242,6 +242,8 @@ class bhop_t
 {
 public:
     void tick();
+    // True while the movement worker has the activation gate established and the activation key is actually held.
+    [[nodiscard]] bool active() const noexcept { return m_active.load(std::memory_order_acquire); }
     // Clears the key gate and the per-ground-sample state. When restore_physical_jump is true and the gate had swallowed
     // a physical jump press, the player's own jump is put back so leaving the feature does not eat a held key.
     void release(bool restore_physical_jump = false) noexcept;
@@ -255,6 +257,8 @@ private:
     float m_last_simulation_time{-1.0f};
     std::uintptr_t m_bunny_pawn{};
     std::chrono::steady_clock::time_point m_last_bunny_tap{};
+    // Render-thread view of the activation gate; the movement worker is the only writer.
+    std::atomic<bool> m_active{};
     // Round identity used to release input across a round or map change.
     std::uintptr_t m_rules_object{};
     int m_rules_rounds{};

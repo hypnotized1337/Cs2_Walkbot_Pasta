@@ -38,6 +38,7 @@ void bhop_t::reset_sample() noexcept
 
 void bhop_t::release(const bool restore_physical_jump) noexcept
 {
+    m_active.store(false, std::memory_order_release);
     const auto jump_key = m_jump_key;
     const auto gate_was_requested = m_gate_requested;
     m_gate_requested = false;
@@ -54,6 +55,7 @@ void bhop_t::release(const bool restore_physical_jump) noexcept
 
 void bhop_t::tick()
 {
+    m_active.store(false, std::memory_order_release);
     const auto now = std::chrono::steady_clock::now();
     const auto snapshot = config::get_runtime_snapshot();
     if (!snapshot)
@@ -170,6 +172,7 @@ void bhop_t::tick()
     const auto bunny_active = platform::windows::bound_input().key_gate_ready() &&
                               (activation_is_jump ? platform::windows::bound_input().key_gate_held()
                                                   : activation_held);
+    m_active.store(bunny_active, std::memory_order_release);
     if (!bunny_active)
     {
         reset_sample();

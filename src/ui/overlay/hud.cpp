@@ -4,11 +4,13 @@
 #include <platform/windows/input.hpp>
 #include <diagnostics/health.hpp>
 #include <render/presentation.hpp>
+#include <game/input/bindings.hpp>
 #include <game/memory/bound_services.hpp>
 #include <game/state/services.hpp>
 #include <ui/presentation.hpp>
 #include <features/aimbot/aimbot.hpp>
 #include <features/misc/auto_stop.hpp>
+#include <features/misc/misc.hpp>
 #include <features/visuals/event_log.hpp>
 #include <features/visuals/visuals.hpp>
 #include <render/text/localization.hpp>
@@ -1276,14 +1278,23 @@ void panels::draw_keybind_list(const bool interactive)
                                                                                              : "hold";
         rows.push_back({"Radar", mode, true});
     }
-    const auto key_down = [](int key) { return key > 0 && (::GetAsyncKeyState(key) & 0x8000) != 0; };
     const auto& misc = config::general_settings;
     if (cfg.show_hold && misc.m_auto_stop.enabled && features::misc::auto_stop().active())
         rows.push_back({"Auto Stop", "active", true});
-    // Walk Bot owns jump while it is enabled, so the hold row would otherwise claim a feature that is standing down.
-    if (cfg.show_hold && misc.m_bunny_hop.enabled && !misc.m_walk_bot.enabled &&
-        key_down(misc.m_bunny_hop.activation_key))
-        rows.push_back({"Bunny Hop", "hold", true});
+    // Bunny publishes its real gate state from the movement worker. Use that instead of duplicating its focus,
+    // Walk Bot, jump-bind and player checks here, where a transient cursor or menu state can hide an active row.
+    if (cfg.show_hold && misc.m_bunny_hop.enabled && !misc.m_walk_bot.enabled && !render::menu_open() &&
+        features::misc::bhop().active())
+    {
+        const auto bunny_jump = game::input_bindings().resolve(game::input_action::jump);
+        const auto bunny_jump_key =
+            bunny_jump.device == game::input_device::keyboard ? bunny_jump.virtual_key : std::uint16_t{};
+        const auto bunny_activation = static_cast<int>(std::clamp(misc.m_bunny_hop.activation_key, 0, 255));
+        // The activation key may be the jump key itself; show its name where other rows show the bind state.
+        const auto state = bunny_activation == bunny_jump_key ? ui::menu::detail::key_name(bunny_activation)
+                                                               : std::string{"hold"};
+        rows.push_back({"Bunny Hop", state, true});
+    }
     if (cfg.show_always && config::visual_settings.m_no_flash.enabled)
         rows.push_back({"No Flash", "always", true});
     if (cfg.show_always && config::visual_settings.m_no_smoke.enabled)
