@@ -655,7 +655,8 @@ void walk_bot_t::tick()
     release_tapped_key(!cfg.enabled);
     if (!cfg.enabled)
     {
-        release_auto_weapon_switch(true);
+        // Disabling is not a new life: keep the dry latches so re-enabling cannot bounce between the same empty guns.
+        release_auto_weapon_switch(false);
         // A buy sequence belongs to the walk bot session. Drop it on disable so re-enabling cannot type stale keys.
         m_buy_queue.clear();
         m_buy_waiting_menu = false;
@@ -800,7 +801,7 @@ void walk_bot_t::tick()
     record(player, now);
     if (m_recording_active)
     {
-        release_auto_weapon_switch(true);
+        release_auto_weapon_switch(false);
         auto_bonus().set_auto_knife_active(false);
         m_knife_restore = false;
         m_knife_target = 0;
@@ -861,7 +862,7 @@ void walk_bot_t::tick()
     const auto scope_wait = cfg.auto_scope && sniper && !weapon.is_scoped && !scope_confirmed;
     if (!focused || ui_open || movement_taken || now < m_player_until)
     {
-        release_auto_weapon_switch(true);
+        release_auto_weapon_switch(false);
         auto_bonus().set_auto_knife_active(false);
         note_idle(!focused ? 2u : ui_open ? 6u : movement_taken ? 4u : 7u);
         // Stop the held spray when the player takes the movement back, or when a grenade throw, the buy menu or
@@ -880,7 +881,7 @@ void walk_bot_t::tick()
     }
     if (!graph)
     {
-        release_auto_weapon_switch(true);
+        release_auto_weapon_switch(false);
         auto_bonus().set_auto_knife_active(false);
         features::aimbot::g_walk_autofire.store(false, std::memory_order_release);
         features::aimbot::publish_walk_autofire_parts(0);

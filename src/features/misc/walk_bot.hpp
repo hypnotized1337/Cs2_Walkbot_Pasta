@@ -217,11 +217,20 @@ private:
     // ---- extras (walk_bot_extras.cpp)
     void auto_buy(const player_state& player, clock::time_point now);
     void auto_reload(const player_state& player, const path* route, clock::time_point now);
-    // Auto Weapon Switch: release handshake, slot tap, verification, switch back and the one-shot reload nudge.
+    // Auto Weapon Switch: release handshake, candidate readiness, slot tap, verification, switch back and the
+    // one-shot reload nudge.
     void service_auto_weapon_switch(const player_state& player, clock::time_point now);
-    void release_auto_weapon_switch(bool forget);
+    void release_auto_weapon_switch(bool reset_latches);
+    void refresh_auto_switch_latches();
+    void latch_auto_switch_dry(std::uintptr_t weapon, std::uint32_t type, int clip, const char* reason,
+                               int candidate_clip = -1, bool candidate_reloading = false);
+    void note_auto_switch(clock::time_point now, std::uintptr_t weapon, std::uint32_t type, int clip,
+                          int candidate_clip = -1, bool candidate_reloading = false);
+    void reset_auto_switch_engagement(clock::time_point now);
+    [[nodiscard]] bool auto_switch_engaged(clock::time_point now) const;
     void log_auto_switch(const char* reason, std::uintptr_t weapon, std::uint32_t type, int clip,
-                         const std::string& candidate, const std::string& result);
+                         const std::string& candidate, const std::string& result, int candidate_clip = -1,
+                         bool candidate_reloading = false);
     void record(const player_state& player, clock::time_point now);
     void load_recordings(const std::string& map, int team);
     void note_idle(std::uint32_t reason);
@@ -418,8 +427,8 @@ private:
     clock::time_point m_reload_cooldown{};
 
     // Auto Weapon Switch. The phase machine owns the weapon slot from the release handshake until the switch back or
-    // the give-up path, and releases it on every exit. `handled` is the dry weapon already resolved, so one dry
-    // magazine cannot start a chain of switches; it clears when that weapon has ammo again.
+    // the give-up path, and releases it on every exit. Dry latches are per weapon handle and clear only after that
+    // weapon is read with ammo again. The counters cap automatic switches per dry engagement and in a rolling window.
     enum class auto_switch_phase : std::uint8_t
     {
         idle,
@@ -433,8 +442,9 @@ private:
     };
     auto_switch_phase m_auto_switch_phase{auto_switch_phase::idle};
     std::uintptr_t m_auto_switch_source{};
-    std::uintptr_t m_auto_switch_handled{};
+    std::uintptr_t m_auto_switch_target{};
     std::uint32_t m_auto_switch_source_type{};
+    std::uint32_t m_auto_switch_target_type{};
     std::uint16_t m_auto_switch_source_slot{};
     std::uint16_t m_auto_switch_target_slot{};
     clock::time_point m_auto_switch_started{};
@@ -443,6 +453,12 @@ private:
     clock::time_point m_auto_switch_return_at{};
     clock::time_point m_auto_switch_next_attempt{};
     int m_auto_switch_attempts{};
+    std::unordered_map<std::uintptr_t, std::uint32_t> m_auto_switch_dry{};
+    std::deque<clock::time_point> m_auto_switch_history{};
+    int m_auto_switch_engagement_switches{};
+    std::uintptr_t m_auto_switch_nudged{};
+    bool m_auto_switch_stand_down{};
+    bool m_auto_switch_both_dry_logged{};
 
     // Recording.
     walk_logic::recording m_recording{};
