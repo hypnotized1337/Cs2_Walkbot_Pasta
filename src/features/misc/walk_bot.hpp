@@ -220,7 +220,7 @@ private:
     // Auto Weapon Switch: release handshake, candidate readiness, slot tap, verification, switch back and the
     // one-shot reload nudge.
     void service_auto_weapon_switch(const player_state& player, clock::time_point now);
-    void release_auto_weapon_switch(bool reset_latches);
+    void release_auto_weapon_switch(bool reset_latches, bool hold_owner = false);
     void refresh_auto_switch_latches();
     void latch_auto_switch_dry(std::uintptr_t weapon, std::uint32_t type, int clip, const char* reason,
                                int candidate_clip = -1, bool candidate_reloading = false);
@@ -452,10 +452,8 @@ private:
     clock::time_point m_auto_switch_verify_at{};
     clock::time_point m_auto_switch_return_at{};
     clock::time_point m_auto_switch_next_attempt{};
+    clock::time_point m_auto_switch_owner_grace_until{};
     int m_auto_switch_attempts{};
-    std::unordered_map<std::uintptr_t, std::uint32_t> m_auto_switch_dry{};
-    std::deque<clock::time_point> m_auto_switch_history{};
-    int m_auto_switch_engagement_switches{};
     std::uintptr_t m_auto_switch_nudged{};
     bool m_auto_switch_stand_down{};
     bool m_auto_switch_both_dry_logged{};

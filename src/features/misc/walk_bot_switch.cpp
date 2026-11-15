@@ -32,15 +32,13 @@ constexpr auto k_switch_ack_timeout = std::chrono::milliseconds(50);
 constexpr auto k_switch_interval = std::chrono::milliseconds(350);
 constexpr auto k_switch_verify_timeout = std::chrono::milliseconds(300);
 constexpr auto k_reload_verify_timeout = std::chrono::milliseconds(750);
-constexpr auto k_switch_window = std::chrono::seconds(5);
 constexpr auto k_no_candidate_retry = std::chrono::seconds(1);
 constexpr auto k_candidate_reloading_retry = std::chrono::milliseconds(500);
 constexpr auto k_engaged_grace = std::chrono::milliseconds(300);
 constexpr auto k_return_retry = std::chrono::milliseconds(250);
 constexpr auto k_return_log_interval = std::chrono::seconds(1);
+constexpr auto k_owner_grace = std::chrono::milliseconds(500);
 constexpr int k_switch_attempts = 2;
-constexpr int k_max_engagement_switches = 2;
-constexpr int k_max_window_switches = 3;
 
 [[nodiscard]] int clip_of(const std::uintptr_t weapon)
 {
@@ -140,8 +138,7 @@ void collect_held_firearms(std::vector<held_weapon>& out)
     }
 }
 
-[[nodiscard]] slot_scan scan_slot(const std::vector<held_weapon>& weapons, const bool primary,
-                                  const std::unordered_map<std::uintptr_t, std::uint32_t>& dry)
+[[nodiscard]] slot_scan scan_slot(const std::vector<held_weapon>& weapons, const bool primary)
 {
     slot_scan result{};
     for (const auto& weapon : weapons)
@@ -153,9 +150,9 @@ void collect_held_firearms(std::vector<held_weapon>& out)
             result.carried = true;
             result.sample = weapon;
         }
-        // A latched weapon is not a destination. The latch is normally cleared above as soon as the fresh read sees
-        // ammo, so this is also a guard against a momentary stale read promoting an empty weapon.
-        if (dry.contains(weapon.weapon))
+        // A latched weapon is not a destination. The shared latch is cleared as soon as the fresh read sees ammo, so
+        // this is also a guard against a momentary stale read promoting an empty weapon.
+        if (auto_bonus().weapon_dry(weapon.weapon))
             continue;
         if (weapon.can_fire())
         {
@@ -170,120 +167,66 @@ void collect_held_firearms(std::vector<held_weapon>& out)
 }
 } // namespace
 
-// One line per decision, written only while the user enabled the debug log. The formatter deliberately avoids reading
-// more game state: the caller passes the clip and reload values the decision was based on.
+// One line per decision, written only while the user enabled the debug log. The shared formatter also reports the
+// universal change counts so Auto Bonus and Auto Weapon Switch decisions can be compared directly.
 void walk_bot_t::log_auto_switch(const char* reason, const std::uintptr_t weapon, const std::uint32_t type,
                                  const int clip, const std::string& candidate, const std::string& result,
                                  const int candidate_clip, const bool candidate_reloading)
 {
-    const auto snapshot = config::get_runtime_snapshot();
-    if (!snapshot || !snapshot->general.m_walk_bot.auto_weapon_switch.debug_log)
-        return;
-    try
-    {
-        const auto directory = diagnostics::default_logs_directory();
-        if (directory.empty())
-            return;
-        std::error_code error{};
-        std::filesystem::create_directories(directory, error);
-        std::ofstream out(directory / L"auto-weapon-switch.log", std::ios::app);
-        if (!out)
-            return;
-        SYSTEMTIME local{};
-        ::GetLocalTime(&local);
-        const auto candidate_clip_text = candidate_clip >= 0 ? std::to_string(candidate_clip) : std::string{"-"};
-        out << std::format("{:04}-{:02}-{:02} {:02}:{:02}:{:02}.{:03} | reason={} | current=0x{:x} type={} clip={} "
-                           "reload={} | candidate={} clip={} reload={} | owner={} | result={}\n",
-                           local.wYear, local.wMonth, local.wDay, local.wHour, local.wMinute, local.wSecond,
-                           local.wMilliseconds, reason, static_cast<std::uint64_t>(weapon), type, clip,
-                           reloading_of(weapon) ? 1 : 0, candidate.empty() ? "none" : candidate, candidate_clip_text,
-                           candidate_reloading ? 1 : 0, static_cast<int>(auto_bonus().owner()), result);
-    }
-    catch (...)
-    {
-        // Diagnostics must never change the switch behaviour.
-    }
+    const auto now = std::chrono::steady_clock::now();
+    log_weapon_automation(reason, weapon, type, clip, reloading_of(weapon), candidate, result, candidate_clip,
+                          candidate_reloading, auto_bonus().weapon_changes_this_engagement(now),
+                          auto_bonus().weapon_changes_in_window(now));
 }
 
-// A latch is keyed by the weapon handle and is cleared only after that exact weapon reads ammo again. Switching,
-// starting a reload, an owner change or an ordinary tick never clears it, so two empty weapons cannot bounce forever.
+// The latch lives in the shared automation state. Auto Bonus reads the same map before every pickup tap, and only a
+// fresh clip read above zero removes an entry.
 void walk_bot_t::latch_auto_switch_dry(const std::uintptr_t weapon, const std::uint32_t type, const int clip,
                                        const char* reason, const int candidate_clip, const bool candidate_reloading)
 {
-    if (!weapon)
-        return;
-    const auto [it, inserted] = m_auto_switch_dry.try_emplace(weapon, type);
-    if (!inserted)
-    {
-        it->second = type;
-        return;
-    }
-    log_auto_switch("dry_latch", weapon, type, clip, reason, "latched until clip > 0", candidate_clip,
-                    candidate_reloading);
+    auto_bonus().latch_weapon_dry(weapon, type, clip, reason, candidate_clip, candidate_reloading);
 }
 
 void walk_bot_t::refresh_auto_switch_latches()
 {
-    for (auto it = m_auto_switch_dry.begin(); it != m_auto_switch_dry.end();)
-    {
-        const auto weapon = it->first;
-        const auto type = it->second;
-        const auto clip = clip_of(weapon);
-        if (clip > 0)
-        {
-            log_auto_switch("dry_clear", weapon, type, clip, "dry latch", "clip above zero");
-            if (m_auto_switch_nudged == weapon)
-                m_auto_switch_nudged = 0; // this weapon really did get ammo; a later empty magazine may nudge once again
-            it = m_auto_switch_dry.erase(it);
-            continue;
-        }
-        ++it;
-    }
+    auto_bonus().refresh_weapon_latches();
+    // The one-shot nudge belongs to this dry engagement. A verified clip above zero ends it, so the same weapon may get
+    // one nudge again in a later engagement.
+    if (m_auto_switch_nudged && clip_of(m_auto_switch_nudged) > 0)
+        m_auto_switch_nudged = 0;
 }
 
 void walk_bot_t::note_auto_switch(const clock::time_point now, const std::uintptr_t weapon, const std::uint32_t type,
                                   const int clip, const int candidate_clip, const bool candidate_reloading)
 {
-    ++m_auto_switch_engagement_switches;
-    while (!m_auto_switch_history.empty() && now - m_auto_switch_history.front() >= k_switch_window)
-        m_auto_switch_history.pop_front();
-    m_auto_switch_history.push_back(now);
-    // Every verified slot change starts the ordinary switch cooldown, including the switch back. This keeps the
-    // configured 350 ms minimum interval even when a new dry engagement begins immediately.
+    (void)type;
+    (void)clip;
+    (void)candidate_clip;
+    (void)candidate_reloading;
+    // Every verified slot change starts the ordinary switch cooldown, including the switch back. The shared observer
+    // counts the change against both limits regardless of which automation caused it.
     m_auto_switch_next_attempt = now + k_switch_interval;
-    if (m_auto_switch_stand_down)
-        return;
-    if (m_auto_switch_engagement_switches < k_max_engagement_switches &&
-        m_auto_switch_history.size() < static_cast<std::size_t>(k_max_window_switches))
-        return;
-
-    m_auto_switch_stand_down = true;
-    log_auto_switch("limit_reached", weapon, type, clip, "switch cap",
-                    std::format("standing down: {}/{} this engagement, {}/{} in 5 s",
-                                m_auto_switch_engagement_switches, k_max_engagement_switches,
-                                m_auto_switch_history.size(), k_max_window_switches),
-                    candidate_clip, candidate_reloading);
+    (void)auto_bonus().observe_weapon(weapon, now);
+    if (auto_bonus().weapon_change_stand_down(now))
+        m_auto_switch_stand_down = true;
 }
 
-// An engagement ends only once the switch sequence is idle and the weapon in hand can actually fire. A weapon that is
-// reloading, or still dry, keeps the per-engagement count and the stand-down in place.
+// Local flags end when the switch sequence is idle and the weapon in hand can actually fire. The shared change cap
+// ends itself once no known weapon is dry and the active weapon is loaded; it logs that transition exactly once.
 void walk_bot_t::reset_auto_switch_engagement(const clock::time_point now)
 {
+    (void)now;
     if (m_auto_switch_phase != auto_switch_phase::idle || auto_bonus().auto_switch_active())
         return;
     const auto weapon = game::local_player().weapon();
     const auto type = game::local_player().weapon_type();
     if (!weapon || !game::rules::is_firearm(type) || clip_of(weapon) <= 0 || reloading_of(weapon))
         return;
-    if (m_auto_switch_engagement_switches == 0 && !m_auto_switch_stand_down && !m_auto_switch_both_dry_logged &&
-        m_auto_switch_nudged == 0)
+    if (!m_auto_switch_stand_down && !m_auto_switch_both_dry_logged && m_auto_switch_nudged == 0)
         return;
-    m_auto_switch_engagement_switches = 0;
     m_auto_switch_stand_down = false;
     m_auto_switch_both_dry_logged = false;
     m_auto_switch_nudged = 0;
-    log_auto_switch("engagement_end", weapon, type, clip_of(weapon), "loaded and idle",
-                    std::format("counters reset; {} switches in the rolling 5 s", m_auto_switch_history.size()));
 }
 
 // A recent fight or a target that flickers in and out keeps the timed switch-back on hold. The return is only a
@@ -298,17 +241,21 @@ bool walk_bot_t::auto_switch_engaged(const clock::time_point now) const
 }
 
 // Releases everything the switch may still own. `reset_latches` is only for a new map, life or session; an ordinary
-// finish keeps the dry latches and the rolling switch history. The next-attempt time is kept on an ordinary finish so a
-// slot tap that did not take cannot be repeated on the very next movement tick.
-void walk_bot_t::release_auto_weapon_switch(const bool reset_latches)
+// finish keeps the shared dry latches and change history. `hold_owner` keeps the auto_switch owner through a short
+// grace period after the sequence, so Auto Bonus cannot claim the slot in the gap. The next-attempt time is kept on an
+// ordinary finish so a slot tap that did not take cannot be repeated on the very next movement tick.
+void walk_bot_t::release_auto_weapon_switch(const bool reset_latches, const bool hold_owner)
 {
-    if (m_auto_switch_phase != auto_switch_phase::idle || auto_bonus().auto_switch_active())
+    const auto was_active = m_auto_switch_phase != auto_switch_phase::idle || auto_bonus().auto_switch_active();
+    if (was_active)
     {
         release_tapped_key(true);
         features::aimbot::g_weapon_switch_hold_aim.store(false, std::memory_order_release);
         features::aimbot::g_weapon_switch_release_request.store(false, std::memory_order_release);
         features::aimbot::g_weapon_switch_release_ack.store(false, std::memory_order_release);
-        auto_bonus().set_auto_switch_active(false);
+        if (!hold_owner || reset_latches)
+            auto_bonus().set_auto_switch_active(false);
+        auto_bonus().note_auto_switch_activity(std::chrono::steady_clock::now());
     }
     m_auto_switch_phase = auto_switch_phase::idle;
     m_auto_switch_source = 0;
@@ -322,16 +269,19 @@ void walk_bot_t::release_auto_weapon_switch(const bool reset_latches)
     m_auto_switch_verify_at = {};
     m_auto_switch_return_at = {};
     m_auto_switch_attempts = 0;
+    m_auto_switch_owner_grace_until = {};
     if (!reset_latches)
+    {
+        if (hold_owner && was_active)
+            m_auto_switch_owner_grace_until = std::chrono::steady_clock::now() + k_owner_grace;
         return;
+    }
 
-    m_auto_switch_dry.clear();
-    m_auto_switch_history.clear();
-    m_auto_switch_engagement_switches = 0;
     m_auto_switch_nudged = 0;
     m_auto_switch_stand_down = false;
     m_auto_switch_both_dry_logged = false;
     m_auto_switch_next_attempt = {};
+    auto_bonus().reset_weapon_automation();
 }
 
 void walk_bot_t::service_auto_weapon_switch(const player_state& player, const clock::time_point now)
@@ -345,22 +295,33 @@ void walk_bot_t::service_auto_weapon_switch(const player_state& player, const cl
     if (!cfg.enabled)
     {
         if (m_auto_switch_phase != auto_switch_phase::idle || auto_bonus().auto_switch_active())
-            release_auto_weapon_switch(false);
+            release_auto_weapon_switch(false, false);
         return;
     }
 
-    while (!m_auto_switch_history.empty() && now - m_auto_switch_history.front() >= k_switch_window)
-        m_auto_switch_history.pop_front();
     refresh_auto_switch_latches();
-    reset_auto_switch_engagement(now);
 
     const auto current_weapon = game::local_player().weapon();
     const auto current_type = game::local_player().weapon_type();
+    const auto current_clip = clip_of(current_weapon);
+    const auto current_reloading = reloading_of(current_weapon);
+    if (current_weapon && game::rules::is_firearm(current_type) && current_clip <= 0)
+        latch_auto_switch_dry(current_weapon, current_type, current_clip, "active weapon dry", current_clip,
+                              current_reloading);
+    (void)auto_bonus().observe_weapon(current_weapon, now);
+    reset_auto_switch_engagement(now);
 
-    // An idle phase must not retain the auto-switch owner; releasing it here also clears a stale hold after a reset
-    // path changed ownership without going through this feature.
+    if (m_auto_switch_phase != auto_switch_phase::idle || auto_bonus().auto_switch_active())
+        auto_bonus().note_auto_switch_activity(now);
+
+    // An idle phase may keep the owner through its short grace. After that, release it with the normal Auto Bonus
+    // hold-off; an idle owner is never allowed to linger.
     if (m_auto_switch_phase == auto_switch_phase::idle && auto_bonus().auto_switch_active())
-        release_auto_weapon_switch(false);
+    {
+        if (now < m_auto_switch_owner_grace_until)
+            return;
+        release_auto_weapon_switch(false, false);
+    }
 
     // The one-shot reload nudge runs without claiming the slot; everything else in the phase machine must still own it.
     if (m_auto_switch_phase != auto_switch_phase::idle && m_auto_switch_phase != auto_switch_phase::reload_verify &&
@@ -368,7 +329,7 @@ void walk_bot_t::service_auto_weapon_switch(const player_state& player, const cl
     {
         // Something else released the owner (a reset path, or a new session). Do not keep tapping into a slot the
         // feature no longer owns.
-        release_auto_weapon_switch(false);
+        release_auto_weapon_switch(false, false);
         return;
     }
 
@@ -395,7 +356,7 @@ void walk_bot_t::service_auto_weapon_switch(const player_state& player, const cl
                             clip_of(m_auto_switch_source), weapon_text(m_auto_switch_target,
                                                                       m_auto_switch_target_slot, "target"),
                             "aborted: no combat ack", clip_of(m_auto_switch_target), reloading_of(m_auto_switch_target));
-            release_auto_weapon_switch(false);
+            release_auto_weapon_switch(false, true);
             return;
         }
         case auto_switch_phase::waiting:
@@ -406,7 +367,7 @@ void walk_bot_t::service_auto_weapon_switch(const player_state& player, const cl
             {
                 log_auto_switch("switch", m_auto_switch_source, m_auto_switch_source_type,
                                 clip_of(m_auto_switch_source), "none", "aborted: target slot unbound");
-                release_auto_weapon_switch(false);
+                release_auto_weapon_switch(false, true);
                 return;
             }
 
@@ -419,7 +380,7 @@ void walk_bot_t::service_auto_weapon_switch(const player_state& player, const cl
                                 weapon_text(m_auto_switch_target, m_auto_switch_target_slot, "target"),
                                 "aborted: source has ammo again", clip_of(m_auto_switch_target),
                                 reloading_of(m_auto_switch_target));
-                release_auto_weapon_switch(false);
+                release_auto_weapon_switch(false, true);
                 return;
             }
             const auto target_clip = clip_of(m_auto_switch_target);
@@ -433,7 +394,17 @@ void walk_bot_t::service_auto_weapon_switch(const player_state& player, const cl
                 log_auto_switch("no_candidate", m_auto_switch_source, m_auto_switch_source_type, clip_of(m_auto_switch_source),
                                 weapon_text(m_auto_switch_target, m_auto_switch_target_slot, "target"),
                                 "aborted: candidate cannot fire now", target_clip, target_reloading);
-                release_auto_weapon_switch(false);
+                release_auto_weapon_switch(false, true);
+                return;
+            }
+
+            if (auto_bonus().weapon_change_stand_down(now))
+            {
+                m_auto_switch_stand_down = true;
+                log_auto_switch("keep", m_auto_switch_source, m_auto_switch_source_type, source_clip,
+                                weapon_text(m_auto_switch_target, m_auto_switch_target_slot, "target"),
+                                "aborted before tap: shared change cap", target_clip, target_reloading);
+                release_auto_weapon_switch(false, true);
                 return;
             }
 
@@ -469,14 +440,14 @@ void walk_bot_t::service_auto_weapon_switch(const player_state& player, const cl
                     {
                         log_auto_switch("keep", active, type, active_clip, "switch cap",
                                         "standing down on the loaded candidate", active_clip, active_reloading);
-                        release_auto_weapon_switch(false);
+                        release_auto_weapon_switch(false, true);
                         return;
                     }
                     if (std::clamp(cfg.switch_back_ms, 0, 3000) <= 0)
                     {
                         log_auto_switch("keep", active, type, active_clip, "switch-back disabled",
                                         "owner released", active_clip, active_reloading);
-                        release_auto_weapon_switch(false);
+                        release_auto_weapon_switch(false, true);
                         return;
                     }
                     m_auto_switch_phase = auto_switch_phase::engaged;
@@ -507,7 +478,7 @@ void walk_bot_t::service_auto_weapon_switch(const player_state& player, const cl
                                         "both dry, standing down", active_clip, active_reloading);
                     }
                 }
-                release_auto_weapon_switch(false);
+                release_auto_weapon_switch(false, true);
                 return;
             }
             if (now < m_auto_switch_verify_at)
@@ -525,7 +496,17 @@ void walk_bot_t::service_auto_weapon_switch(const player_state& player, const cl
                                     clip_of(m_auto_switch_source),
                                     weapon_text(m_auto_switch_target, m_auto_switch_target_slot, "target"),
                                     "aborted before retry: candidate cannot fire", target_clip, target_reloading);
-                    release_auto_weapon_switch(false);
+                    release_auto_weapon_switch(false, true);
+                    return;
+                }
+                if (auto_bonus().weapon_change_stand_down(now))
+                {
+                    m_auto_switch_stand_down = true;
+                    log_auto_switch("keep", m_auto_switch_source, m_auto_switch_source_type,
+                                    clip_of(m_auto_switch_source),
+                                    weapon_text(m_auto_switch_target, m_auto_switch_target_slot, "target"),
+                                    "aborted before retry: shared change cap", target_clip, target_reloading);
+                    release_auto_weapon_switch(false, true);
                     return;
                 }
                 tap_key(m_auto_switch_target_slot);
@@ -544,7 +525,7 @@ void walk_bot_t::service_auto_weapon_switch(const player_state& player, const cl
                             "aborted: active weapon did not change", clip_of(m_auto_switch_target),
                             reloading_of(m_auto_switch_target));
             m_auto_switch_stand_down = true;
-            release_auto_weapon_switch(false);
+            release_auto_weapon_switch(false, true);
             return;
         }
         case auto_switch_phase::engaged:
@@ -557,7 +538,8 @@ void walk_bot_t::service_auto_weapon_switch(const player_state& player, const cl
             {
                 log_auto_switch("lost", active, type, active_clip, "engaged", "released: no firearm in hand",
                                 active_clip, active_reloading);
-                release_auto_weapon_switch(false);
+                // The player (or the knife draw) took the slot; do not hold ownership against that input.
+                release_auto_weapon_switch(false, false);
                 return;
             }
             if (active != m_auto_switch_target)
@@ -565,7 +547,7 @@ void walk_bot_t::service_auto_weapon_switch(const player_state& player, const cl
                 log_auto_switch("lost", active, type, active_clip,
                                 weapon_text(m_auto_switch_target, m_auto_switch_target_slot, "target"),
                                 "released: the player changed weapon", active_clip, active_reloading);
-                release_auto_weapon_switch(false);
+                release_auto_weapon_switch(false, false);
                 return;
             }
             if (active_clip <= 0)
@@ -580,7 +562,7 @@ void walk_bot_t::service_auto_weapon_switch(const player_state& player, const cl
                     log_auto_switch("both_dry", active, type, active_clip, "source and target",
                                     "both dry, standing down", active_clip, active_reloading);
                 }
-                release_auto_weapon_switch(false);
+                release_auto_weapon_switch(false, true);
                 return;
             }
             if (now < m_auto_switch_return_at)
@@ -589,7 +571,7 @@ void walk_bot_t::service_auto_weapon_switch(const player_state& player, const cl
             {
                 log_auto_switch("return", active, type, active_clip, "source slot unbound", "owner released",
                                 active_clip, active_reloading);
-                release_auto_weapon_switch(false);
+                release_auto_weapon_switch(false, true);
                 return;
             }
 
@@ -606,7 +588,7 @@ void walk_bot_t::service_auto_weapon_switch(const player_state& player, const cl
                 log_auto_switch("return_blocked", active, type, active_clip,
                                 weapon_text(m_auto_switch_source, m_auto_switch_source_slot, "source"),
                                 "staying on the loaded candidate", source_clip, source_reloading);
-                release_auto_weapon_switch(false);
+                release_auto_weapon_switch(false, true);
                 return;
             }
 
@@ -622,17 +604,13 @@ void walk_bot_t::service_auto_weapon_switch(const player_state& player, const cl
                 m_auto_switch_return_at = now + k_return_retry;
                 return;
             }
-            if (m_auto_switch_stand_down || m_auto_switch_engagement_switches >= k_max_engagement_switches ||
-                m_auto_switch_history.size() >= static_cast<std::size_t>(k_max_window_switches))
+            if (m_auto_switch_stand_down || auto_bonus().weapon_change_stand_down(now))
             {
-                if (!m_auto_switch_stand_down)
-                {
-                    m_auto_switch_stand_down = true;
-                    log_auto_switch("limit_reached", active, type, active_clip,
-                                    weapon_text(m_auto_switch_source, m_auto_switch_source_slot, "source"),
-                                    "switch-back skipped at the cap", source_clip, source_reloading);
-                }
-                release_auto_weapon_switch(false);
+                m_auto_switch_stand_down = true;
+                log_auto_switch("keep", active, type, active_clip,
+                                weapon_text(m_auto_switch_source, m_auto_switch_source_slot, "source"),
+                                "switch-back skipped at the cap", source_clip, source_reloading);
+                release_auto_weapon_switch(false, true);
                 return;
             }
 
@@ -657,7 +635,7 @@ void walk_bot_t::service_auto_weapon_switch(const player_state& player, const cl
                                 weapon_text(m_auto_switch_source, m_auto_switch_source_slot, "source"),
                                 "aborted: no combat ack", clip_of(m_auto_switch_source),
                                 reloading_of(m_auto_switch_source));
-                release_auto_weapon_switch(false);
+                release_auto_weapon_switch(false, true);
                 return;
             }
             if (auto_switch_engaged(now))
@@ -667,7 +645,9 @@ void walk_bot_t::service_auto_weapon_switch(const player_state& player, const cl
                                 weapon_text(m_auto_switch_source, m_auto_switch_source_slot, "source"),
                                 "aborted: engagement started", clip_of(m_auto_switch_source),
                                 reloading_of(m_auto_switch_source));
-                release_auto_weapon_switch(false);
+                // A fight or a knife draw must be able to take the slot back immediately; the Auto Bonus hold-off still
+                // runs after this release, so no pickup can follow the hand-back.
+                release_auto_weapon_switch(false, false);
                 return;
             }
             const auto source_clip = clip_of(m_auto_switch_source);
@@ -681,7 +661,17 @@ void walk_bot_t::service_auto_weapon_switch(const player_state& player, const cl
                                 clip_of(game::local_player().weapon()),
                                 weapon_text(m_auto_switch_source, m_auto_switch_source_slot, "source"),
                                 "aborted: source cannot fire now", source_clip, source_reloading);
-                release_auto_weapon_switch(false);
+                release_auto_weapon_switch(false, true);
+                return;
+            }
+            if (auto_bonus().weapon_change_stand_down(now))
+            {
+                m_auto_switch_stand_down = true;
+                log_auto_switch("keep", game::local_player().weapon(), game::local_player().weapon_type(),
+                                clip_of(game::local_player().weapon()),
+                                weapon_text(m_auto_switch_source, m_auto_switch_source_slot, "source"),
+                                "aborted before switch-back: shared change cap", source_clip, source_reloading);
+                release_auto_weapon_switch(false, true);
                 return;
             }
             tap_key(m_auto_switch_source_slot);
@@ -717,7 +707,7 @@ void walk_bot_t::service_auto_weapon_switch(const player_state& player, const cl
                 // let this weapon reload; the latch on it clears only when the fresh read sees ammo again.
                 if (active_clip <= 0 || active_reloading)
                     m_auto_switch_stand_down = true;
-                release_auto_weapon_switch(false);
+                release_auto_weapon_switch(false, true);
                 return;
             }
             if (now < m_auto_switch_verify_at)
@@ -726,7 +716,7 @@ void walk_bot_t::service_auto_weapon_switch(const player_state& player, const cl
                             weapon_text(m_auto_switch_source, m_auto_switch_source_slot, "source"),
                             "aborted: source did not come back", clip_of(m_auto_switch_source),
                             reloading_of(m_auto_switch_source));
-            release_auto_weapon_switch(false);
+            release_auto_weapon_switch(false, true);
             return;
         }
         case auto_switch_phase::reload_verify:
@@ -739,21 +729,21 @@ void walk_bot_t::service_auto_weapon_switch(const player_state& player, const cl
             {
                 log_auto_switch("reload", active, type, active_clip, "weapon changed", "stopped", active_clip,
                                 active_reloading);
-                release_auto_weapon_switch(false);
+                release_auto_weapon_switch(false, true);
                 return;
             }
             if (active_clip > 0 || active_reloading)
             {
                 log_auto_switch("reload", active, type, active_clip, "one nudge", "reload observed", active_clip,
                                 active_reloading);
-                release_auto_weapon_switch(false);
+                release_auto_weapon_switch(false, true);
                 return;
             }
             if (now < m_auto_switch_verify_at)
                 return;
             log_auto_switch("reload", active, type, active_clip, "one nudge", "no reload observed; stopped",
                             active_clip, active_reloading);
-            release_auto_weapon_switch(false);
+            release_auto_weapon_switch(false, true);
             return;
         }
         case auto_switch_phase::idle:
@@ -763,7 +753,6 @@ void walk_bot_t::service_auto_weapon_switch(const player_state& player, const cl
 
     if (!current_weapon || !game::rules::is_firearm(current_type))
         return;
-    const auto current_clip = clip_of(current_weapon);
     if (current_clip > 0)
         return;
     if (now < m_auto_switch_next_attempt)
@@ -838,7 +827,7 @@ void walk_bot_t::service_auto_weapon_switch(const player_state& player, const cl
         return;
     }
 
-    const auto target = scan_slot(weapons, target_is_primary, m_auto_switch_dry);
+    const auto target = scan_slot(weapons, target_is_primary);
     if (!target.carried)
     {
         latch_auto_switch_dry(current_weapon, current_type, current_clip, "target slot empty");
@@ -878,41 +867,28 @@ void walk_bot_t::service_auto_weapon_switch(const player_state& player, const cl
     }
 
     const auto candidate = target.sample;
-    // A limit or a failed/candidate-empty switch stands the feature down until the weapon in hand can fire again. The
-    // no-candidate paths above may still send the single reload nudge; nothing here may send another slot key.
-    if (m_auto_switch_stand_down)
+    // A shared cap or a failed/candidate-empty switch stands the feature down until the weapon in hand can fire again.
+    // The no-candidate paths above may still send the single reload nudge; nothing here may send another slot key.
+    if (m_auto_switch_stand_down || auto_bonus().weapon_change_stand_down(now))
     {
-        // The feature is standing down, not the weapon: the single nudge may still start this weapon's reload. Throttle
-        // the inventory scan as well; the no-candidate paths below set their own retry.
+        m_auto_switch_stand_down = true;
         m_auto_switch_next_attempt = now + k_no_candidate_retry;
         (void)nudge_current();
         return;
     }
-    if (m_auto_switch_engagement_switches >= k_max_engagement_switches ||
-        m_auto_switch_history.size() >= static_cast<std::size_t>(k_max_window_switches))
-    {
-        if (!m_auto_switch_stand_down)
-        {
-            m_auto_switch_stand_down = true;
-            log_auto_switch("limit_reached", current_weapon, current_type, current_clip,
-                            weapon_text(candidate.weapon, target_slot, "target"),
-                            std::format("standing down: {}/{} this engagement, {}/{} in 5 s",
-                                        m_auto_switch_engagement_switches, k_max_engagement_switches,
-                                        m_auto_switch_history.size(), k_max_window_switches),
-                            candidate.clip, candidate.reloading);
-        }
-        return;
-    }
 
-    auto_bonus().set_auto_switch_active(true);
-    if (!auto_bonus().auto_switch_active())
+    if (!auto_bonus().claim_auto_switch_slot())
     {
         log_auto_switch("owner_busy", current_weapon, current_type, current_clip,
-                        weapon_text(candidate.weapon, target_slot, "target"), "deferred: slot owned", candidate.clip,
-                        candidate.reloading);
+                        weapon_text(candidate.weapon, target_slot, "target"),
+                        auto_bonus().pickup_tap_pending() ? "deferred: pickup tap in flight" : "deferred: slot owned",
+                        candidate.clip, candidate.reloading);
         m_auto_switch_next_attempt = now + k_switch_interval;
         return;
     }
+    // The hold-off starts at takeover, not on the next tick: Auto Bonus must not send a pickup key into the release
+    // window even if the phase machine has not logged its first switch yet.
+    auto_bonus().note_auto_switch_activity(now);
 
     m_auto_switch_phase = auto_switch_phase::releasing;
     m_auto_switch_source = current_weapon;

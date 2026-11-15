@@ -6,8 +6,10 @@
 #include <atomic>
 #include <chrono>
 #include <cstdint>
+#include <deque>
 #include <iosfwd>
 #include <memory>
+#include <mutex>
 #include <string>
 #include <string_view>
 #include <unordered_map>
@@ -17,6 +19,12 @@
 
 namespace features::misc
 {
+
+// Shared Auto Weapon Switch / Auto Bonus diagnostic line. Both features write to the same opt-in log so a skipped
+// pickup and the switch that caused it can be read in order.
+void log_weapon_automation(const char* reason, std::uintptr_t weapon, std::uint32_t type, int clip, bool reloading,
+                           const std::string& candidate, const std::string& result, int candidate_clip,
+                           bool candidate_reloading, int engagement_changes, int window_changes);
 
 class nade_helper_t
 {
@@ -270,6 +278,34 @@ public:
     // health shot waits a held tap out before it starts drawing, so two weapon-switch keys are never in flight.
     [[nodiscard]] bool key_pressed() const noexcept { return m_key.pressed; }
 
+    // Shared dry state. A weapon stays latched until a fresh clip read is above zero; switching, picking it up again
+    // or changing its handle does not clear it. Both Auto Weapon Switch and Auto Bonus read the same map.
+    void latch_weapon_dry(std::uintptr_t weapon, std::uint32_t type, int clip, const char* reason,
+                          int candidate_clip = -1, bool candidate_reloading = false);
+    void refresh_weapon_latches();
+    [[nodiscard]] bool weapon_dry(std::uintptr_t weapon) const;
+    [[nodiscard]] bool has_dry_weapon() const;
+    [[nodiscard]] std::string weapon_latch_summary() const;
+    // Serializes a pickup tap against an Auto Weapon Switch takeover. The pickup reservation and the auto-switch claim
+    // both take m_automation_mutex, so one feature cannot send a second slot key into the other's window.
+    [[nodiscard]] bool begin_bonus_tap();
+    void end_bonus_tap();
+    [[nodiscard]] bool claim_auto_switch_slot();
+    [[nodiscard]] bool pickup_tap_pending() const;
+    // Clears the dry map, change history and Auto Bonus hold-off on a new map or life.
+    void reset_weapon_automation();
+
+    // Every active-weapon change observed while a weapon is dry, an automation owns the slot, or the auto-switch
+    // hold-off is running counts against the shared cap. Both features call this from their own worker.
+    bool observe_weapon(std::uintptr_t weapon, std::chrono::steady_clock::time_point now);
+    [[nodiscard]] bool weapon_change_stand_down(std::chrono::steady_clock::time_point now);
+    [[nodiscard]] int weapon_changes_this_engagement(std::chrono::steady_clock::time_point now);
+    [[nodiscard]] int weapon_changes_in_window(std::chrono::steady_clock::time_point now);
+    // Auto Weapon Switch calls this while it owns or is resolving the slot. Auto Bonus stays off the pickup key until
+    // this deadline plus the dry latch checks below.
+    void note_auto_switch_activity(std::chrono::steady_clock::time_point now);
+    [[nodiscard]] std::chrono::steady_clock::time_point auto_switch_hold_until() const;
+
 private:
     using owned_control = input_lifecycle::owned_control;
 
@@ -280,9 +316,18 @@ private:
     void release(weapon_owner expected) noexcept;
 
     // Records the active weapon a pickup tap produced. The observation runs on the combat worker, the same thread as
-    // the tap, so no lock is needed. The remembered weapon is forgotten on reset.
+    // the tap, so no lock is needed. The remembered weapon survives a menu pause or toggle and is forgotten only on a
+    // map/life reset.
     void observe_bonus_weapon(std::chrono::steady_clock::time_point now);
-    [[nodiscard]] bool bonus_weapon_needs_time() const;
+    [[nodiscard]] bool bonus_weapon_needs_time();
+    void log_bonus_decision(const char* reason, const char* result, bool force = false);
+    void refresh_weapon_engagement(std::chrono::steady_clock::time_point now);
+
+    struct dry_entry
+    {
+        std::uint32_t type{};
+        int clip{};
+    };
 
     owned_control m_key{};
     std::chrono::steady_clock::time_point m_next_tap{};
@@ -292,7 +337,20 @@ private:
     bool m_auto_health_shot_was_active{};
     std::uintptr_t m_tap_weapon{};
     std::chrono::steady_clock::time_point m_tap_watch_until{};
-    std::uintptr_t m_bonus_weapon{};
+    std::atomic<std::uintptr_t> m_bonus_weapon{};
+    std::chrono::steady_clock::time_point m_next_log{};
+    std::string_view m_last_log_reason{};
+    bool m_was_alive{};
+
+    mutable std::mutex m_automation_mutex{};
+    std::unordered_map<std::uintptr_t, dry_entry> m_dry{};
+    std::deque<std::chrono::steady_clock::time_point> m_change_history{};
+    std::uintptr_t m_last_active{};
+    int m_engagement_changes{};
+    bool m_change_stand_down{};
+    bool m_pickup_pending{};
+    std::chrono::steady_clock::time_point m_tap_activity_until{};
+    std::chrono::steady_clock::time_point m_auto_switch_hold_until{};
 };
 
 // Auto Health Shot: the Auto Bonus Weapon pattern (a key held long enough for one game input sample, then released)
