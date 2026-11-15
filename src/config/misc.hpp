@@ -284,6 +284,18 @@ struct general_profile
         // Every preset starts empty: the user adds the items a mode needs ("Add Item").
         std::array<buy_preset, buy_mode_count> buy_presets{};
         int buy_edit{}; // the preset the menu shows
+        // Auto Weapon Switch: when the firearm in hand runs dry, switch to the other firearm slot for a moment and
+        // switch back afterwards. The slot keys are keyboard virtual keys sent directly to the game.
+        struct auto_weapon_switch_settings
+        {
+            bool enabled{false};
+            int switch_delay_ms{40};
+            int switch_back_ms{800}; // 0 never switches back
+            int primary_slot{'1'};
+            int pistol_slot{'2'};
+            bool debug_log{false};
+        };
+        auto_weapon_switch_settings auto_weapon_switch{};
         bool auto_reload{true};
         // Auto health shot: a standalone automation (it does not need the walk bot). Below `health_shot_health`, once
         // `health_shot_damage_ms` have passed since the last hit, while Auto Knife is idle and while the bot is not

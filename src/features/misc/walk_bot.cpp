@@ -164,6 +164,19 @@ void walk_bot_t::servo_scope(const clock::time_point now)
         return;
     const auto& cfg = snapshot->general.m_walk_bot;
 
+    // Auto Weapon Switch owns the slot from its release handshake until it switches back. Do not tap the scope, and do
+    // not run the knife holster path: the switch resets the scope state without sending slot 3.
+    if (auto_bonus().auto_switch_active())
+    {
+        if (m_scope.pressed)
+            (void)set_scope_control(false);
+        m_scope_state = scope_state::idle;
+        m_scope_target = 0;
+        m_scope_next = {};
+        m_scope_attempts = 0;
+        return;
+    }
+
     // The knife owns the hands while it is out. Release a scope tap that was in flight and leave the scope state
     // idle; the knife slot itself drops a scope anyway.
     if (m_knife_target)
@@ -642,6 +655,7 @@ void walk_bot_t::tick()
     release_tapped_key(!cfg.enabled);
     if (!cfg.enabled)
     {
+        release_auto_weapon_switch(true);
         // A buy sequence belongs to the walk bot session. Drop it on disable so re-enabling cannot type stale keys.
         m_buy_queue.clear();
         m_buy_waiting_menu = false;
@@ -691,6 +705,7 @@ void walk_bot_t::tick()
     player_state player{};
     if (!read_player(player))
     {
+        release_auto_weapon_switch(true);
         auto_bonus().set_auto_knife_active(false);
         // A missing pawn (rather than a dead one, which stays readable while spectating) is a map load or a
         // reconnect. The controller can stay valid across the reload, so the controller alone is not enough: the
@@ -785,6 +800,7 @@ void walk_bot_t::tick()
     record(player, now);
     if (m_recording_active)
     {
+        release_auto_weapon_switch(true);
         auto_bonus().set_auto_knife_active(false);
         m_knife_restore = false;
         m_knife_target = 0;
@@ -845,6 +861,7 @@ void walk_bot_t::tick()
     const auto scope_wait = cfg.auto_scope && sniper && !weapon.is_scoped && !scope_confirmed;
     if (!focused || ui_open || movement_taken || now < m_player_until)
     {
+        release_auto_weapon_switch(true);
         auto_bonus().set_auto_knife_active(false);
         note_idle(!focused ? 2u : ui_open ? 6u : movement_taken ? 4u : 7u);
         // Stop the held spray when the player takes the movement back, or when a grenade throw, the buy menu or
@@ -863,6 +880,7 @@ void walk_bot_t::tick()
     }
     if (!graph)
     {
+        release_auto_weapon_switch(true);
         auto_bonus().set_auto_knife_active(false);
         features::aimbot::g_walk_autofire.store(false, std::memory_order_release);
         features::aimbot::publish_walk_autofire_parts(0);
@@ -872,12 +890,28 @@ void walk_bot_t::tick()
     }
     gate_movement(true);
 
+    // Resolve a dry firearm before the fight plan draws any conclusions from the slot. The handshake removes the
+    // aimbot's spray, trigger, seed press and scheduled shot on the combat worker; the switch then owns the slot while
+    // the candidate and the switch-back are verified.
+    service_auto_weapon_switch(player, now);
+    const auto auto_switch_owns = auto_bonus().auto_switch_active();
+    const auto auto_switch_handshake =
+        features::aimbot::g_weapon_switch_hold_aim.load(std::memory_order_acquire);
+
     // Fighting comes first: an enemy in sight stops the walk for the aim, a spawn-protected one is walked round
     // sideways, a hit from someone unseen turns the view while the walk goes on.
     const auto fight = combat(player, now);
     const auto knife_engagement =
-        (fight.what == combat_plan::kind::knife && fight.enemy != 0) ||
-        (fight.what == combat_plan::kind::rear && fight.weapon == 1 && fight.enemy != 0);
+        ((fight.what == combat_plan::kind::knife && fight.enemy != 0) ||
+         (fight.what == combat_plan::kind::rear && fight.weapon == 1 && fight.enemy != 0)) &&
+        !auto_switch_owns;
+    if (auto_switch_owns && (fight.what == combat_plan::kind::knife || fight.what == combat_plan::kind::rear))
+    {
+        // The dry gun won the slot this tick. Drop the knife plan's latch so the next tick starts clean after the
+        // switch instead of resuming a chase that never drew the knife.
+        m_knife_target = 0;
+        m_knife_locked = false;
+    }
     auto_bonus().set_auto_knife_active(knife_engagement);
     // Publish the chosen part before the permission: the trigger runs on another worker, and must not see autofire
     // enabled with the previous fight's part for a pass. This is the part that owns the selected point, including a
@@ -886,11 +920,13 @@ void walk_bot_t::tick()
     features::aimbot::publish_walk_autofire_parts(engaging ? fight.view.part : 0);
     // Publish the permission only once the plan is known. The trigger worker runs at 250 Hz and could otherwise see
     // a true published for the current tick before handle_knife() suspends the gun autofire for a knife engagement.
-    features::aimbot::g_walk_autofire.store(cfg.autofire && !scope_wait && !knife_engagement,
+    // A verified switch leaves the alternative firearm usable: only the handshake itself holds the aim. The slot-owner
+    // flag still keeps the knife, scope, health shot and pickup tap out until the switch-back has finished.
+    features::aimbot::g_walk_autofire.store(cfg.autofire && !scope_wait && !knife_engagement && !auto_switch_handshake,
                                             std::memory_order_release);
     // The knife leaves a different slot selected. Put the gun back as soon as the knife engagement is over, before
     // the next fight (and the auto scope) starts. The rear handler draws its own primary when that is its weapon.
-    if (fight.what != combat_plan::kind::knife && fight.what != combat_plan::kind::rear)
+    if (!auto_switch_owns && fight.what != combat_plan::kind::knife && fight.what != combat_plan::kind::rear)
         restore_knife_weapon(now);
 
     if (fight.what != combat_plan::kind::knife && fight.what != combat_plan::kind::rear)
@@ -899,14 +935,14 @@ void walk_bot_t::tick()
         m_knife_locked = false;
         (void)set_secondary_control(m_knife_attack, false);
     }
-    m_scope_wanted = engaging;
+    m_scope_wanted = engaging && !auto_switch_owns;
     servo_scope(now);
-    if (fight.what == combat_plan::kind::knife)
+    if (fight.what == combat_plan::kind::knife && !auto_switch_owns)
     {
         handle_knife(player, fight, now);
         return;
     }
-    if (fight.what == combat_plan::kind::rear)
+    if (fight.what == combat_plan::kind::rear && !auto_switch_owns)
     {
         handle_rear(player, fight, now);
         return;

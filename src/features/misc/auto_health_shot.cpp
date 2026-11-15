@@ -309,6 +309,22 @@ void auto_health_shot_t::tick()
         return;
     }
 
+    // Auto Weapon Switch is resolving a dry firearm. Its slot key and the syringe draw would fight for the same slot,
+    // so stand down until the switch sequence has released its owner.
+    if (auto_bonus().auto_switch_active())
+    {
+        if (release_all())
+        {
+            m_phase = phase::idle;
+            m_attempts = 0;
+            m_inject_at = {};
+            m_injection_until = {};
+        }
+        sync_auto_bonus_priority();
+        publish_debug(block::auto_switch);
+        return;
+    }
+
     const auto threshold = std::clamp(cfg.health_shot_health, 1, 99);
     const auto damage_window = std::chrono::milliseconds(std::clamp(cfg.health_shot_damage_ms, 0, 15000));
     const auto near_limit = static_cast<float>(std::clamp(cfg.health_shot_near_distance, 0, 2000));
@@ -561,6 +577,9 @@ void auto_health_shot_t::on_render(render::draw::draw_list& draw_list)
             break;
         case block::auto_knife:
             status = "auto knife engaged";
+            break;
+        case block::auto_switch:
+            status = "auto weapon switch engaged";
             break;
         case block::recent_damage:
             status = std::format("recent damage, wait {:.1f}s", static_cast<float>(next_ms) / 1000.0f);

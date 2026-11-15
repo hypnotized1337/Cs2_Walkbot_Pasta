@@ -1,5 +1,6 @@
 #include <stdafx.hpp>
 #include <features/misc/walk_bot_detail.hpp>
+#include <features/misc/misc.hpp>
 #include <features/misc/match_flow.hpp>
 #include <features/misc/match_flow_logic.hpp>
 #include <config/misc.hpp>
@@ -212,6 +213,8 @@ void walk_bot_t::auto_buy(const player_state& player, const clock::time_point no
 void walk_bot_t::auto_reload(const player_state& player, const path* route, const clock::time_point now)
 {
     const auto snapshot = config::get_runtime_snapshot();
+    if (auto_bonus().auto_switch_active())
+        return; // Auto Weapon Switch is resolving the dry weapon; its switch-back decides the reload
     if (!snapshot->general.m_walk_bot.auto_reload || now < m_next_reload_check || now < m_reload_cooldown)
         return;
     m_next_reload_check = now + std::chrono::milliseconds(200);

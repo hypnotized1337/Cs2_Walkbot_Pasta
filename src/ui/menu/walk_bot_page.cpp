@@ -117,7 +117,7 @@ void menu_t::draw_walk_bot()
     // These controls used to live on Automations. They stay available only while the Walk Bot itself is enabled; the
     // stored values are left untouched, so turning the Walk Bot back on restores the previous switches.
     card_in_column(
-        "walk_automation", "WALK BOT AUTOMATION", 7, 1,
+        "walk_automation", "WALK BOT AUTOMATION", 8, 1,
         [&]
         {
             const auto automation_locked = !walk.enabled;
@@ -153,6 +153,25 @@ void menu_t::draw_walk_bot()
                                      slider_row("No Enemy Within", walk.health_shot_near_distance, 0, 2000, " u");
                                      keybind_row("Use Bind", walk.health_shot_key, true);
                                      toggle_row("Show Debug", walk.health_shot_debug);
+                                 });
+                toggle_popup_row("Auto Weapon Switch", walk.auto_weapon_switch.enabled, 6,
+                                 [&]
+                                 {
+                                     slider_row("Switch Delay", walk.auto_weapon_switch.switch_delay_ms, 0, 250,
+                                                " ms");
+                                     slider_row("Switch Back", walk.auto_weapon_switch.switch_back_ms, 0, 3000,
+                                                " ms");
+                                     keybind_row("Primary Slot", walk.auto_weapon_switch.primary_slot, true);
+                                     keybind_row("Pistol Slot", walk.auto_weapon_switch.pistol_slot, true);
+                                     toggle_row("Debug Log", walk.auto_weapon_switch.debug_log);
+                                     const auto slot_key = [](const int key)
+                                     { return key > 6 && key < 256; };
+                                     if (!slot_key(walk.auto_weapon_switch.primary_slot) ||
+                                         !slot_key(walk.auto_weapon_switch.pistol_slot) ||
+                                         walk.auto_weapon_switch.primary_slot == walk.auto_weapon_switch.pistol_slot)
+                                         ImGui::TextColored(ImVec4{1.0f, 0.45f, 0.45f, 1.0f}, "%s",
+                                                            render::localization::tr(
+                                                                "Bind both slots to keyboard keys"));
                                  });
                 toggle_row("Auto Reload", walk.auto_reload);
                 toggle_popup_row(

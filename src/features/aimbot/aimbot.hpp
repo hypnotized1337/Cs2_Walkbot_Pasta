@@ -45,6 +45,13 @@ inline std::atomic<int> g_walk_autofire_parts{0};
 // own aim owns the target and the impact point; the spray only mirrors that lock (g_walk_autofire_parts) and never
 // traces for targets itself.
 inline std::atomic<bool> g_walk_autofire_spray{false};
+// Auto Weapon Switch release handshake. The movement worker sets hold_aim, clears ack, then raises request. The combat
+// worker resets the aimbot (spray, trigger, seed press, scheduled shot, RCS, pending mouse and aim tracking), lowers the
+// ack, and keeps the aim tick out while hold_aim is set. The movement worker aborts the switch if the ack does not
+// arrive within its timeout, so a stopped or busy combat worker cannot leave the slot half-owned.
+inline std::atomic<bool> g_weapon_switch_hold_aim{false};
+inline std::atomic<bool> g_weapon_switch_release_request{false};
+inline std::atomic<bool> g_weapon_switch_release_ack{false};
 // When the walk bot last published the part mask and its aim error. The spray must not trust a lock or an error that
 // stopped updating: a stopped movement worker would otherwise leave the attack held on a frozen frame.
 inline std::atomic<std::int64_t> g_walk_autofire_parts_at{0};

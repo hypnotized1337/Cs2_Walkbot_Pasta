@@ -133,6 +133,7 @@ set(vesta_sources
     src/features/misc/walk_bot_view.cpp
     src/features/misc/walk_bot_combat.cpp
     src/features/misc/walk_bot_extras.cpp
+    src/features/misc/walk_bot_switch.cpp
     src/features/misc/walk_bot_render.cpp
     src/features/misc/match_flow.cpp
     src/game/panorama/panorama.cpp

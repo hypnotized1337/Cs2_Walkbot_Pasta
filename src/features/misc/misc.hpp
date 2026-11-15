@@ -254,6 +254,13 @@ public:
     {
         return owner() == weapon_owner::health_shot;
     }
+    // Auto Weapon Switch holds the slot from the release handshake until it has switched back (or until it gives up),
+    // so the pickup tap and the syringe cannot fight it for the slot.
+    void set_auto_switch_active(bool active) noexcept;
+    [[nodiscard]] bool auto_switch_active() const noexcept
+    {
+        return owner() == weapon_owner::auto_switch;
+    }
     // One owner at a time. Readers use this snapshot instead of consulting separate feature flags.
     [[nodiscard]] weapon_owner owner() const noexcept
     {
@@ -272,12 +279,20 @@ private:
     [[nodiscard]] bool claim(weapon_owner next) noexcept;
     void release(weapon_owner expected) noexcept;
 
+    // Records the active weapon a pickup tap produced. The observation runs on the combat worker, the same thread as
+    // the tap, so no lock is needed. The remembered weapon is forgotten on reset.
+    void observe_bonus_weapon(std::chrono::steady_clock::time_point now);
+    [[nodiscard]] bool bonus_weapon_needs_time() const;
+
     owned_control m_key{};
     std::chrono::steady_clock::time_point m_next_tap{};
     std::chrono::steady_clock::time_point m_press_started{};
     std::atomic<weapon_owner> m_owner{weapon_owner::none};
     bool m_auto_knife_was_active{};
     bool m_auto_health_shot_was_active{};
+    std::uintptr_t m_tap_weapon{};
+    std::chrono::steady_clock::time_point m_tap_watch_until{};
+    std::uintptr_t m_bonus_weapon{};
 };
 
 // Auto Health Shot: the Auto Bonus Weapon pattern (a key held long enough for one game input sample, then released)
@@ -309,6 +324,7 @@ private:
         dead,
         health_ok,
         auto_knife,
+        auto_switch,
         recent_damage,
         player_near,
         aiming,

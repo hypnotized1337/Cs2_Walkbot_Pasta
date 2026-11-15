@@ -217,6 +217,11 @@ private:
     // ---- extras (walk_bot_extras.cpp)
     void auto_buy(const player_state& player, clock::time_point now);
     void auto_reload(const player_state& player, const path* route, clock::time_point now);
+    // Auto Weapon Switch: release handshake, slot tap, verification, switch back and the one-shot reload nudge.
+    void service_auto_weapon_switch(const player_state& player, clock::time_point now);
+    void release_auto_weapon_switch(bool forget);
+    void log_auto_switch(const char* reason, std::uintptr_t weapon, std::uint32_t type, int clip,
+                         const std::string& candidate, const std::string& result);
     void record(const player_state& player, clock::time_point now);
     void load_recordings(const std::string& map, int team);
     void note_idle(std::uint32_t reason);
@@ -411,6 +416,33 @@ private:
     float m_spawn_time{};
     clock::time_point m_next_reload_check{};
     clock::time_point m_reload_cooldown{};
+
+    // Auto Weapon Switch. The phase machine owns the weapon slot from the release handshake until the switch back or
+    // the give-up path, and releases it on every exit. `handled` is the dry weapon already resolved, so one dry
+    // magazine cannot start a chain of switches; it clears when that weapon has ammo again.
+    enum class auto_switch_phase : std::uint8_t
+    {
+        idle,
+        releasing,
+        waiting,
+        verifying,
+        engaged,
+        return_release,
+        return_verify,
+        reload_verify,
+    };
+    auto_switch_phase m_auto_switch_phase{auto_switch_phase::idle};
+    std::uintptr_t m_auto_switch_source{};
+    std::uintptr_t m_auto_switch_handled{};
+    std::uint32_t m_auto_switch_source_type{};
+    std::uint16_t m_auto_switch_source_slot{};
+    std::uint16_t m_auto_switch_target_slot{};
+    clock::time_point m_auto_switch_started{};
+    clock::time_point m_auto_switch_action_at{};
+    clock::time_point m_auto_switch_verify_at{};
+    clock::time_point m_auto_switch_return_at{};
+    clock::time_point m_auto_switch_next_attempt{};
+    int m_auto_switch_attempts{};
 
     // Recording.
     walk_logic::recording m_recording{};

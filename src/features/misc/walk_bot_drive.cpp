@@ -721,6 +721,7 @@ void walk_bot_t::stop_walking()
 // no other thread touches the route or input state.
 void walk_bot_t::reset_state()
 {
+    release_auto_weapon_switch(true);
     auto_bonus().set_auto_knife_active(false);
     (void)set_scope_control(false);
     stop_walking();

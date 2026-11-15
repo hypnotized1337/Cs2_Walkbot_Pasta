@@ -1917,6 +1917,30 @@ static void read_buy_presets(const json& j, general_profile::walk_bot& w)
     }
 }
 
+static void to_json(json& j, const general_profile::walk_bot::auto_weapon_switch_settings& a)
+{
+    j = json{{"enabled", a.enabled},
+             {"switch_delay_ms", a.switch_delay_ms},
+             {"switch_back_ms", a.switch_back_ms},
+             {"primary_slot", a.primary_slot},
+             {"pistol_slot", a.pistol_slot},
+             {"debug_log", a.debug_log}};
+}
+
+static void from_json(const json& j, general_profile::walk_bot::auto_weapon_switch_settings& a)
+{
+    read_field(j, "enabled", a.enabled);
+    read_field(j, "switch_delay_ms", a.switch_delay_ms);
+    a.switch_delay_ms = std::clamp(a.switch_delay_ms, 0, 250);
+    read_field(j, "switch_back_ms", a.switch_back_ms);
+    a.switch_back_ms = std::clamp(a.switch_back_ms, 0, 3000);
+    read_field(j, "primary_slot", a.primary_slot);
+    a.primary_slot = std::clamp(a.primary_slot, 0, 255);
+    read_field(j, "pistol_slot", a.pistol_slot);
+    a.pistol_slot = std::clamp(a.pistol_slot, 0, 255);
+    read_field(j, "debug_log", a.debug_log);
+}
+
 static void to_json(json& j, const general_profile::walk_bot& w)
 {
     j = json{{"enabled", w.enabled},
@@ -1954,6 +1978,7 @@ static void to_json(json& j, const general_profile::walk_bot& w)
              {"auto_buy", w.auto_buy},
              {"buy_edit", w.buy_edit},
              {"buy_presets", buy_presets_json(w)},
+             {"auto_weapon_switch", w.auto_weapon_switch},
              {"auto_reload", w.auto_reload},
              {"auto_health_shot", w.auto_health_shot},
              {"health_shot_health", w.health_shot_health},
@@ -2041,6 +2066,7 @@ static void from_json(const json& j, general_profile::walk_bot& w)
     read_field(j, "buy_edit", w.buy_edit);
     w.buy_edit = std::clamp(w.buy_edit, 0, static_cast<int>(general_profile::walk_bot::buy_mode_count) - 1);
     read_buy_presets(j, w);
+    read_field(j, "auto_weapon_switch", w.auto_weapon_switch);
     read_field(j, "auto_reload", w.auto_reload);
     read_field(j, "auto_health_shot", w.auto_health_shot);
     read_field(j, "health_shot_health", w.health_shot_health);

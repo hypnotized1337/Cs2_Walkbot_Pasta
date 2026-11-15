@@ -446,19 +446,40 @@ void combat(control control)
                 VESTA_PERF_SCOPE(auto_crouch_tick);
                 features::misc::auto_crouch().tick();
             }
-            // A trigger already held from the previous tick must still run so it can release. New trigger presses are
-            // ordinary aim ticks and stay behind the crouch gate.
-            if (features::misc::auto_crouch().combat_ready() || features::aimbot::aim().seed_input_pending())
+            // Auto Weapon Switch asks for the hands before it taps a slot key. Service the request here, where the
+            // aimbot's spray, trigger, seed press, scheduled shot, RCS and pending mouse state can all be cleared on
+            // one thread. While the handshake is held, keep the aim tick out entirely; only Auto Bonus runs so it can
+            // release an in-flight pickup tap.
+            const auto weapon_switch_hold =
+                features::aimbot::g_weapon_switch_hold_aim.load(std::memory_order_acquire);
+            if (features::aimbot::g_weapon_switch_release_request.exchange(false, std::memory_order_acq_rel))
             {
-                VESTA_PERF_SCOPE(aim_tick);
-                features::aimbot::aim().tick();
+                features::aimbot::aim().reset();
+                features::misc::auto_crouch().reset();
+                features::misc::auto_health_shot().reset();
+                features::aimbot::g_weapon_switch_release_ack.store(true, std::memory_order_release);
             }
-            // The health shot runs before Auto Bonus so its weapon-slot reservation is visible to the same tick's
-            // pickup tap; otherwise a bonus switch could cancel the syringe draw or the injection.
+            if (!weapon_switch_hold)
             {
-                VESTA_PERF_SCOPE(auto_health_shot_tick);
-                features::misc::auto_health_shot().tick();
+                // A trigger already held from the previous tick must still run so it can release. New trigger presses
+                // are ordinary aim ticks and stay behind the crouch gate.
+                if (features::misc::auto_crouch().combat_ready() || features::aimbot::aim().seed_input_pending())
+                {
+                    VESTA_PERF_SCOPE(aim_tick);
+                    features::aimbot::aim().tick();
+                }
+                // The health shot runs before Auto Bonus so its weapon-slot reservation is visible to the same tick's
+                // pickup tap; otherwise a bonus switch could cancel the syringe draw or the injection.
+                {
+                    VESTA_PERF_SCOPE(auto_health_shot_tick);
+                    features::misc::auto_health_shot().tick();
+                }
+                {
+                    VESTA_PERF_SCOPE(auto_bonus_tick);
+                    features::misc::auto_bonus().tick();
+                }
             }
+            else
             {
                 VESTA_PERF_SCOPE(auto_bonus_tick);
                 features::misc::auto_bonus().tick();

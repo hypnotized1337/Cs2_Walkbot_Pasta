@@ -349,9 +349,11 @@ void aimbot_t::seed_tick(ballistics_t& seed_shared)
 
     // The walk bot's autofire owns the trigger while it is on. A seeded press would fight it for the same button and
     // stay silent unless its activation key was also held, so the seed path stands down for every walk bot autofire,
-    // including sniper rifles. Only the seed's own press is released; the advanced trigger's spray belongs to the
-    // other worker and must keep its button down.
-    if (g_walk_autofire.load(std::memory_order_acquire))
+    // including sniper rifles. Auto Weapon Switch has the same claim during its release handshake: the switch taps a
+    // slot key and must not have a seeded shot in flight. Only the seed's own press is released; the advanced
+    // trigger's spray belongs to the other worker and must keep its button down.
+    if (g_walk_autofire.load(std::memory_order_acquire) ||
+        g_weapon_switch_hold_aim.load(std::memory_order_acquire))
     {
         end_seed_press();
         return;
