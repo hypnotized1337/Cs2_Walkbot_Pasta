@@ -226,25 +226,38 @@ private:
 class auto_bonus_t
 {
 public:
+    enum class weapon_owner : std::uint8_t
+    {
+        none,
+        bonus,
+        knife,
+        health_shot,
+        auto_switch,
+    };
+
     void tick();
     void reset();
-    // Auto Knife has priority over the bonus pickup. While this is raised Auto Bonus sends no keys; clearing it is the
-    // green flag from Auto Knife that lets Auto Bonus resume.
-    void set_auto_knife_active(const bool active) noexcept
-    {
-        m_auto_knife_active.store(active, std::memory_order_release);
-    }
+    // The existing priorities are preserved: Auto Knife outranks Auto Health Shot, which outranks the bonus pickup.
+    // Auto Weapon Switch can only take the slot through its own arbitration checks. While Auto Knife owns the slot,
+    // Auto Bonus sends no keys; clearing the knife owner is the green flag that lets Auto Bonus resume.
+    void set_auto_knife_active(bool active) noexcept;
     // Raised for the whole knife engagement. Other automations that would draw a weapon or click must keep their hands
     // off while it is set.
     [[nodiscard]] bool auto_knife_active() const noexcept
     {
-        return m_auto_knife_active.load(std::memory_order_acquire);
+        return owner() == weapon_owner::knife;
     }
-    // Auto Health Shot claims the weapon slot the same way while it draws, injects or restores, so a bonus pickup tap
-    // cannot switch the weapon out from under the syringe.
-    void set_auto_health_shot_active(const bool active) noexcept
+    // Auto Health Shot claims the weapon slot while it draws, injects or restores, so a bonus pickup tap cannot switch
+    // the weapon out from under the syringe.
+    void set_auto_health_shot_active(bool active) noexcept;
+    [[nodiscard]] bool auto_health_shot_active() const noexcept
     {
-        m_auto_health_shot_active.store(active, std::memory_order_release);
+        return owner() == weapon_owner::health_shot;
+    }
+    // One owner at a time. Readers use this snapshot instead of consulting separate feature flags.
+    [[nodiscard]] weapon_owner owner() const noexcept
+    {
+        return m_owner.load(std::memory_order_acquire);
     }
     // True while the pickup key is held. Only read from the combat worker (the same thread that ticks Auto Bonus): the
     // health shot waits a held tap out before it starts drawing, so two weapon-switch keys are never in flight.
@@ -254,12 +267,15 @@ private:
     using owned_control = input_lifecycle::owned_control;
 
     [[nodiscard]] bool send_key(bool pressed);
+    // Claims are priority-aware: a lower-ranked owner never displaces a higher-ranked one. Auto Weapon Switch is the
+    // highest rank, but it only claims after its own dry-weapon checks.
+    [[nodiscard]] bool claim(weapon_owner next) noexcept;
+    void release(weapon_owner expected) noexcept;
 
     owned_control m_key{};
     std::chrono::steady_clock::time_point m_next_tap{};
     std::chrono::steady_clock::time_point m_press_started{};
-    std::atomic<bool> m_auto_knife_active{};
-    std::atomic<bool> m_auto_health_shot_active{};
+    std::atomic<weapon_owner> m_owner{weapon_owner::none};
     bool m_auto_knife_was_active{};
     bool m_auto_health_shot_was_active{};
 };

@@ -14,19 +14,82 @@ namespace
 // The game samples keyboard input at its own tick rate; a 40 ms hold is long enough for one tap to register.
 constexpr auto k_hold = std::chrono::milliseconds(40);
 constexpr auto k_retry = std::chrono::milliseconds(100);
+
+[[nodiscard]] int weapon_owner_rank(const auto_bonus_t::weapon_owner owner) noexcept
+{
+    switch (owner)
+    {
+        case auto_bonus_t::weapon_owner::none:
+            return 0;
+        case auto_bonus_t::weapon_owner::bonus:
+            return 1;
+        case auto_bonus_t::weapon_owner::health_shot:
+            return 2;
+        case auto_bonus_t::weapon_owner::knife:
+            return 3;
+        case auto_bonus_t::weapon_owner::auto_switch:
+            return 4;
+    }
+    return 0;
+}
+} // namespace
+
+void auto_bonus_t::set_auto_knife_active(const bool active) noexcept
+{
+    if (active)
+        (void)claim(weapon_owner::knife);
+    else
+        release(weapon_owner::knife);
+}
+
+void auto_bonus_t::set_auto_health_shot_active(const bool active) noexcept
+{
+    if (active)
+        (void)claim(weapon_owner::health_shot);
+    else
+        release(weapon_owner::health_shot);
+}
+
+bool auto_bonus_t::claim(const weapon_owner next) noexcept
+{
+    auto current = m_owner.load(std::memory_order_acquire);
+    const auto next_rank = weapon_owner_rank(next);
+    for (;;)
+    {
+        if (next_rank < weapon_owner_rank(current))
+            return false;
+        if (current == next)
+            return true;
+        if (m_owner.compare_exchange_weak(current, next, std::memory_order_release,
+                                          std::memory_order_acquire))
+            return true;
+    }
+}
+
+void auto_bonus_t::release(const weapon_owner expected) noexcept
+{
+    auto current = expected;
+    (void)m_owner.compare_exchange_strong(current, weapon_owner::none, std::memory_order_release,
+                                          std::memory_order_acquire);
 }
 
 bool auto_bonus_t::send_key(const bool pressed)
 {
     if (!m_key.binding)
         return false;
-    return input_lifecycle::transition(
-        m_key, pressed,
-        [](const game::input_binding& binding, const bool down)
-        {
-            return binding.device == game::input_device::keyboard &&
-                   platform::windows::bound_input().key(binding.virtual_key, down);
-        });
+    if (!input_lifecycle::transition(
+            m_key, pressed,
+            [](const game::input_binding& binding, const bool down)
+            {
+                return binding.device == game::input_device::keyboard &&
+                       platform::windows::bound_input().key(binding.virtual_key, down);
+            }))
+        return false;
+    if (pressed)
+        (void)claim(weapon_owner::bonus);
+    else
+        release(weapon_owner::bonus);
+    return true;
 }
 
 void auto_bonus_t::reset()
@@ -34,7 +97,10 @@ void auto_bonus_t::reset()
     if (m_key.pressed)
         (void)send_key(false);
     if (!m_key.pressed)
+    {
         m_key = {};
+        release(weapon_owner::bonus);
+    }
     m_next_tap = {};
     m_press_started = {};
 }
@@ -57,8 +123,9 @@ void auto_bonus_t::tick()
     }
 
     const auto now = std::chrono::steady_clock::now();
-    const auto auto_knife_active = m_auto_knife_active.load(std::memory_order_acquire);
-    const auto health_shot_active = m_auto_health_shot_active.load(std::memory_order_acquire);
+    const auto current_owner = owner();
+    const auto auto_knife_active = current_owner == weapon_owner::knife;
+    const auto health_shot_active = current_owner == weapon_owner::health_shot;
     if (m_key.binding.device != game::input_device::keyboard ||
         m_key.binding.virtual_key != static_cast<std::uint16_t>(key))
     {
@@ -71,7 +138,7 @@ void auto_bonus_t::tick()
     }
 
     // Auto Knife owns the weapon slot. Stop the current tap and keep the next one deferred until Auto Knife clears
-    // this flag (the green flag). The 100 ms retry delay gives the knife's restore or the next weapon draw time to
+    // the owner (the green flag). The 100 ms retry delay gives the knife's restore or the next weapon draw time to
     // settle before a pickup key can switch the slot again.
     if (auto_knife_active)
     {
