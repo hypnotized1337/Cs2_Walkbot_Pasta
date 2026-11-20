@@ -44,6 +44,8 @@ enum class node_type : std::uint8_t
     uint8 = 23,
     array_type_byte_length = 24,
     array_type_auxiliary_buffer = 25,
+    uint32_zero = 26,
+    uint32_one = 27,
 };
 
 class cursor
@@ -283,6 +285,10 @@ object read_value(context& ctx, std::uint8_t raw_type, buffers& lane)
             return object{0.0};
         case node_type::double_one:
             return object{1.0};
+        case node_type::uint32_zero:
+            return object{std::uint64_t{0}};
+        case node_type::uint32_one:
+            return object{std::uint64_t{1}};
 
         case node_type::boolean:
             return object{lane.bytes1.read(1)[0] != 0};

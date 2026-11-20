@@ -716,9 +716,23 @@ std::shared_ptr<const nav_graph> load_nav_mesh(const std::string& raw_map, const
     const auto map = bare_map_name(raw_map);
     if (map.empty())
         return nullptr;
-    const auto vpk_path = assets::vpk_archive::locate_map_vpk(map);
+    if (assets::vpk_archive::locate_map_vpk(map).empty())
+    {
+        diagnostics::emit(diagnostics::event::navmesh_unavailable, diagnostics::severity::warning,
+                          diagnostics::code_domain::mode, 1);
+        return nullptr;
+    }
+    // Community maps can keep the navigation mesh in csgo_community_addons or in a nested map VPK. Locate the
+    // package that actually contains maps/<map>.nav instead of assuming it is in the map shell.
+    const auto vpk_path = assets::vpk_archive::locate_map_archive(map, "maps/" + map + ".nav");
     assets::vpk_archive vpk{};
-    if (vpk_path.empty() || !vpk.open(vpk_path))
+    if (vpk_path.empty())
+    {
+        diagnostics::emit(diagnostics::event::navmesh_unavailable, diagnostics::severity::warning,
+                          diagnostics::code_domain::mode, 2);
+        return nullptr;
+    }
+    if (!vpk.open(vpk_path))
     {
         diagnostics::emit(diagnostics::event::navmesh_unavailable, diagnostics::severity::warning,
                           diagnostics::code_domain::mode, 1);

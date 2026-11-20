@@ -8,6 +8,7 @@
 #include <cstring>
 #include <filesystem>
 #include <fstream>
+#include <optional>
 #include <string>
 #include <string_view>
 #include <unordered_set>
@@ -169,6 +170,35 @@ template<typename T>
     return result;
 }
 
+// Every archive that can hold a map's files. Official Valve maps are in csgo/maps; curated community maps keep
+// their map content in csgo_community_addons/<name>/. Both are checked because an update can ship either shape.
+[[nodiscard]] std::vector<std::string> map_archive_candidates(const std::string& map_name)
+{
+    std::vector<std::string> result{};
+    const auto add = [&result, &map_name](const std::filesystem::path& game)
+    {
+        const std::array candidates{game / "csgo" / "maps" / (map_name + ".vpk"),
+                                    game / "csgo" / "maps" / (map_name + "_dir.vpk"),
+                                    game / "csgo_community_addons" / map_name / (map_name + "_dir.vpk"),
+                                    game / "csgo_community_addons" / map_name / (map_name + ".vpk")};
+        for (const auto& candidate : candidates)
+        {
+            std::error_code error{};
+            if (!std::filesystem::exists(candidate, error) || error)
+                continue;
+            auto path = candidate.string();
+            if (std::find(result.begin(), result.end(), path) == result.end())
+                result.push_back(std::move(path));
+        }
+    };
+
+    if (const auto game = running_cs2_game_directory(); !game.empty())
+        add(game);
+    for (const auto& library : steam_libraries(steam_path_from_registry()))
+        add(std::filesystem::path{library} / "steamapps" / "common" / "Counter-Strike Global Offensive" / "game");
+    return result;
+}
+
 } // namespace
 
 std::string vpk_archive::locate_cs2_pak()
@@ -202,28 +232,49 @@ std::string vpk_archive::locate_map_vpk(const std::string& map_name)
         return {};
     }
 
-    std::error_code ec{};
-    if (const auto game = running_cs2_game_directory(); !game.empty())
-    {
-        const auto candidate = game / "csgo" / "maps" / (map_name + ".vpk");
-        if (std::filesystem::exists(candidate, ec) && !ec)
-            return candidate.string();
-    }
-    for (const auto& library : steam_libraries(steam_path_from_registry()))
-    {
-        const auto candidate = std::filesystem::path{library} / "steamapps" / "common" /
-                               "Counter-Strike Global Offensive" / "game" / "csgo" / "maps" / (map_name + ".vpk");
-
-        if (std::filesystem::exists(candidate, ec) && !ec)
-        {
-            return candidate.string();
-        }
-    }
+    if (const auto candidates = map_archive_candidates(map_name); !candidates.empty())
+        return candidates.front();
 
     // Workshop maps: the archive is named after the workshop id, so look inside the archives instead. The index is
     // built once per process and reused; only the map loader thread asks for maps.
     static workshop_map_index workshop{};
     return workshop.find(workshop_content_roots(), map_name);
+}
+
+std::string vpk_archive::locate_map_archive(const std::string& map_name, const std::string& archive_path)
+{
+    if (map_name.empty() || archive_path.empty())
+        return {};
+
+    const auto contains = [&](const std::string& path) -> std::optional<std::string>
+    {
+        vpk_archive archive{};
+        if (!archive.open(path))
+            return std::nullopt;
+        if (archive.find(archive_path))
+            return path;
+
+        // A map can be shipped as maps/<name>.vpk inside its outer package. The workshop index already returns that
+        // embedded form, but official and community packages do not.
+        if (path.find('|') == std::string::npos)
+        {
+            const auto nested = embedded_path(path, "maps/" + map_name + ".vpk");
+            vpk_archive inner{};
+            if (inner.open(nested) && inner.find(archive_path))
+                return nested;
+        }
+        return std::nullopt;
+    };
+
+    for (const auto& candidate : map_archive_candidates(map_name))
+        if (const auto found = contains(candidate))
+            return *found;
+
+    static workshop_map_index workshop{};
+    if (const auto path = workshop.find(workshop_content_roots(), map_name); !path.empty())
+        if (const auto found = contains(path))
+            return *found;
+    return {};
 }
 
 std::vector<std::filesystem::path> vpk_archive::workshop_content_roots()

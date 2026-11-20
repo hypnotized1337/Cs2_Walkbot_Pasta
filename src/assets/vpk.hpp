@@ -49,9 +49,14 @@ public:
 
     [[nodiscard]] static std::string locate_cs2_pak();
 
-    // Stock maps live in game/csgo/maps/<name>.vpk; workshop maps are found by content in the Steam workshop
+    // Stock maps live in game/csgo/maps/<name>.vpk; official community maps also live in
+    // game/csgo_community_addons/<name>/<name>_dir.vpk. Workshop maps are found by content in the Steam workshop
     // folders (see workshop_maps.hpp), because their archives are named after the workshop id.
     [[nodiscard]] static std::string locate_map_vpk(const std::string& map_name);
+    // Locates the archive that actually contains `archive_path` for a map. This checks the map package and the
+    // community addon package, then a map VPK nested inside either as maps/<name>.vpk. Used for world physics and
+    // navigation data, which are not always in the same package as the map shell.
+    [[nodiscard]] static std::string locate_map_archive(const std::string& map_name, const std::string& archive_path);
 
     // .../steamapps/workshop/content/730 of the running game's library and of every Steam library.
     [[nodiscard]] static std::vector<std::filesystem::path> workshop_content_roots();

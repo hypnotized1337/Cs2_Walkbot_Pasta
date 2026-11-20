@@ -1061,11 +1061,23 @@ bool collision_world::build_from_map_file(const std::string& map_name_raw, const
         return false;
     }
 
-    const auto vpk_path = assets::vpk_archive::locate_map_vpk(map);
-    if (vpk_path.empty())
+    const auto map_vpk_path = assets::vpk_archive::locate_map_vpk(map);
+    if (map_vpk_path.empty())
     {
         game::bound_memory().log.warning("[bvh] map vpk not found for \"{}\"", map);
         m_file_failure = file_failure::archive_not_found;
+        return false;
+    }
+
+    // Official community maps can keep world physics in csgo_community_addons, or in a nested maps/<map>.vpk inside
+    // either package. Search the archive that actually contains the entry rather than assuming the map shell does.
+    const auto vpk_path =
+        assets::vpk_archive::locate_map_archive(map, "maps/" + map + "/world_physics.vmdl_c");
+    if (vpk_path.empty())
+    {
+        game::bound_memory().log.warning("[bvh] world_physics.vmdl_c not found for {} (map package {})", map,
+                                         map_vpk_path);
+        m_file_failure = file_failure::no_world_physics;
         return false;
     }
 
