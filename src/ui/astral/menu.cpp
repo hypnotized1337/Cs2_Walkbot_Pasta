@@ -18,6 +18,103 @@ namespace
 {
 constexpr float k_header_height = 50.0f;
 constexpr float k_footer_height = 26.0f;
+constexpr float k_pasta_pi = 3.14159265358979323846f;
+
+[[nodiscard]] ImVec2 pasta_point(const ImVec2 center, const float scale, const float cosine, const float sine,
+                                const float x, const float y)
+{
+    return {center.x + (x * cosine - y * sine) * scale, center.y + (x * sine + y * cosine) * scale};
+}
+
+// Small silhouettes, all built around the particle center so the field can rotate and drift them without separate
+// state: farfalle, penne rigate, conchiglie and rotelle, the four pasta types from the reference sheet that keep
+// their silhouette at header size. At this size a shape only has a handful of pixels, so every outline stays convex
+// and every stroke stays thick: thin wiggles read as noise instead of pasta.
+void pasta_bowtie(ImDrawList& draw, const ImVec2 center, const float scale, const float angle, const ImU32 color)
+{
+    const auto cosine = std::cos(angle);
+    const auto sine = std::sin(angle);
+    const auto point = [&](const float x, const float y) { return pasta_point(center, scale, cosine, sine, x, y); };
+    // Farfalle: two triangular wings that overlap at the centre line, so the pinch stays solid without a hub that
+    // would turn the whole silhouette into an asterisk.
+    const ImVec2 left[]{point(-1.0f, -0.64f), point(0.04f, -0.22f), point(0.04f, 0.22f), point(-1.0f, 0.64f)};
+    const ImVec2 right[]{point(1.0f, -0.64f), point(1.0f, 0.64f), point(-0.04f, 0.22f), point(-0.04f, -0.22f)};
+    draw.AddConvexPolyFilled(left, 4, color);
+    draw.AddConvexPolyFilled(right, 4, color);
+}
+
+void pasta_penne(ImDrawList& draw, const ImVec2 center, const float scale, const float angle, const ImU32 color)
+{
+    const auto cosine = std::cos(angle);
+    const auto sine = std::sin(angle);
+    const auto point = [&](const float x, const float y) { return pasta_point(center, scale, cosine, sine, x, y); };
+    // Penne rigate: the diagonal-cut tube plus two ridges scored along its length, the detail that keeps it from
+    // reading as a plain bar at this size.
+    const ImVec2 body[]{point(-0.95f, -0.40f), point(0.68f, -0.40f), point(0.95f, 0.40f), point(-0.68f, 0.40f)};
+    draw.AddConvexPolyFilled(body, 4, color);
+    constexpr float k_ridges[]{-0.14f, 0.14f};
+    for (const auto offset : k_ridges)
+        draw.AddLine(point(-0.72f, offset), point(0.72f, offset), IM_COL32(0, 0, 0, 42), 0.8f);
+}
+
+void pasta_shell(ImDrawList& draw, const ImVec2 center, const float scale, const float angle, const ImU32 color)
+{
+    const auto cosine = std::cos(angle);
+    const auto sine = std::sin(angle);
+    const auto point = [&](const float x, const float y) { return pasta_point(center, scale, cosine, sine, x, y); };
+    // Conchiglie: a fan body, three bumps along the outer edge for the scallops and three scored ribs. The bumps are
+    // separate circles so the outline stays convex, which is what ImDrawList fills reliably at this size.
+    constexpr int k_segments = 16;
+    ImVec2 fan[k_segments + 2];
+    fan[0] = point(0.0f, 0.58f);
+    for (int i = 0; i <= k_segments; ++i)
+    {
+        const auto t = static_cast<float>(i) / static_cast<float>(k_segments);
+        const auto arc = 1.08f * k_pasta_pi + t * 0.84f * k_pasta_pi;
+        fan[i + 1] = point(std::cos(arc) * 0.86f, std::sin(arc) * 0.86f);
+    }
+    draw.AddConvexPolyFilled(fan, k_segments + 2, color);
+    constexpr float k_scallops[]{1.19f, 1.50f, 1.81f};
+    for (const auto scallop : k_scallops)
+    {
+        const auto arc = scallop * k_pasta_pi;
+        draw.AddCircleFilled(point(std::cos(arc) * 0.86f, std::sin(arc) * 0.86f), scale * 0.12f, color);
+    }
+    constexpr float k_ribs[]{1.22f, 1.50f, 1.78f};
+    for (const auto rib : k_ribs)
+    {
+        const auto arc = rib * k_pasta_pi;
+        draw.AddLine(fan[0], point(std::cos(arc) * 0.72f, std::sin(arc) * 0.72f), IM_COL32(0, 0, 0, 38), 0.9f);
+    }
+}
+
+void pasta_rotelle(ImDrawList& draw, const ImVec2 center, const float scale, const float angle, const ImU32 color)
+{
+    const auto cosine = std::cos(angle);
+    const auto sine = std::sin(angle);
+    const auto point = [&](const float x, const float y) { return pasta_point(center, scale, cosine, sine, x, y); };
+    // Rotelle: a rim, a hub and four spokes. The spokes are what keep it from reading as a plain letter O.
+    draw.AddCircle(center, scale * 0.80f, color, 20, scale * 0.24f);
+    draw.AddCircleFilled(center, scale * 0.15f, color);
+    for (int i = 0; i < 4; ++i)
+    {
+        const auto arc = static_cast<float>(i) * 0.5f * k_pasta_pi;
+        draw.AddLine(point(std::cos(arc) * 0.15f, std::sin(arc) * 0.15f),
+                     point(std::cos(arc) * 0.68f, std::sin(arc) * 0.68f), color, scale * 0.17f);
+    }
+}
+
+void pasta_particle(ImDrawList& draw, const int index, const ImVec2 center, const float scale, const float angle,
+                    const ImU32 color)
+{
+    switch (index % 4)
+    {
+    case 0: pasta_bowtie(draw, center, scale, angle, color); break;
+    case 1: pasta_penne(draw, center, scale, angle, color); break;
+    case 2: pasta_shell(draw, center, scale, angle, color); break;
+    default: pasta_rotelle(draw, center, scale, angle, color); break;
+    }
+}
 
 void header_decoration(ImDrawList& draw, const ImVec2 origin, const ImVec2 size)
 {
@@ -33,14 +130,28 @@ void header_decoration(ImDrawList& draw, const ImVec2 origin, const ImVec2 size)
         }
         draw.PathStroke(IM_COL32(255, 255, 255, 22), ImDrawFlags_None, 1.0f);
     }
-    for (int i = 0; i < 20; ++i)
+    // The field occupies the clear space between the wordmark and the section icons. Drift, bob and turn are all
+    // functions of ImGui time, so opening the menu always resumes the same deterministic animation.
+    constexpr int k_pasta_count = 8;
+    constexpr float k_field_left = 160.0f;
+    constexpr float k_field_width = 236.0f;
+    for (int i = 0; i < k_pasta_count; ++i)
     {
-        const auto x = 170.0f + std::fmod(i * 37.3f + time * (5.0f + i % 5), 235.0f);
-        const auto y = 9.0f + std::fmod(i * 17.7f, 32.0f);
-        const auto alpha = static_cast<int>((0.5f + 0.25f * std::sin(time * 1.7f + i)) * 160.0f);
-        const auto p = origin + ImVec2{x, y};
-        draw.AddLine(p - ImVec2{2.0f, 0.0f}, p + ImVec2{2.0f, 0.0f}, IM_COL32(255, 255, 255, alpha));
-        draw.AddLine(p - ImVec2{0.0f, 2.0f}, p + ImVec2{0.0f, 2.0f}, IM_COL32(255, 255, 255, alpha));
+        // Evenly spaced lanes that sway around their slot: the field drifts as one band, so the shapes never bunch
+        // into a clump the way independent speeds do after a few minutes of menu time.
+        const auto lane = static_cast<float>(i) / static_cast<float>(k_pasta_count) * k_field_width;
+        const auto drift = std::fmod(lane + time * 3.4f + std::sin(time * 0.5f + static_cast<float>(i) * 1.7f) * 3.0f,
+                                     k_field_width);
+        const auto x = k_field_left + drift;
+        const auto y = 12.0f + std::fmod(static_cast<float>(i) * 11.3f, 26.0f) +
+                       std::sin(time * 0.7f + static_cast<float>(i) * 1.9f) * 1.3f;
+        // A shallow shared tilt keeps every silhouette readable as pasta; arbitrary spins turned them into glyphs.
+        const auto scale = 5.8f + static_cast<float>(i % 3) * 0.45f;
+        const auto angle = -0.28f + static_cast<float>(i % 4) * 0.16f;
+        const auto edge = std::clamp(std::min(drift, k_field_width - drift) / 10.0f, 0.0f, 1.0f);
+        // Steady alpha: a twinkle made half the field look faded and dirty on the light accent bar.
+        const auto alpha = static_cast<int>(236.0f * edge);
+        pasta_particle(draw, i, origin + ImVec2{x, y}, scale, angle, IM_COL32(255, 252, 244, alpha));
     }
     draw.PopClipRect();
 }

@@ -12,6 +12,9 @@
 #include <ui/menu/menu.hpp>
 #include <ui/menu/internal.hpp>
 #include <ui/overlay/overlay.hpp>
+#if defined(VESTA_ASTRAL_MENU)
+#include <ui/astral/widgets.hpp>
+#endif
 #include <imgui.h>
 #include <imgui_internal.h>
 #include <d3d11.h>
@@ -175,6 +178,21 @@ struct preview_fonts
 
 void draw_panel_frame(ImDrawList* draw, const ImVec2 panel_min, const ImVec2 panel_max)
 {
+#if defined(VESTA_ASTRAL_MENU)
+    // Follow the Astral shell: its base surface, hairline border and Inter typography, with the accent marking the
+    // editor heading instead of the old standalone panel treatment.
+    const auto& palette = ui::astral::widgets::get().pal;
+    draw->AddRectFilled(panel_min, panel_max, packed(palette.window_bg), 6.0f);
+    draw->AddRect(panel_min, panel_max, packed(palette.popup_border), 6.0f, 0, 1.0f);
+    const auto divider_y = panel_min.y + 38.0f;
+    draw->AddLine({panel_min.x + 14.0f, divider_y}, {panel_max.x - 14.0f, divider_y},
+                  packed(palette.popup_border), 1.0f);
+    draw->AddLine({panel_min.x + 14.0f, divider_y}, {panel_min.x + 64.0f, divider_y},
+                  packed(palette.accent), 1.5f);
+    const auto title = source_title("ESP EDITOR");
+    draw->AddText(ui::astral::widgets::get().fonts.bold, ui::astral::widgets::font_px(15.0f),
+                  {panel_min.x + 14.0f, panel_min.y + 9.0f}, packed(palette.text), title.c_str());
+#else
     // The editor now uses the menu's three-layer frame and title/card language: no shadow, a near-black outside, a
     // light hairline edge, then the dark surface and a single separator under a lowercase heading.
     draw->AddRectFilled(panel_min, panel_max, packed(k_outline_dark), 6.0f);
@@ -184,13 +202,21 @@ void draw_panel_frame(ImDrawList* draw, const ImVec2 panel_min, const ImVec2 pan
                   packed(k_line), 1.0f);
     const auto title = source_title("ESP EDITOR");
     draw->AddText({panel_min.x + 12.0f, panel_min.y + 7.0f}, packed(k_text_main), title.c_str());
+#endif
 }
 
 void draw_stage_frame(ImDrawList* draw, const ImVec2 stage_min, const ImVec2 stage_max)
 {
+#if defined(VESTA_ASTRAL_MENU)
+    const auto& palette = ui::astral::widgets::get().pal;
+    draw->AddRectFilled(stage_min, stage_max, packed(palette.popup_border), 4.0f);
+    draw->AddRectFilled(stage_min + ImVec2{1.0f, 1.0f}, stage_max - ImVec2{1.0f, 1.0f},
+                        packed(palette.panel), 3.0f);
+#else
     draw->AddRectFilled(stage_min, stage_max, packed(k_outline_dark), 4.0f);
     draw->AddRectFilled(stage_min + ImVec2{1.0f, 1.0f}, stage_max - ImVec2{1.0f, 1.0f}, packed(k_border), 3.0f);
     draw->AddRectFilled(stage_min + ImVec2{2.0f, 2.0f}, stage_max - ImVec2{2.0f, 2.0f}, packed(k_bg_card), 2.0f);
+#endif
 }
 
 // Renders the agent last seen in a match through the chams preview, with the configured chams material; null when GPU
@@ -230,8 +256,19 @@ void draw_model_image(const preview_stage& stage, ID3D11ShaderResourceView* text
     }
     else
     {
+#if defined(VESTA_ASTRAL_MENU)
+        const auto& palette = ui::astral::widgets::get().pal;
+        auto* font = ui::astral::widgets::get().fonts.regular;
+        const auto size = ui::astral::widgets::font_px(12.0f);
+        constexpr std::string_view message{"PREVIEW UNAVAILABLE"};
+        const auto text = render::localization::tr(message.data());
+        const auto measured = font->CalcTextSizeA(size, k_image_size.x, 0.0f, text);
+        stage.draw->AddText(font, size, stage.image_min + (k_image_size - measured) * 0.5f,
+                            packed(palette.text_dim), text);
+#else
         stage.draw->AddText(stage.image_min + ImVec2{72.0f, 190.0f}, packed(k_text_muted),
                             render::localization::tr("PREVIEW UNAVAILABLE"));
+#endif
     }
 }
 
@@ -826,12 +863,13 @@ void menu_t::draw_visual_editor()
 
     auto display = ImGui::GetIO().DisplaySize;
     map_pointer_to_layout(display.x, display.y, display.x, display.y);
+    const auto panel_size = ImVec2{k_panel_size.x, std::max(k_panel_size.y, g_menu_max.y - g_menu_min.y)};
     auto panel_x = g_menu_max.x + 12.0f;
-    if (panel_x + k_panel_size.x > display.x - 8.0f)
-        panel_x = std::max(8.0f, display.x - k_panel_size.x - 8.0f);
+    if (panel_x + panel_size.x > display.x - 8.0f)
+        panel_x = std::max(8.0f, display.x - panel_size.x - 8.0f);
 
     ImGui::SetNextWindowPos({panel_x + (1.0f - reveal) * 18.0f, g_menu_min.y}, ImGuiCond_Always);
-    ImGui::SetNextWindowSize(k_panel_size, ImGuiCond_Always);
+    ImGui::SetNextWindowSize(panel_size, ImGuiCond_Always);
     ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, {0.0f, 0.0f});
     ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 6.0f);
     ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
@@ -841,13 +879,18 @@ void menu_t::draw_visual_editor()
 
     const auto panel_min = ImGui::GetWindowPos();
     auto* draw = ImGui::GetWindowDrawList();
+#if defined(VESTA_ASTRAL_MENU)
+    ImGui::PushFont(ui::astral::widgets::get().fonts.regular, ui::astral::widgets::font_px(12.0f));
+#else
     push_menu_font(render::fonts().menu_source_18);
-    draw_panel_frame(draw, panel_min, panel_min + k_panel_size);
+#endif
+    draw_panel_frame(draw, panel_min, panel_min + panel_size);
 
     // The model and the player box sit centered in the stage; the composition spans from slightly above the image top
     // to the feet.
-    preview_stage stage{
-        .draw = draw, .min = panel_min + ImVec2{16.0f, 54.0f}, .max = panel_min + ImVec2{304.0f, 604.0f}};
+    preview_stage stage{.draw = draw,
+                        .min = panel_min + ImVec2{16.0f, 54.0f},
+                        .max = panel_min + ImVec2{304.0f, panel_size.y - 26.0f}};
     constexpr auto composition_top = -16.0f;
     constexpr auto composition_bottom = 380.0f;
     stage.image_min = {stage.min.x + (stage.max.x - stage.min.x - k_image_size.x) * 0.5f,
